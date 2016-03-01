@@ -189,6 +189,7 @@ Definition
 \begin_layout Standard
 Information Extraction (IE) is the discipline that addresses the task of
  extracting structured information from unstructured sources automatically.
+ Sources usually take the form of text documents.
  The most explored aspect of IE is the extraction of 
 \emph on
 named entities.
@@ -379,7 +380,20 @@ Recently many solutions have been proposed to target the scalability issue;
 \end_layout
 
 \begin_layout Section
-Rule-Based Methods
+Entity Extraction
+\end_layout
+
+\begin_layout Standard
+Named entities are elements of interest in a text.
+ Example of entities are person names, street addresses, institutions, countries
+, and so on.
+ In this section and in the next one, I assume that the output of an extraction
+ task is a series of labels inserted into an input text document, although
+ there are other possibilities.
+\end_layout
+
+\begin_layout Subsection
+Rule-based Methods
 \end_layout
 
 \begin_layout Standard
@@ -426,10 +440,6 @@ Most systems in this category present a cascaded structure: an input document
  the input of the next one.
  A famous example is that of cascading grammars: formal grammars are evaluated
  in sequence on the input.
-\end_layout
-
-\begin_layout Subsection
-Entity Extraction
 \end_layout
 
 \begin_layout Standard
@@ -535,6 +545,213 @@ Multiple entities can be matched at once.
 \end_layout
 
 \begin_layout Subsection
+Statistical Methods
+\end_layout
+
+\begin_layout Standard
+Statistical methods aim to decompose the source, assigning a label to each
+ element in the decomposition.
+ We distinguish between three types of statistical models:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Token-level models
+\emph default
+: they assign a label to each token of the source.
+ Since entities are usually comprised of multiple adjacent tokens, the tags
+ used are of the forms 
+\begin_inset Quotes eld
+\end_inset
+
+entity_begin
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+entity_continue
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+entity_end
+\begin_inset Quotes erd
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Segment-level models
+\emph default
+: they try to find the best segmentation of the source text among all the
+ possible ones, assigning a label to each output segment.
+ The best segmentation is the one that maximizes a target function;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Grammar-based models: 
+\emph default
+they use formal grammars, outputting parse trees.
+ All the valid parses are considered for an input document, assigning a
+ score to each.
+ The parse with the highest score is retained.
+\end_layout
+
+\begin_layout Standard
+I now give a brief description of Token-level Models and Segment-level Models.
+\end_layout
+
+\begin_layout Subsubsection
+Token-Level Models
+\end_layout
+
+\begin_layout Paragraph
+Features
+\end_layout
+
+\begin_layout Standard
+Clues are of the form 
+\begin_inset Formula 
+\begin{equation}
+f:\left(x,y,i\right)\longmapsto\mathbb{R}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $x$
+\end_inset
+
+ is a sequence of tokens, 
+\begin_inset Formula $i$
+\end_inset
+
+ is a position in 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ is a candidate label for the token at 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ We distinguish between these types of features:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+word features
+\emph default
+;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+orthographic features;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+dictionary lookup features.
+\end_layout
+
+\begin_layout Paragraph
+Models for Labeling Token
+\end_layout
+
+\begin_layout Standard
+The best models are the ones that take into account dependencies between
+ tokens, among which we may find:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+ordered classifiers
+\emph default
+;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Hidden Markov models;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Maximum Entropy Taggers;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Conditional Markov Models;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Conditional Random Fields 
+\emph default
+(the state of the art).
+\end_layout
+
+\begin_layout Subsubsection
+Segment-Level Models
+\end_layout
+
+\begin_layout Paragraph
+Features
+\end_layout
+
+\begin_layout Standard
+In these models the label for a segment depends on the properties of its
+ token and on the previous segment.
+ We can describe a segment 
+\begin_inset Formula $s_{j}$
+\end_inset
+
+ as:
+\begin_inset Formula 
+\begin{equation}
+s_{j}=\left(y_{i},\right)
+\end{equation}
+
+\end_inset
+
+Therefore, a feature is of the form:
+\begin_inset Formula 
+\begin{equation}
+f\left(y_{i},y_{i-1},x,l_{j},u_{j}\right)
+\end{equation}
+
+\end_inset
+
+where 
+\end_layout
+
+\begin_layout Section
 Relationship Extraction
 \end_layout
 
@@ -548,7 +765,174 @@ given a pair of entities, find the relationship between them;
 \end_layout
 
 \begin_layout Itemize
-given an entity and a relationship, 
+given an entity 
+\begin_inset Formula $e$
+\end_inset
+
+ and a relationship 
+\begin_inset Formula $r$
+\end_inset
+
+, find all the other entities 
+\begin_inset Formula $e'$
+\end_inset
+
+ such that 
+\begin_inset Formula $\left(e,e'\right)\in r$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+given a big and open-ended input and a relationship 
+\begin_inset Formula $r$
+\end_inset
+
+ find all pairs of entities 
+\begin_inset Formula $e',e''$
+\end_inset
+
+ such that 
+\begin_inset Formula $\left(e',e''\right)\in r$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+For the first task, we can exploit the following resources:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+surface tokens
+\emph default
+: tokens that are usually placed between entities.
+ They are strong clues;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+part of speech tags 
+\emph default
+(the most important being verbs);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+syntactic parse tree
+\emph default
+: allows grouping words in phrase types, e.g.
+ noun phrases, propositional phrases, and so on;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+dependency graph
+\emph default
+: it is a less expensive structure to compute than the parse tree and it
+ links a word to those that depend on it.
+\end_layout
+
+\begin_layout Standard
+The main methods available to carry out the task are:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Feature-based methods
+\emph default
+, that simply transform the clues mentioned above for usage by conventional
+ classifier models;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Kernel-based methods
+\emph default
+, that use kernel functions to encode the similarity between two graphs;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Rule-based methods
+\emph default
+, creating rules over structures around pairs of entities.
+\end_layout
+
+\begin_layout Standard
+The second task is a special case of the third one so I don't treat it directly.
+\begin_inset Newline newline
+\end_inset
+
+The third task can be met especially when dealing with the Web.
+ Usually we can exploit the following resources to fulfill it:
+\end_layout
+
+\begin_layout Itemize
+the 
+\emph on
+types of arguments
+\emph default
+ of 
+\begin_inset Formula $r$
+\end_inset
+
+ (that might need specific recognition patterns);
+\end_layout
+
+\begin_layout Itemize
+a 
+\emph on
+seed database
+\emph default
+ of pairs of entities belonging to 
+\begin_inset Formula $r$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+manually coded patterns
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+The generic procedure that is used in this case can be described with these
+ steps:
+\end_layout
+
+\begin_layout Enumerate
+Use the seed database to learn the relevant extraction patterns;
+\end_layout
+
+\begin_layout Enumerate
+Use the obtained patterns to define candidate triples of the form 
+\begin_inset Formula $\left(e',e'',r\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Enumerate
+Retain a subset of the candidate triples, using a statistical test.
+\end_layout
+
+\begin_layout Standard
+There exist also rule-based methods for the task.
+ 
 \end_layout
 
 \begin_layout Standard
