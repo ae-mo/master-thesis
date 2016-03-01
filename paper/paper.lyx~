@@ -1,71 +1,41 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
 \begin_document
 \begin_header
 \textclass ulb_thesis
 \options draftfoot
-\use_default_options false
-\maintain_unincluded_children false
 \language american
-\language_package default
 \inputencoding auto
-\fontencoding global
 \font_roman default
 \font_sans default
 \font_typewriter default
-\font_math auto
 \font_default_family default
-\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
 \graphics default
-\default_output_format default
-\output_sync 0
-\bibtex_command default
-\index_command default
 \paperfontsize 11
 \spacing single
-\use_hyperref false
 \papersize default
 \use_geometry false
-\use_package amsmath 2
-\use_package amssymb 2
-\use_package cancel 1
-\use_package esint 0
-\use_package mathdots 0
-\use_package mathtools 1
-\use_package mhchem 0
-\use_package stackrel 1
-\use_package stmaryrd 1
-\use_package undertilde 1
+\use_amsmath 2
+\use_esint 0
 \cite_engine basic
-\cite_engine_type default
-\biblio_style plain
 \use_bibtopic false
-\use_indices false
 \paperorientation portrait
-\suppress_date false
-\justification true
-\use_refstyle 0
-\index Index
-\shortcut idx
-\color #008000
-\end_index
 \secnumdepth 2
 \tocdepth 2
 \paragraph_separation indent
-\paragraph_indentation default
+\defskip medskip
 \quotes_language english
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\html_math_output 0
-\html_css_as_file 0
-\html_be_strict false
+\author "" 
+\author "" 
 \end_header
 
 \begin_body
@@ -73,7 +43,7 @@
 \begin_layout Title
 
 \lang english
-Engineering a Runtime System for AQL
+Your Title
 \end_layout
 
 \begin_layout Author
@@ -82,9 +52,7 @@ your name
 
 \begin_layout Degree
 Docteur en XXX
-\begin_inset Newline newline
-\end_inset
-
+\newline
 (Département XXX, Faculté XXX)
 \end_layout
 
@@ -133,8 +101,7 @@ abstract of the thesis
 \end_layout
 
 \begin_layout Standard
-\begin_inset CommandInset toc
-LatexCommand tableofcontents
+\begin_inset LatexCommand tableofcontents
 
 \end_inset
 
@@ -161,7 +128,7 @@ LatexCommand tableofcontents
 \begin_inset ERT
 status collapsed
 
-\begin_layout Plain Layout
+\begin_layout Standard
 
 
 \backslash
@@ -174,9 +141,8 @@ mainmatter
 \end_layout
 
 \begin_layout Standard
-\begin_inset CommandInset include
-LatexCommand include
-filename "intro.lyx"
+\begin_inset Include \include{intro.lyx}
+preview false
 
 \end_inset
 
@@ -184,9 +150,8 @@ filename "intro.lyx"
 \end_layout
 
 \begin_layout Standard
-\begin_inset CommandInset include
-LatexCommand include
-filename "conclusion.lyx"
+\begin_inset Include \include{conclusion.lyx}
+preview false
 
 \end_inset
 
@@ -196,10 +161,9 @@ filename "conclusion.lyx"
 \begin_layout Standard
 
 \lang english
-\begin_inset CommandInset bibtex
-LatexCommand bibtex
-bibfiles "xampl"
+\begin_inset LatexCommand bibtex
 options "apalike"
+bibfiles "xampl"
 
 \end_inset
 
@@ -208,9 +172,8 @@ options "apalike"
 
 \begin_layout Standard
 \start_of_appendix
-\begin_inset CommandInset include
-LatexCommand include
-filename "appendix.lyx"
+\begin_inset Include \include{appendix.lyx}
+preview false
 
 \end_inset
 
@@ -218,9 +181,7 @@ filename "appendix.lyx"
 \end_layout
 
 \begin_layout Standard
-\begin_inset CommandInset index_print
-LatexCommand printindex
-type "idx"
+\begin_inset LatexCommand printindex
 
 \end_inset
 
