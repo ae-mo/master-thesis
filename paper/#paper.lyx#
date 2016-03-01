@@ -548,23 +548,7 @@ given a pair of entities, find the relationship between them;
 \end_layout
 
 \begin_layout Itemize
-given an entity 
-\begin_inset Formula $e$
-\end_inset
-
- and a relationship 
-\begin_inset Formula $r$
-\end_inset
-
-, find all the other entities 
-\begin_inset Formula $e'$
-\end_inset
-
- such that 
-\begin_inset Formula $\left(e,e'\right)\in r$
-\end_inset
-
- 
+given an entity and a relationship, 
 \end_layout
 
 \begin_layout Standard
