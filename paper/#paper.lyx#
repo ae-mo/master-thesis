@@ -381,6 +381,13 @@ Recently many solutions have been proposed to target the scalability issue;
 
 \begin_layout Section
 Entity Extraction
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Entity-Extraction"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -388,8 +395,12 @@ Named entities are elements of interest in a text.
  Example of entities are person names, street addresses, institutions, countries
 , and so on.
  In this section and in the next one, I assume that the output of an extraction
- task is a series of labels inserted into an input text document, although
- there are other possibilities.
+ task is a series of labels inserted into an input text document (that becomes
+ 
+\emph on
+annotated
+\emph default
+), although there are other possibilities.
 \end_layout
 
 \begin_layout Subsection
@@ -593,9 +604,7 @@ entity_end
 \emph on
 Segment-level models
 \emph default
-: they try to find the best segmentation of the source text among all the
- possible ones, assigning a label to each output segment.
- The best segmentation is the one that maximizes a target function;
+: they try to find the best segmentation of the source text;
 \end_layout
 
 \begin_layout Itemize
@@ -615,6 +624,13 @@ I now give a brief description of Token-level Models and Segment-level Models.
 
 \begin_layout Subsubsection
 Token-Level Models
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Token-Level-Models"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph
@@ -735,12 +751,29 @@ In these models the label for a segment depends on the properties of its
  as:
 \begin_inset Formula 
 \begin{equation}
-s_{j}=\left(y_{i},\right)
+s_{j}=\left(y_{i},l_{j},u_{j}\right)\label{eq:segment}
 \end{equation}
 
 \end_inset
 
-Therefore, a feature is of the form:
+where 
+\begin_inset Formula $y_{i}$
+\end_inset
+
+ is the proposed label for 
+\begin_inset Formula $s_{j}$
+\end_inset
+
+ and 
+\begin_inset Formula $l_{j},u_{j}$
+\end_inset
+
+ are the start and end positions of 
+\begin_inset Formula $s_{j}$
+\end_inset
+
+.
+ Therefore, a feature is of the form:
 \begin_inset Formula 
 \begin{equation}
 f\left(y_{i},y_{i-1},x,l_{j},u_{j}\right)
@@ -749,6 +782,47 @@ f\left(y_{i},y_{i-1},x,l_{j},u_{j}\right)
 \end_inset
 
 where 
+\begin_inset Formula $x$
+\end_inset
+
+ is the input sequence of tokens, 
+\begin_inset Formula $y_{i-1}$
+\end_inset
+
+ is the proposed label for the previous segment and the other symbols are
+ defined as for Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:segment"
+
+\end_inset
+
+.
+ Besides token-level features (see subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Token-Level-Models"
+
+\end_inset
+
+), we can exploit the following feature types:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Similarity to an entity in a database;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Length of the segment.
+\end_layout
+
+\begin_layout Standard
+There are also global segmentation models, that try to find the best segmentatio
+n of a token sequence by maximizing a target function.
 \end_layout
 
 \begin_layout Section
@@ -798,6 +872,10 @@ given a big and open-ended input and a relationship
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Subsection
+Predicting the Relationship between a Entity Pair 
 \end_layout
 
 \begin_layout Standard
@@ -870,9 +948,13 @@ Rule-based methods
 
 \begin_layout Standard
 The second task is a special case of the third one so I don't treat it directly.
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Subsection
+Finding All Possible Entity Pairs Belonging to a Relationship
+\end_layout
+
+\begin_layout Standard
 The third task can be met especially when dealing with the Web.
  Usually we can exploit the following resources to fulfill it:
 \end_layout
@@ -935,6 +1017,220 @@ There exist also rule-based methods for the task.
  
 \end_layout
 
+\begin_layout Chapter
+SystemT and AQL
+\end_layout
+
+\begin_layout Standard
+In this chapter, I give a description of 
+\emph on
+SystemT
+\emph default
+ and its extraction rule language 
+\emph on
+AQL
+\emph default
+ (Annotation Query Language), and of a new way of evaluating AQL queries,
+ that uses a formalism derived from 
+\emph on
+Finite State Automata
+\emph default
+.
+ Producing and analysing a concrete runtime system for AQL queries that
+ employs this new method is the object of my thesis.
+ Since SystemT is a rule-based system, I now focus only on this category.
+\end_layout
+
+\begin_layout Section
+SystemT
+\end_layout
+
+\begin_layout Standard
+As I mentioned in the previous chapter, scalability has now become a central
+ issue to IE.
+ Companies now rely on IE for many tasks; a prominent example is 
+\emph on
+Business Intelligence
+\emph default
+.
+ Unfortunately, many systems developed in the past don't address this concern
+ correctly.
+ Traditionally, most rule-based system rely on cascading grammars: formal
+ grammars are executed in sequence on the input, each grammar representing
+ a stage that takes as input the ouput of the previous one.
+ Rules in such grammars are matched using regular expressions: if a part
+ of the input text satisfies the regular expression associated with a rule,
+ that rule is activated (i.e.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+fires
+\begin_inset Quotes erd
+\end_inset
+
+) and the corresponding action is executed.
+ Evaluating a grammar on a document tends to be costly, because simply evaluatin
+g a single rule might require scanning the whole document.
+ On large datasets, the running time becomes enormous.
+ What's more, these kind of systems are not able to fulfill the expressivity
+ requirements of the complex extraction tasks.
+\begin_inset Newline newline
+\end_inset
+
+SystemT was developed at IBM to address these issues.
+ This system is based on a new approach to extraction rules: the 
+\emph on
+algebraic approach
+\emph default
+.
+ Here, data manipulations are viewed as operations in a (relational) algebra.
+ Extraction tasks are defined using 
+\emph on
+annotators
+\emph default
+ (see Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Entity-Extraction"
+
+\end_inset
+
+) whose rules are viewed as 
+\emph on
+queries
+\emph default
+ on input documents, that act as virtual databases.
+ Complex annotators are obtained by combining simple ones by means of 
+\emph on
+relational operators
+\emph default
+.
+ By doing so, all the optimization techniques used in regular databases
+ become available, but new techniques are possible too, due to the characteristi
+cs of text documents.
+ Another advantage of SystemT is that it is capable to handle 
+\emph on
+overlapping rule matchings
+\emph default
+, due to rulels being fired independently, which are difficult to resolve
+ in cascading grammars, where they tipically require disambiguation policies
+ that only partially solve the problem.
+\begin_inset Newline newline
+\end_inset
+
+I now give an overview of SystemT's high-level structure.
+ Then, I talk about its data model, execution model and algebra.
+\end_layout
+
+\begin_layout Subsection
+Architecture
+\end_layout
+
+\begin_layout Standard
+These are the main components of SystemT:
+\end_layout
+
+\begin_layout Description
+Development
+\begin_inset space ~
+\end_inset
+
+Environment: allows constructing annotators for extraction tasks.
+ Rules are expressed in AQL, and compiled into an algebra.
+ It supports an iterative development process.
+\end_layout
+
+\begin_layout Description
+Optimizer: seeks for the best query plan for an extraction task, evaluating
+ the most convenient optimization techniques in a cost-based manner.
+\end_layout
+
+\begin_layout Description
+Runtime
+\begin_inset space ~
+\end_inset
+
+Environment: given a query plan, it instantiates the physical operators
+ corresponding to the logical ones in the plan, then it proceeds evaluating
+ it on input documents.
+\end_layout
+
+\begin_layout Standard
+Once the development of an annotator is complete, it is 
+\emph on
+published
+\emph default
+ to the optimizer and runtime.
+ After optimization, the runtime evaluates it on a continuous stream of
+ documents.
+\end_layout
+
+\begin_layout Subsection
+Data Model
+\end_layout
+
+\begin_layout Standard
+SystemT uses an 
+\emph on
+object-relational
+\emph default
+ data model for annotations on a text document, that allows applying logical
+ operators over it.
+ There is an important assumption to mention before continuing: an extraction
+ task over a set of documents is performed one document at a time.
+ This means that any relationships between entities in different documents
+ are disregarded.
+ This assumption is crucial to some optimization techniques that SystemT
+ uses.
+ While there exist tasks where considering these relationships would be
+ useful (think of the Web), still a large number of relevant tasks can be
+ carried out this way.
+ 
+\begin_inset Newline newline
+\end_inset
+
+I consider a finite alphabet 
+\begin_inset Formula $\varSigma$
+\end_inset
+
+ of symbols.
+ 
+\begin_inset Formula $\sum^{*}$
+\end_inset
+
+ denotes the set of all strings of finite length over 
+\begin_inset Formula $\sum^{*}$
+\end_inset
+
+.
+ A document is modeled as a string of this form.
+ 
+\end_layout
+
+\begin_layout Definition
+A document is a string 
+\begin_inset Formula $s\in\sum^{*}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+The most basic data type is the 
+\emph on
+span
+\emph default
+.
+\end_layout
+
+\begin_layout Definition
+The most basic data type is a 
+\emph on
+span.
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset include
 LatexCommand include
@@ -976,7 +1272,7 @@ type "idx"
 
 \end_inset
 
-
+ 
 \end_layout
 
 \end_body
