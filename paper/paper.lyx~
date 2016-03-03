@@ -1176,7 +1176,7 @@ SystemT uses an
 object-relational
 \emph default
  data model for annotations on a text document, that allows applying logical
- operators over it.
+ operators over it, that can be composed.
  There is an important assumption to mention before continuing: an extraction
  task over a set of documents is performed one document at a time.
  This means that any relationships between entities in different documents
@@ -1186,6 +1186,7 @@ object-relational
  While there exist tasks where considering these relationships would be
  useful (think of the Web), still a large number of relevant tasks can be
  carried out this way.
+ In the following, I define the basic data types of SystemT's data model.
  
 \begin_inset Newline newline
 \end_inset
@@ -1194,7 +1195,7 @@ I consider a finite alphabet
 \begin_inset Formula $\varSigma$
 \end_inset
 
- of symbols.
+ of symbols (characters).
  
 \begin_inset Formula $\sum^{*}$
 \end_inset
@@ -1204,7 +1205,7 @@ I consider a finite alphabet
 \end_inset
 
 .
- A document is modeled as a string of this form.
+ A document is modeled as one such string.
  
 \end_layout
 
@@ -1269,6 +1270,679 @@ Given a string
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+\noindent
+Spans can be aggregated in 
+\emph on
+tuples
+\emph default
+, which are finite sequences of spans
+\emph on
+.
+ 
+\emph default
+Let us denote the set of all possible spans of a string 
+\begin_inset Formula $s$
+\end_inset
+
+ by 
+\begin_inset Formula $\textrm{Spans}\left(s\right)$
+\end_inset
+
+ and by 
+\begin_inset Formula $\textrm{SVars}$
+\end_inset
+
+ an infinite set of span variables, which can be assigned spans.
+ A 
+\begin_inset Formula $\left(V,s\right)-\textrm{tuple}$
+\end_inset
+
+ is defined as follows:
+\end_layout
+
+\begin_layout Definition
+Given a set 
+\begin_inset Formula $V\subseteq\textrm{SVars}$
+\end_inset
+
+, 
+\begin_inset Formula $V$
+\end_inset
+
+ being finite, and a string 
+\begin_inset Formula $s\in\sum^{*}$
+\end_inset
+
+, a 
+\begin_inset Formula $\left(V,s\right)-\textrm{tuple}$
+\end_inset
+
+ is a mapping 
+\begin_inset Formula $\mu:V\longmapsto\textrm{Spans}\left(s\right)$
+\end_inset
+
+.
+ When 
+\begin_inset Formula $V$
+\end_inset
+
+ is clear from the context, we might call 
+\begin_inset Formula $\mu$
+\end_inset
+
+ simply a 
+\begin_inset Formula $s-\textrm{tuple}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+A set of tuples is called a 
+\emph on
+relation.
+ 
+\emph default
+Here, I focus on 
+\emph on
+span relations
+\emph default
+.
+ What follows is the definition of a 
+\begin_inset Formula $\left(V,s\right)-\textrm{relation}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Definition
+A 
+\begin_inset Formula $\left(V,s\right)-\textrm{relation}$
+\end_inset
+
+ is a set of 
+\begin_inset Formula $\left(V,s\right)-\textrm{tuples}$
+\end_inset
+
+.
+ As before, we can speak of 
+\begin_inset Formula $s-\textrm{relation}$
+\end_inset
+
+ when 
+\begin_inset Formula $V$
+\end_inset
+
+ is clear.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Each operator in the algebra takes one or more span relations as input and
+ outputs a single span relation.
+\end_layout
+
+\begin_layout Subsection
+Execution Model
+\end_layout
+
+\begin_layout Standard
+A single document is conceived as a 
+\emph on
+local annotation database
+\emph default
+, to which annotators are applied in order to build 
+\emph on
+views
+\emph default
+.
+ In general, a local database fits into main memory.
+ Local databases are contained in a 
+\emph on
+global annotation database
+\emph default
+.
+ The runtime of SystemT takes a global database and it annotates its local
+ databases.
+ The procedure is described by Algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:Annotating-all-local"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Formula $E\longleftarrow\left\{ \textrm{algebra expression}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+for localDB in globalDB do
+\end_layout
+
+\begin_layout Plain Layout
+begin
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\left\{ \textrm{Read localDB into main memory}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $R\longleftarrow E\left(\textrm{localDB}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\left\{ \textrm{Add \ensuremath{R} to localDB}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\left\{ \textrm{Write modified localDB to disk}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:Annotating-all-local"
+
+\end_inset
+
+Annotating all local databases in a global database (taken from REF).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+In this procedure, step 2 in the for loop is the most expensive.
+\end_layout
+
+\begin_layout Subsection
+Algebra of Operators
+\end_layout
+
+\begin_layout Standard
+The operators of SystemT's algebra can be classified in three groups:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+relational operators;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+span extraction operators;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+span aggregation operators.
+\end_layout
+
+\begin_layout Standard
+In addition, there exist some 
+\emph on
+span selection predicates
+\emph default
+ that are used for span selection.
+\end_layout
+
+\begin_layout Subsubsection
+Relational Operators
+\end_layout
+
+\begin_layout Standard
+Relational operators are the usual operators of relational algebra that
+ appear in classical database query plans.
+ Important examples are:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+selection
+\emph default
+ (
+\begin_inset Formula $\sigma$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+projection 
+\emph default
+(
+\begin_inset Formula $\pi$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Cartesian product 
+\emph default
+(
+\begin_inset Formula $\times$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Union
+\emph default
+ (
+\begin_inset Formula $\cup$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Intersection
+\emph default
+ (
+\begin_inset Formula $\cap$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Subsubsection*
+Span Extraction Operators
+\end_layout
+
+\begin_layout Standard
+Loosely speaking, span extraction operators take a pattern and a document
+ as input and output the maximal set of spans that match that pattern.
+ There are two main span extraction operators:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\emph on
+standard
+\begin_inset space ~
+\end_inset
+
+regular
+\begin_inset space ~
+\end_inset
+
+expression
+\begin_inset space ~
+\end_inset
+
+matcher
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset Formula $\varepsilon_{re}$
+\end_inset
+
+)
+\emph default
+: this operator takes a regular expression 
+\begin_inset Formula $r$
+\end_inset
+
+ as input and it identifies all non-overlapping matchings of 
+\begin_inset Formula $r$
+\end_inset
+
+ in the current document, from left to right.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\emph on
+dictionary
+\begin_inset space ~
+\end_inset
+
+matcher
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset Formula $\varepsilon_{d}$
+\end_inset
+
+)
+\emph default
+:
+\emph on
+ 
+\emph default
+this operator outputs all the spans that match some entry in a given dictionary.
+\end_layout
+
+\begin_layout Standard
+Although the dictionary matcher might seem useless since there is a regular
+ expression matcher, it has some advantages over it, as the fact that it
+ can find overlapping matchings or that it enforces the semantics of word
+ boundaries.
+\end_layout
+
+\begin_layout Subsubsection*
+Span Aggregation Operators
+\end_layout
+
+\begin_layout Standard
+Span aggregation operators are used to aggregate spans in a meaningful way.
+ They are of two types:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Consolidation
+\emph default
+: they are used to coalesce overlapping spans that were matched using patterns
+ for the same concept.
+ They are: 
+\end_layout
+
+\begin_deeper
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\emph on
+containment
+\begin_inset space ~
+\end_inset
+
+consolidation
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset Formula $\varOmega_{c}$
+\end_inset
+
+)
+\emph default
+:
+\emph on
+ 
+\emph default
+it discards a span if it is fully contained into another one.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\emph on
+overlap
+\begin_inset space ~
+\end_inset
+
+consolidation
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset Formula $\varOmega_{o}$
+\end_inset
+
+)
+\emph default
+:
+\emph on
+ 
+\emph default
+it merges spans that overlap repeatedly.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\emph on
+Block (
+\begin_inset Formula $\beta$
+\end_inset
+
+)
+\emph default
+: it matches a series of spans, each at a distance from its neighbor span(s)
+ that is not superior to a threshold.
+ It is thought to identify regularity.
+ It is tuned by two parameters: a 
+\emph on
+distance constraint
+\emph default
+ to control regularity and a 
+\emph on
+count constraint 
+\emph default
+that establishes the minimum number of spans in a block.
+\end_layout
+
+\begin_layout Subsubsection
+Span Selection Predicates
+\end_layout
+
+\begin_layout Standard
+Consider two spans 
+\begin_inset Formula $s_{1},s_{2}$
+\end_inset
+
+.
+ The main span predicates that may be used for selection are the following:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $s_{1}\preceq_{d}s_{2}$
+\end_inset
+
+ when 
+\begin_inset Formula $s_{1},s_{2}$
+\end_inset
+
+ do not overlap, 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ precedes 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+ and there are less than 
+\begin_inset Formula $d$
+\end_inset
+
+ characters between them;
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $s_{1}\simeq s_{2}$
+\end_inset
+
+ when the two spans overlap;
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $s_{1}\subset s_{2}$
+\end_inset
+
+ when 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ is strictly contained in 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $s_{1}=s_{2}$
+\end_inset
+
+ when 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ equals 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Optimization Techniques
+\end_layout
+
+\begin_layout Standard
+As I mentioned in the introduction of this chapter, SystemT can make use
+ of the optimization techniques from traditional database systems, but are
+ some peculiar aspects of SystemT that enable new optimization methods.
+\end_layout
+
+\begin_layout Remark
+The effect of document-at-a-time processing is that the span relations produced
+ and consumed for a single document by operators are very small in size
+ and often empty.
+\begin_inset CommandInset label
+LatexCommand label
+name "small-relations"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Remark
+Evaluating an annotator on a large set of document is a 
+\emph on
+CPU-intensive process
+\emph default
+.
+ This is because the running time is by far dominated by the execution of
+ the operators 
+\begin_inset Formula $\varepsilon_{re}$
+\end_inset
+
+ and 
+\begin_inset Formula $\varepsilon_{d}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Remark
+Spans are nothing but 
+\emph on
+intervals
+\emph default
+, so we can exploit 
+\emph on
+interval algebra
+\emph default
+.
+\begin_inset CommandInset label
+LatexCommand label
+name "interval-algebra"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+With Remark 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "small-relations"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "interval-algebra"
+
+\end_inset
+
+ in mind, running time can be reduced in a number of ways.
+ I present them briefly.
 \end_layout
 
 \begin_layout Standard
