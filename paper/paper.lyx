@@ -2701,6 +2701,14 @@ Variable Stack Automata;
 Variable Set Automata.
 \end_layout
 
+\begin_layout Standard
+These formalisms are also called 
+\emph on
+primitive spanner representations
+\emph default
+.
+\end_layout
+
 \begin_layout Subsubsection
 Regex Formulas
 \end_layout
@@ -2864,6 +2872,12 @@ stack of span variables
 \end_layout
 
 \begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "vstk-aut"
+
+\end_inset
+
 A Variable Stack Automaton is a tuple 
 \begin_inset Formula $\left(Q,q_{0},q_{f},\delta\right)$
 \end_inset
@@ -2979,6 +2993,12 @@ run
 \end_layout
 
 \begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "vstk-conf"
+
+\end_inset
+
 Given a string 
 \begin_inset Formula $s$
 \end_inset
@@ -3329,6 +3349,452 @@ The set of all possible accepting runs of a vstk-automaton
 
 \begin_layout Subsubsection
 Variable Set Automata
+\end_layout
+
+\begin_layout Standard
+Variable Set Automata (VSet Automata or vset-automata for short) are another
+ formalism for representing document spanners that is based on FAs.
+ Vset-automata are defined in a very similar way to that of vstk-automata.
+ The main differences are:
+\end_layout
+
+\begin_layout Itemize
+the stack of span variables is replaced by a 
+\emph on
+set;
+\end_layout
+
+\begin_layout Itemize
+since no order is defined on the variables in the set, when we close a variable,
+ we need to specify which one.
+\end_layout
+
+\begin_layout Standard
+I now give a formal definition of a vset-automaton.
+\end_layout
+
+\begin_layout Definition
+A variable set automaton is a tuple 
+\begin_inset Formula $\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q$
+\end_inset
+
+, 
+\begin_inset Formula $q_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $q_{f}$
+\end_inset
+
+ are defined as in Definition 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "vstk-aut"
+
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta$
+\end_inset
+
+ is the same as in Definition 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "vstk-aut"
+
+\end_inset
+
+, except that it has triples of the form 
+\begin_inset Formula $\left(q,\dashv x,q'\right)$
+\end_inset
+
+, with 
+\begin_inset Formula $x\in\textrm{SVars}$
+\end_inset
+
+, instead of those of the form 
+\begin_inset Formula $\left(q,\dashv,q'\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\noindent
+We also need to slightly modify the definitions of configuration and run
+ with respect to those of a vstk-automaton.
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+ with length 
+\begin_inset Formula $\left|s\right|=n$
+\end_inset
+
+ and a vset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ , a configuration of 
+\begin_inset Formula $A$
+\end_inset
+
+ is a tuple 
+\begin_inset Formula $c=\left(q,V,Y,i\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $q$
+\end_inset
+
+, 
+\begin_inset Formula $i$
+\end_inset
+
+ are defined as in Definition 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "vstk-conf"
+
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $V\subseteq\textrm{Vars}\left(A\right)$
+\end_inset
+
+ is the active variable set;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Y\in Vars$
+\end_inset
+
+
+\begin_inset Formula $\left(A\right)$
+\end_inset
+
+ is the set of available variables (those not already placed in the set).
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+ and a vset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $s$
+\end_inset
+
+ is a sequence of configurations 
+\begin_inset Formula $c_{0},...,c_{m}$
+\end_inset
+
+ such that:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $c_{0}=\left(q_{0},\textrm{Ø},\textrm{SVars}\left(A\right),1\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\forall j\in\left\{ 0,...,m-1\right\} $
+\end_inset
+
+, for 
+\begin_inset Formula $c_{j}$
+\end_inset
+
+=
+\begin_inset Formula $\left(q_{j},V_{j},Y_{j},i_{j}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $c_{j+1}$
+\end_inset
+
+=
+\begin_inset Formula $\left(q_{j+1},V_{j+1},Y_{j+1},i_{j+1}\right)$
+\end_inset
+
+ one of the following holds:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $V_{j+1}=V_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}$
+\end_inset
+
+ and either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}+1$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},s_{i_{j}},q_{j+1}\right)\in\delta$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},\in,q_{j+1}\right)\in\delta$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}$
+\end_inset
+
+ and for some 
+\begin_inset Formula $x\in\textrm{SVars}\left(A\right)$
+\end_inset
+
+ either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $x\in Y_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $V_{j+1}=V_{j}\cup\left\{ x\right\} $
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}\setminus\left\{ x\right\} $
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},x\vdash,q_{j+1}\right)\in\delta$
+\end_inset
+
+ (
+\begin_inset Formula $x$
+\end_inset
+
+ is inserted into the set);
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $x\in V_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $V_{j+1}=V_{j}\setminus\left\{ x\right\} $
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},\dashv x,q_{j+1}\right)\in\delta$
+\end_inset
+
+ (
+\begin_inset Formula $x$
+\end_inset
+
+ is removed from the set).
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a string with length 
+\begin_inset Formula $\left|s\right|=n$
+\end_inset
+
+ and a vset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho=c_{0},...,c_{m}$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $s$
+\end_inset
+
+ is accepting if 
+\begin_inset Formula $c_{m}=\left(q_{f},\textrm{Ø},\textrm{Ø},n+1\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+ and a vset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, 
+\begin_inset Formula $\textrm{ARuns}\left(A,s\right)$
+\end_inset
+
+and 
+\begin_inset Formula $\left\llbracket A\right\rrbracket $
+\end_inset
+
+ are defined as for vstk-automata.
+\end_layout
+
+\begin_layout Subsection
+Algebras of Spanners
+\end_layout
+
+\begin_layout Standard
+Besides mere span extraction, AQL offers the capability to combine, transform
+ and filter extracted tuples by using a series of relational operators.
+ Here, I introduce the relational operators for spanners, described in REF,
+ that are considered to capture the core relational operations of AQL.
+ They are:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Union 
+\emph default
+( 
+\begin_inset Formula $\cup$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Projection 
+\emph default
+(
+\begin_inset Formula $\pi$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Natural Join
+\emph default
+ (
+\begin_inset Formula $\bowtie$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+String Selection
+\emph default
+ (
+\begin_inset Formula $\varsigma$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+A finite set of spanner operators forms a 
+\emph on
+spanner algebra
+\emph default
+.
+ In the following, give definitions for each of the listed spanner operators.
+\end_layout
+
+\begin_layout Subsubsection
+Union
+\end_layout
+
+\begin_layout Subsubsection
+Projection
+\end_layout
+
+\begin_layout Subsubsection
+Natural Join
+\end_layout
+
+\begin_layout Subsubsection
+String Selection
 \end_layout
 
 \begin_layout Standard
