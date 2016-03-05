@@ -77,7 +77,7 @@ Engineering a Runtime System for AQL
 \end_layout
 
 \begin_layout Author
-your name
+Andrea Morciano
 \end_layout
 
 \begin_layout Degree
@@ -1168,6 +1168,13 @@ published
 
 \begin_layout Subsection
 Data Model
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Data-Model"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1351,15 +1358,20 @@ Here, I focus on
 \emph on
 span relations
 \emph default
-.
- What follows is the definition of a 
-\begin_inset Formula $\left(V,s\right)-\textrm{relation}$
+, which I formally define as 
+\begin_inset Formula $\left(V,s\right)-\textrm{relations}$
 \end_inset
 
 .
 \end_layout
 
 \begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "span-relation"
+
+\end_inset
+
 A 
 \begin_inset Formula $\left(V,s\right)-\textrm{relation}$
 \end_inset
@@ -1388,6 +1400,13 @@ Each operator in the algebra takes one or more span relations as input and
 
 \begin_layout Subsection
 Execution Model
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Execution-Model"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1500,7 +1519,14 @@ In this procedure, step 2 in the for loop is the most expensive.
 \end_layout
 
 \begin_layout Subsection
-Algebra of Operators
+Algebra of Operators 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Algebra-of-Operators"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1791,6 +1817,7 @@ Consider two spans
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
+\noindent
 \begin_inset Formula $s_{1}\preceq_{d}s_{2}$
 \end_inset
 
@@ -1859,8 +1886,9 @@ Optimization Techniques
 
 \begin_layout Standard
 As I mentioned in the introduction of this chapter, SystemT can make use
- of the optimization techniques from traditional database systems, but are
- some peculiar aspects of SystemT that enable new optimization methods.
+ of the optimization techniques from traditional database systems, but there
+ exist some peculiar aspects of SystemT and span extraction tasks that enable
+ new optimization methods.
 \end_layout
 
 \begin_layout Remark
@@ -1895,7 +1923,7 @@ CPU-intensive process
 \begin_inset Formula $\varepsilon_{d}$
 \end_inset
 
-.
+, that are applied to each document in an input set.
 \end_layout
 
 \begin_layout --Separator--
@@ -1943,6 +1971,1364 @@ reference "interval-algebra"
 
  in mind, running time can be reduced in a number of ways.
  I present them briefly.
+\end_layout
+
+\begin_layout Description
+Regular
+\begin_inset space ~
+\end_inset
+
+Expression
+\begin_inset space ~
+\end_inset
+
+Strength
+\begin_inset space ~
+\end_inset
+
+Reduction Some classes of regular expressions, as defined in the POSIX standard,
+ are executed more efficiently by using 
+\emph on
+specialized engines 
+\emph default
+that are able to improve performance.
+ For example, an expression that looks for a finite number of strings in
+ a text is evaluated more efficiently by a string-matching engine.
+\end_layout
+
+\begin_layout Description
+Shared
+\begin_inset space ~
+\end_inset
+
+Dictionary
+\begin_inset space ~
+\end_inset
+
+Matching
+\begin_inset space ~
+\end_inset
+
+(SDM) Dictionary lookups are usually very expensive, as we need to consult
+ the dictionary thousand of times in a typical setting.
+ Instead of evaluating each 
+\begin_inset Formula $\varepsilon_{d}$
+\end_inset
+
+ operator in an extraction task independently for each input document, it
+ is evaluated once and for all at the beginning of the process, and the
+ obtained matches are shared among the single documents.
+\end_layout
+
+\begin_layout Description
+Conditional
+\begin_inset space ~
+\end_inset
+
+Evaluation
+\begin_inset space ~
+\end_inset
+
+(CE) As we know, an annotator is evaluated indipendently on each input document.
+ Thus, by employing some heuristic, it can be guessed if a (sub)query will
+ give any matches in a document without loss of generality, and in case
+ it does not, it is not evaluated on it.
+\end_layout
+
+\begin_layout Description
+Restricted
+\begin_inset space ~
+\end_inset
+
+Span
+\begin_inset space ~
+\end_inset
+
+Extraction
+\begin_inset space ~
+\end_inset
+
+(RSE) It consists in executing expensive operations on selected regions
+ of a document.
+ It is used for 
+\emph on
+join
+\emph default
+ operators involving dictionary matching operators and/or a regular expression
+ matching operators in their argments.
+ One input operator to a join is evaluated on the whole document, while
+ the other operators are modified to consider only some neighborhood of
+ the results from the first one.
+ These neighborhoods are established by some ad hoc heuristic.
+\end_layout
+
+\begin_layout Standard
+The techniques described allow the use of a 
+\emph on
+cost-based plan optimizer
+\emph default
+: in a query plan, the subgraphs suitable for optimization are identified,
+ and all the possible optimized plans for them are formulated.
+ In the end, the best ones are retained.
+ Results of sample experiments on a large dataset are decribed in REF and
+ REF.
+\end_layout
+
+\begin_layout Section
+AQL
+\end_layout
+
+\begin_layout Standard
+AQL is the concrete language used by SystemT to express annotators, designed
+ to support the execution model I described in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Execution-Model"
+
+\end_inset
+
+.
+ It is a declarative language with a syntax very similar to that of SQL.
+ It supports all the operators that I presented in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Algebra-of-Operators"
+
+\end_inset
+
+.
+ When coding an extraction task in AQL, we are able to build a series of
+ views of a document, that are of progressively higher level, and can be
+ based on lower-level views.
+ The content of a view corresponds with annotations in the text.
+ An input document is modeled as a view too, which is provided by default.
+ The main advantages of AQL are:
+\end_layout
+
+\begin_layout Itemize
+it allows formulating 
+\emph on
+complex low-level 
+\emph default
+patterns in a declarative fashion;
+\end_layout
+
+\begin_layout Itemize
+it enables 
+\emph on
+modularization 
+\emph default
+and 
+\emph on
+reuse
+\emph default
+ of the queries, making development and maintance of 
+\emph on
+complex high-level structures
+\emph default
+ easier.
+\end_layout
+
+\begin_layout Section
+A Formalism for AQL's Core: VStack and VSet Automata
+\end_layout
+
+\begin_layout Standard
+AUTHORS describe in REF a formal model that captures the core functionality
+ of AQL.
+ They show a way to represent annotators expressed in AQL by means of modified
+ finite state automata, namely 
+\emph on
+VStack
+\emph default
+ and 
+\emph on
+VSet automata
+\emph default
+.
+ In my work, I define and implement a runtime system based on this new formalism.
+ I now describe the model and discuss the relative expressive power of its
+ main elements.
+ First of all, we need to be more precise on some basic concepts.
+\end_layout
+
+\begin_layout Subsection
+Basic Definitions
+\end_layout
+
+\begin_layout Standard
+I consider 
+\begin_inset Formula $\varSigma$
+\end_inset
+
+ and 
+\begin_inset Formula $\varSigma^{\ast}$
+\end_inset
+
+, defined as in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Data-Model"
+
+\end_inset
+
+.
+ Let us start with the definition of a language.
+\end_layout
+
+\begin_layout Definition
+A language L is a subset of 
+\begin_inset Formula $\varSigma^{\ast}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Now we can state formally define regular expressions, by giving their language.
+\end_layout
+
+\begin_layout Definition
+Regular expressions over 
+\begin_inset Formula $\varSigma$
+\end_inset
+
+ are those that belong to the language 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ defined as:
+\begin_inset Formula 
+\begin{equation}
+\gamma:=\textrm{Ø}\mid\epsilon\mid\sigma\mid\gamma\vee\gamma\mid\gamma\cdot\gamma\mid\gamma^{\ast}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\noindent
+where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Ø$
+\end_inset
+
+ is the empty language;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ is the empty string;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\sigma\in\varSigma$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\vee$
+\end_inset
+
+ is the ordinary disjunction operator;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\cdot$
+\end_inset
+
+ is the concatenation operator;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\ast$
+\end_inset
+
+ is the Kleene Closure.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\noindent
+Additionally, we might use 
+\begin_inset Formula $\gamma^{+}$
+\end_inset
+
+ as a shortcut for 
+\begin_inset Formula $\gamma\cdot\gamma^{\ast}$
+\end_inset
+
+, and 
+\begin_inset Formula $\varSigma$
+\end_inset
+
+ as an abbreviation of 
+\begin_inset Formula $\sigma_{1}\vee...\vee\sigma_{n}$
+\end_inset
+
+ (with a slight abuse of notation).
+ We also need the definition of a 
+\emph on
+string relation
+\emph default
+.
+\end_layout
+
+\begin_layout Definition
+A n-ary string relation is a subset of 
+\begin_inset Formula $\left(\varSigma^{\ast}\right)^{n}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+I have already defined span relations (Definition 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "span-relation"
+
+\end_inset
+
+).
+ They allow us to give a precise definition of annotators, by introducing
+ the concept of 
+\emph on
+document spanner
+\emph default
+.
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+, a document spanner P is a function that maps 
+\begin_inset Formula $s$
+\end_inset
+
+ to a 
+\begin_inset Formula $\left(V,s\right)-\textrm{relation}$
+\end_inset
+
+ 
+\begin_inset Formula $r$
+\end_inset
+
+ , where 
+\begin_inset Formula $V:=\textrm{Svars}\left(P\right)$
+\end_inset
+
+.
+ We have 
+\begin_inset Formula $r=P\left(s\right).$
+\end_inset
+
+ We say 
+\begin_inset Formula $P$
+\end_inset
+
+ is n-ary if 
+\begin_inset Formula $\left|V\right|=n$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+I now present two types of spanners that will be useful later on.
+ The first one is that of 
+\emph on
+Hierarchical Spanners
+\emph default
+.
+ First, let us see when a 
+\begin_inset Formula $s-\textrm{tuple}$
+\end_inset
+
+ is hierarchical.
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "hierarchical-tuple"
+
+\end_inset
+
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+, a document spanner P and an 
+\begin_inset Formula $s-\textrm{tuple}$
+\end_inset
+
+ 
+\begin_inset Formula $\mu\in P\left(s\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\mu$
+\end_inset
+
+is hiearchical if, for every 
+\begin_inset Formula $x,y\in\textrm{SVars}\left(P\right)$
+\end_inset
+
+, one of the following conditions holds:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\mu\left(x\right)\supseteq\mu\left(y\right);$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mu\left(x\right)\subseteq\mu\left(y\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mu\left(x\right)$
+\end_inset
+
+ is disjoint from 
+\begin_inset Formula $\mu\left(y\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\noindent
+The definition of 
+\emph on
+hierarchical spanner
+\emph default
+ follows.
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "hierarchical-spanner"
+
+\end_inset
+
+Given a document spanner 
+\begin_inset Formula $P$
+\end_inset
+
+, 
+\begin_inset Formula $P$
+\end_inset
+
+ is hierarchical if 
+\begin_inset Formula $\forall s\in\varSigma^{\ast}$
+\end_inset
+
+, 
+\begin_inset Formula $\forall\mu\in P\left(s\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\mu$
+\end_inset
+
+ is hierarchical.
+\end_layout
+
+\begin_layout Standard
+\noindent
+The class of hierarchical spanners is denoted by 
+\begin_inset Formula $\mathbf{HS}$
+\end_inset
+
+.
+ As it emerges from Definition 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "hierarchical-tuple"
+
+\end_inset
+
+ and Definition 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "hierarchical-spanner"
+
+\end_inset
+
+, a hierarchical spanner outputs only 
+\begin_inset Formula $s-\textrm{tuples}$
+\end_inset
+
+ whose spans don't overlap.
+ The second type of spanners I introduce is that of 
+\emph on
+Universal Spanners
+\emph default
+.
+ Some accessory definitions are needed.
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+ and a document spanner 
+\begin_inset Formula $P$
+\end_inset
+
+, 
+\begin_inset Formula $P$
+\end_inset
+
+ is total on 
+\begin_inset Formula $s$
+\end_inset
+
+ if 
+\begin_inset Formula $P\left(s\right)$
+\end_inset
+
+ consists of all the possible 
+\begin_inset Formula $s-\textrm{tuples}$
+\end_inset
+
+ on 
+\begin_inset Formula $\textrm{SVars}\left(P\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+ and a document spanner 
+\begin_inset Formula $P$
+\end_inset
+
+, 
+\begin_inset Formula $P$
+\end_inset
+
+ is hierarchically total on 
+\begin_inset Formula $s$
+\end_inset
+
+ if 
+\begin_inset Formula $P\left(s\right)$
+\end_inset
+
+ consists of all the possible hierarchical 
+\begin_inset Formula $s-\textrm{tuples}$
+\end_inset
+
+ on 
+\begin_inset Formula $\textrm{SVars}\left(P\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+There are two kinds of universal spanners: the 
+\emph on
+universal spanner
+\emph default
+ and the 
+\emph on
+universal hierarchical spanner
+\emph default
+.
+\end_layout
+
+\begin_layout Definition
+Given a set of span variables 
+\begin_inset Formula $Y$
+\end_inset
+
+
+\begin_inset Formula $\subseteq\textrm{SVars}$
+\end_inset
+
+, the universal spanner 
+\begin_inset Formula $\Upsilon_{Y}$
+\end_inset
+
+ over 
+\begin_inset Formula $Y$
+\end_inset
+
+ is the unique document spanner 
+\begin_inset Formula $P$
+\end_inset
+
+ such that 
+\begin_inset Formula $\textrm{SVars}\left(P\right)=Y$
+\end_inset
+
+ and 
+\begin_inset Formula $P$
+\end_inset
+
+ is total on every string 
+\begin_inset Formula $s\in\varSigma^{\ast}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a set of span variables 
+\begin_inset Formula $Y$
+\end_inset
+
+
+\begin_inset Formula $\subseteq\textrm{SVars}$
+\end_inset
+
+, the universal hierarchical spanner 
+\begin_inset Formula $\Upsilon_{Y}^{H}$
+\end_inset
+
+ over 
+\begin_inset Formula $Y$
+\end_inset
+
+ is the unique document spanner 
+\begin_inset Formula $P$
+\end_inset
+
+ such that 
+\begin_inset Formula $\textrm{SVars}\left(P\right)=Y$
+\end_inset
+
+ and 
+\begin_inset Formula $P$
+\end_inset
+
+ is hierarchically total on every string 
+\begin_inset Formula $s\in\varSigma^{\ast}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\noindent
+I now present the formal spanner represantations described in REF.
+\end_layout
+
+\begin_layout Subsection
+Spanner Representations
+\end_layout
+
+\begin_layout Standard
+We saw in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Algebra-of-Operators"
+
+\end_inset
+
+ that the operations used by SystemT and AQL to extract spans relations
+ are regular expression matching and dictionary matching.
+ Here I focus on regular expressions.
+ AQL's regular expressions can be seen as usual regular expressions enriched
+ with 
+\emph on
+capture variables
+\emph default
+, that are nothing but the span variables that constitute the span relations
+ I defined.
+ In what follows.
+ In REF, three formalisms are described that are able to model this kind
+ of modified regular expressions, namely:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Regex Formulas;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Variable Stack Automata;
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Variable Set Automata.
+\end_layout
+
+\begin_layout Subsubsection
+Regex Formulas
+\end_layout
+
+\begin_layout Standard
+To define regex formula, I first introduce the concept of 
+\emph on
+variable regex.
+\end_layout
+
+\begin_layout Definition
+A variable regex is a regular expression with capture variables that extends
+ usual regular expressions in the following way:
+\begin_inset Formula 
+\begin{equation}
+\gamma:=\textrm{Ø}\mid\epsilon\mid\sigma\mid\gamma\vee\gamma\mid\gamma\cdot\gamma\mid\gamma^{\ast}\mid x\left\{ \gamma\right\} 
+\end{equation}
+
+\end_inset
+
+ where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $x\in\textrm{SVars}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $x\left\{ \gamma\right\} $
+\end_inset
+
+ means that we assign the result of the evaluation of 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ to x.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\noindent
+Evaluating a variable regex on a string produces a parse tree over the alphabet
+ 
+\begin_inset Formula $\Lambda=\varSigma\cup\textrm{SVars}\cup\left\{ \in,\vee,\cdot,\ast\right\} $
+\end_inset
+
+.
+ A valid parse tree for a variable regex
+\begin_inset Formula $\gamma$
+\end_inset
+
+ is called a 
+\begin_inset Formula $\gamma-\textrm{parse}$
+\end_inset
+
+.
+ We accept only those variable regex expressions whose parses have only
+ one occurence of each of their variables, otherwise the variable assignment
+ would remain unclear.
+ Such expressions are referred to as 
+\emph on
+functional
+\emph default
+.
+\end_layout
+
+\begin_layout Definition
+A variable regex 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ is functional if 
+\begin_inset Formula $\forall s\in\varSigma^{\ast}$
+\end_inset
+
+, 
+\begin_inset Formula $\forall\gamma-\textrm{parse }t$
+\end_inset
+
+ for 
+\begin_inset Formula $s$
+\end_inset
+
+, 
+\begin_inset Formula $\forall x\in\textrm{SVars}\left(\gamma\right)$
+\end_inset
+
+, 
+\begin_inset Formula $x$
+\end_inset
+
+ occurs exactly one time in 
+\begin_inset Formula $t$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+A regex formula is a functional variable regex.
+\end_layout
+
+\begin_layout Standard
+\noindent
+The spanner represented by a regex formula 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ may be denoted as 
+\begin_inset Formula $\left\llbracket \gamma\right\rrbracket $
+\end_inset
+
+.
+ We have that 
+\begin_inset Formula $\textrm{SVars}\left(\left\llbracket \gamma\right\rrbracket \right)=\textrm{SVars}\left(\gamma\right)$
+\end_inset
+
+, and the span relation 
+\begin_inset Formula $\left\llbracket \gamma\right\rrbracket \left(s\right)$
+\end_inset
+
+ is the set 
+\begin_inset Formula $\left\{ \mu^{p}\mid p\textrm{ is a }\gamma-\textrm{parse for \ensuremath{s}}\right\} $
+\end_inset
+
+, where 
+\begin_inset Formula $\mu^{p}$
+\end_inset
+
+ is a tuple defined by a parse 
+\begin_inset Formula $p$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Variable Stack Automata
+\end_layout
+
+\begin_layout Standard
+Variable stack automata (VStack Automata or vstk-automata for short) are
+ representations of document spanners by means of modified finite state
+ automata (FAs).
+ Basically, a FA is augmented with a 
+\emph on
+stack of span variables
+\emph default
+.
+ A variable is pushed on the stack when its corresponding span is opened,
+ and popped when it is closed.
+ The formal definition of a vstk-automaton follows.
+\end_layout
+
+\begin_layout Definition
+A Variable Stack Automaton is a tuple 
+\begin_inset Formula $\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q$
+\end_inset
+
+ is a finite set of states;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{0}\in Q$
+\end_inset
+
+ is the initial state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}\in Q$
+\end_inset
+
+ is the accepting state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta$
+\end_inset
+
+ is a finite transition relation, containing triples of the forms 
+\begin_inset Formula $\left(q,\sigma,q'\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q,\epsilon,q'\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q,x\vdash,q'\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q,\dashv,q'\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $q,q'\in Q$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\sigma\in\varSigma$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $x\in SVars$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\vdash$
+\end_inset
+
+ is the push symbol;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\dashv$
+\end_inset
+
+ is the pop symbol.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+\noindent
+Notice that we don't need to specify which variable we want to pop, as it
+ is naturally the last that was pushed on the stack.
+ Given a vstk-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, the set of variables that appear in its transitions is denoted as 
+\begin_inset Formula $\textrm{SVars}\left(A\right)$
+\end_inset
+
+.
+ Next I give the definitions of a 
+\emph on
+configuration 
+\emph default
+and of a 
+\emph on
+run
+\emph default
+ of a vstk-automaton.
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+ with length 
+\begin_inset Formula $\left|s\right|=n$
+\end_inset
+
+ and a vstk-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ , a configuration of 
+\begin_inset Formula $A$
+\end_inset
+
+ is a tuple 
+\begin_inset Formula $c=\left(q,\overrightarrow{v},Y,i\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $q\in Q$
+\end_inset
+
+ is the current state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\overrightarrow{v}$
+\end_inset
+
+ is the current variable stack;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Y\in Vars$
+\end_inset
+
+
+\begin_inset Formula $\left(A\right)$
+\end_inset
+
+ is the set of available variables (those not already pushed on the stack);
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $i\in\left\{ 1,...,n+1\right\} $
+\end_inset
+
+ is the position of the next character to be read in 
+\begin_inset Formula $s$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\noindent
+Here, as for regex formulas, we want the variable assignment to be clear,
+ so once a variable is pushed on the stack, it is removed from the set of
+ available variables, thus it can be pushed only once.
+ For the rest, a run of a vstk-automaton is similar to those of ordinary
+ FAs.
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $s$
+\end_inset
+
+ and a vstk-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $s$
+\end_inset
+
+ is a sequence of configurations 
+\begin_inset Formula $c_{0},...,c_{m}$
+\end_inset
+
+ such that:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $c_{0}=\left(q_{0},\epsilon,\textrm{SVars}\left(A\right),1\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\forall j\in\left\{ 0,...,m-1\right\} $
+\end_inset
+
+, for 
+\begin_inset Formula $c_{j}$
+\end_inset
+
+=
+\begin_inset Formula $\left(q_{j},\overrightarrow{v_{j}},Y_{j},i_{j}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $c_{j+1}$
+\end_inset
+
+=
+\begin_inset Formula $\left(q_{j+1},\overrightarrow{v_{j+1}},Y_{j+1},i_{j+1}\right)$
+\end_inset
+
+ one of the following holds:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\overrightarrow{v_{j+1}}=\overrightarrow{v_{j}}$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}$
+\end_inset
+
+ and either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}+1$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},s_{i_{j}},q_{j+1}\right)\in\delta$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},\in,q_{j+1}\right)\in\delta$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}$
+\end_inset
+
+ and for some 
+\begin_inset Formula $x\in\textrm{SVars}\left(A\right)$
+\end_inset
+
+ either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\overrightarrow{v_{j+1}}=\overrightarrow{v_{j}}\cdot x$
+\end_inset
+
+, 
+\begin_inset Formula $x\in Y_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}\setminus\left\{ x\right\} $
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},x\vdash,q_{j+1}\right)\in\delta$
+\end_inset
+
+ (x is pushed on the stack);
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\overrightarrow{v_{j}}=\overrightarrow{v_{j+1}}\cdot x$
+\end_inset
+
+, 
+\begin_inset Formula $x\in Y_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{j},\dashv,q_{j+1}\right)\in\delta$
+\end_inset
+
+ (a variable is popped from the stack).
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a string with length 
+\begin_inset Formula $\left|s\right|=n$
+\end_inset
+
+ and a vstk-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho=c_{0},...,c_{m}$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $s$
+\end_inset
+
+ is accepting if 
+\begin_inset Formula $c_{m}=\left(q_{f},\epsilon,\textrm{Ø},n+1\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+The set of all possible accepting runs of a vstk-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ on a string 
+\begin_inset Formula $s$
+\end_inset
+
+ is denoted as 
+\begin_inset Formula $\textrm{ARuns}\left(A,s\right)$
+\end_inset
+
+.
+ The spanner represented by 
+\begin_inset Formula $A$
+\end_inset
+
+ may be referred to as 
+\begin_inset Formula $\left\llbracket A\right\rrbracket $
+\end_inset
+
+.
+ We have that 
+\begin_inset Formula $\textrm{SVars}\left(\left\llbracket A\right\rrbracket \right)=\textrm{SVars}\left(A\right)$
+\end_inset
+
+, and the span relation 
+\begin_inset Formula $\left\llbracket A\right\rrbracket \left(s\right)$
+\end_inset
+
+ is the set 
+\begin_inset Formula $\left\{ \mu^{\rho}\mid\rho\in\textrm{ARuns}\left(A,s\right)\right\} $
+\end_inset
+
+, where 
+\begin_inset Formula $\mu^{\rho}$
+\end_inset
+
+ is a tuple defined by a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ In particular, for every variable 
+\begin_inset Formula $x\in\textrm{SVars}\left(A\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\mu^{\rho}\left(x\right)$
+\end_inset
+
+ is the span 
+\begin_inset Formula $\left[i_{b},i_{e}\right\rangle $
+\end_inset
+
+, where:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $c_{b}$
+\end_inset
+
+=
+\begin_inset Formula $\left(q_{b},\overrightarrow{v_{b}},Y_{b},i_{b}\right)$
+\end_inset
+
+ is the unique configuration of 
+\begin_inset Formula $\rho$
+\end_inset
+
+ where 
+\begin_inset Formula $x$
+\end_inset
+
+ appears in the stack for the fist time;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $c_{e}$
+\end_inset
+
+=
+\begin_inset Formula $\left(q_{e},\overrightarrow{v_{e}},Y_{e},i_{e}\right)$
+\end_inset
+
+ is the unique configuration of 
+\begin_inset Formula $\rho$
+\end_inset
+
+ where 
+\begin_inset Formula $x$
+\end_inset
+
+ appears in the stack for the last time.
+\end_layout
+
+\begin_layout Subsubsection
+Variable Set Automata
 \end_layout
 
 \begin_layout Standard
