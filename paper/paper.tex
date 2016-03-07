@@ -619,8 +619,8 @@ constraint }that establishes the minimum number of spans in a block.
 
 \subsubsection{Span Selection Predicates}
 
-Consider two spans $s_{1},s_{2}$. The main span predicates that may
-be used for selection are the following:
+\noindent Consider two spans $s_{1},s_{2}$. The main span predicates
+that may be used for selection are the following:
 \begin{lyxlist}{00.00.0000}
 \item [{$s_{1}\preceq_{d}s_{2}$}] \noindent when $s_{1},s_{2}$ do not
 overlap, $s_{1}$ precedes $s_{2}$ and there are less than $d$ characters
@@ -758,9 +758,26 @@ language $\gamma$ defined as:
 \noindent Additionally, we might use $\gamma^{+}$ as a shortcut for
 $\gamma\cdot\gamma^{\ast}$, and $\varSigma$ as an abbreviation of
 $\sigma_{1}\vee...\vee\sigma_{n}$ (with a slight abuse of notation).
-We also need the definition of a \emph{string relation}.
+The language $\mathcal{L}\left(\gamma\right)$of a regular expression
+$\gamma$ is the set of strings $\mathbf{s}$ over $\varSigma$ that
+are matched by that expression. A language $L$ is \emph{regular}
+if $L=\mathcal{L}\left(\gamma\right)$ for some regular expression
+$\gamma$. We also need the definition of a \emph{string relation}.
 \begin{definition}
 A n-ary string relation is a subset of $\left(\varSigma^{\ast}\right)^{n}$.
+\end{definition}
+
+\noindent An interesting class of string relations is that of recognizable
+relations, denoted as $\textrm{REC}$.
+\begin{definition}
+Given a k-ary string relation $R$, $R$ is recognizable if it is
+representable by a finite union the form:
+\begin{equation}
+\bigcup L_{1}\times...\times L_{k}
+\end{equation}
+
+
+where each $L$$_{i}$ is a regular language.
 \end{definition}
 
 \noindent I have already defined span relations (Definition \ref{span-relation}).
@@ -893,7 +910,8 @@ be denoted as $\left\llbracket \gamma\right\rrbracket $. We have
 that $\textrm{SVars}\left(\left\llbracket \gamma\right\rrbracket \right)=\textrm{SVars}\left(\gamma\right)$,
 and the span relation $\left\llbracket \gamma\right\rrbracket \left(s\right)$
 is the set $\left\{ \mu^{p}\mid p\textrm{ is a }\gamma-\textrm{parse for \ensuremath{s}}\right\} $,
-where $\mu^{p}$ is a tuple defined by a parse $p$.
+where $\mu^{p}$ is a tuple defined by a parse $p$. The class of
+regex formulas is referred to as $\textrm{RGX}$.
 
 
 \subsubsection{Variable Stack Automata}
@@ -1006,6 +1024,8 @@ for the fist time;
 is the unique configuration of $\rho$ where $x$ appears in the stack
 for the last time.
 \end{itemize}
+\noindent The class of variable stack automata is called $\textrm{VA}_{\textrm{stk}}$.
+
 
 \subsubsection{Variable Set Automata}
 
@@ -1085,9 +1105,10 @@ $c_{m}=\left(q_{f},\textrm{Ø},\textrm{Ø},n+1\right)$.
 
 \noindent Given a string $s$ and a vset-automaton $A$, $\textrm{ARuns}\left(A,s\right)$and
 $\left\llbracket A\right\rrbracket $ are defined as for vstk-automata.
+The class of variable set automata is called $\textrm{VA}_{\textrm{stk}}$.
 
 
-\subsection{Algebras of Spanners}
+\subsection{Algebras of Spanners\label{sub:Algebras-of-Spanners}}
 
 Besides mere span extraction, AQL offers the capability to combine,
 transform and filter extracted tuples by using a series of relational
@@ -1107,14 +1128,271 @@ operators.
 
 \subsubsection{Union}
 
+Before giving the definition of the union operator, we need to introduce
+the concept of \emph{union compatible spanners.}
+\begin{definition}
+Given two document spanner $P_{1}$ and $P_{2}$, they are union compatible
+if and only if $\textrm{SVars}\left(P_{1}\right)=\textrm{SVars}\left(P_{2}\right)$.
+\end{definition}
+
+\noindent The definition of union of two spanners is as follows.
+\begin{definition}
+Given two union compatible document spanners $P_{1}$ and $P_{2}$,
+their union is the spanner denoted as $P_{1}\cup P_{2}$, for which
+we have that:
+\begin{itemize}
+\item $\textrm{SVars}\left(P_{1}\cup P_{2}\right)=\textrm{SVars}\left(P_{1}\right)$;
+\item given a string $\mathbf{s}$, $\left(P_{1}\cup P_{2}\right)\left(\mathbf{s}\right)=P_{1}\left(\mathbf{s}\right)\cup P_{2}\left(\mathbf{s}\right)$.
+\end{itemize}
+\end{definition}
+
 
 \subsubsection{Projection}
+\begin{definition}
+Given a document spanner $P$ and a set of span variables $Y\subseteq\textrm{SVars}\left(P\right)$,
+the projection of $P$ over $Y$ is the spanner denoted as $\pi_{Y}P$,
+satisfying $\textrm{SVars}\left(\pi_{Y}P\right)=Y$.
+\end{definition}
+
+\noindent As the name and the definition suggest, the projection of
+a document spanner $P$ over a subset of its span variables $Y$ is
+obtained by reducing the domain of each of the spanner's output $s-\textrm{tuples}$
+to $Y$.
 
 
 \subsubsection{Natural Join}
+\begin{definition}
+Given two document spanners $P_{1}$ and $P_{2}$, their natural join
+is the spanner denoted as $P_{1}\bowtie P_{2}$, for which we have
+that:
+\begin{itemize}
+\item $\textrm{SVars}\left(P_{1}\bowtie P_{2}\right)=\textrm{SVars}\left(P_{1}\right)\cup\textrm{SVars}\left(P_{2}\right)$;
+\item given a string $\mathbf{s}$, $\left(P_{1}\bowtie P_{2}\right)\left(\mathbf{s}\right)$
+consists of all the $\mathbf{s}-\textrm{tuples}$ $\mu$ agreeing
+with some $\mu_{1}\in P_{1}\left(\mathbf{s}\right)$ and some $\mu_{2}\in P_{2}\left(\mathbf{s}\right)$.
+Note that this implies that $\mu_{1},\mu_{2}$ agree on variables
+that are common to $P_{1},P_{2}$: $\forall x\in\textrm{SVars}\left(P_{1}\right)\cap\textrm{SVars}\left(P_{2}\right)$,
+$\mu_{1}\left(x\right)=\mu_{2}\left(x\right)$. 
+\end{itemize}
+\end{definition}
 
 
 \subsubsection{String Selection}
+\begin{definition}
+Given a document spanner $P$ and a k-ary string relation $R$, the
+string selection operation according to $R$ is denoted as $\varsigma^{R}$,
+and is parametrized by $x_{1},...,x_{k}\in\textrm{SVars}\left(P\right)$.
+We have that, given a string $\mathbf{s}$ and a spanner $P':=\varsigma_{x_{1},...,x_{k}}^{R}P$,
+$P'\left(\mathbf{s}\right)$ consists of all the $\mathbf{s}-\textrm{tuples}$
+$\mu$ such that $\left(\mathbf{s}_{\mu\left(x_{1}\right)},...,\mathbf{s}_{\mu\left(x_{k}\right)}\right)\in R$.
+\end{definition}
+
+\noindent In the remainder of this document, the only string selection
+operator I consider is $\varsigma_{x,y}^{=}$ which, given a spanner
+$P$, restricts $P\left(\mathbf{s}\right)$ to those $\mathbf{s}-\textrm{tuples}$
+that satisfy $\mathbf{s}_{\mu\left(x\right)}=\mathbf{s}_{\mu\left(y\right)}$.
+
+\medskip{}
+
+
+\noindent I now introduce some additional notation. Given a generic
+class of spanner representations $\textrm{SR}$, the set of all the
+spannners that can be represented by $\textrm{SR}$ is denoted as
+$\left\llbracket \textrm{SR}\right\rrbracket $. Formally, we have
+that $\left\llbracket \textrm{SR}\right\rrbracket =\left\{ \left\llbracket r\right\rrbracket \mid\in\textrm{SR}\right\} $.
+Let $O$ be a spanner algebra. I denote by $\textrm{SR}^{O}$ the
+closure of $\textrm{SR}$ under $O$, that is: the class of spanner
+represantations obtained by applying (compositions of) operators contained
+in $O$ to the represantations in $\textrm{SR}$. The corresponding
+set of spanners is referred to as $\left\llbracket \textrm{SR}^{O}\right\rrbracket $.
+We are ready to start reasoning on the expressive power of the spanner
+representations that we defined.
+\begin{proposition}
+The following hold:
+\begin{enumerate}
+\item every document spanner represented in the classes $\textrm{RGX}$
+and $\textrm{VA}_{\textrm{stk}}$ is hierarchical, that is: $\left\llbracket \textrm{\textrm{RGX}}\right\rrbracket ,\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{stk}}}}\right\rrbracket \subseteq\mathbf{HS}$;
+\item there exist some spanners represented in $\textrm{VA}_{\textrm{set}}$
+that are not hierarchical: $\left\llbracket \textrm{\ensuremath{\textrm{VA}_{set}}}\right\rrbracket \nsubseteq\mathbf{HS}$;
+\item the operators $\cup$, $\pi$, $\varsigma^{R}$ preserve the property
+of being hierarchical, while $\bowtie$ does not, thus we have that:
+
+\begin{enumerate}
+\item given a class of spanner representations $\textrm{SR}$, $\left\llbracket \textrm{SR}\right\rrbracket \subseteq\mathbf{HS}\Rightarrow\left\llbracket \textrm{SR}^{\left\{ \cup,\pi,\varsigma^{R}\right\} }\right\rrbracket \subseteq\mathbf{HS};$
+\item there exist two hierarchical spanners $P_{1},P_{2}$ such that $P_{1}\bowtie P_{2}\notin\mathbf{HS}$.
+\end{enumerate}
+\end{enumerate}
+\end{proposition}
+
+\noindent In the next Subsection, I discuss the class of \emph{regular
+spanners}, which plays a central role in the discussion of the class
+of spanners that constitute the core of AQL.
+
+
+\subsection{Regular Spanners}
+
+A regular spanner is defined as follows.
+\begin{definition}
+A spanner is regular if it can be defined by a vset-automaton.
+\end{definition}
+
+\noindent Let us now see how regular spanners are related to the other
+basic spanner classes. A preliminary result is that regex formulas
+and vstk-automata have the same expressive power.
+\begin{theorem}
+\label{.rgx=00003Dvstk}$\left\llbracket \textrm{\textrm{RGX}}\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{stk}}}}\right\rrbracket $.
+\end{theorem}
+
+\noindent It turns out that the spanners expressed by representations
+in $\textrm{\ensuremath{\textrm{VA}_{\textrm{stk}}}}$($\textrm{\textrm{RGX}}$)
+are exactly those that are both regular and hierarchical.
+\begin{theorem}
+$\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{stk}}}}\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}\right\rrbracket \cap\mathbf{HS}$.
+\end{theorem}
+
+\noindent For what concerns the algebraic operators I presented in
+Subsection \ref{sub:Algebras-of-Spanners}, it can be shown that union,
+projection and join don't increase the expressive power of regular
+spanners.
+\begin{theorem}
+\label{.setext=00003Dset}$\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}^{\left\{ \cup,\pi,\bowtie\right\} }\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}\right\rrbracket $.
+\end{theorem}
+
+\noindent On the other hand, the same operators make the spanners
+represented in $\textrm{\ensuremath{\textrm{VA}_{\textrm{stk}}}}$
+equivalent to regular spanners.
+\begin{theorem}
+\label{.stkext=00003Dset}$\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{stk}}}}^{\left\{ \cup,\pi,\bowtie\right\} }\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}\right\rrbracket $.
+\end{theorem}
+
+\noindent Finally, I look at which string relations can be simulated
+by regular spanners. Let us start by defining the concept of \emph{selectable
+string relation}.
+\begin{definition}
+Given a string relation $R$ and a class of spanners $C$, $R$ is
+selectable by $C$ if for every document spanner $P\in C$ and for
+every $\overrightarrow{x}=x_{1},...,x_{k}$, $x_{i}\in\textrm{SVars}\left(P\right)$,
+we have that $\varsigma_{\overrightarrow{x}}^{R}P\in C$.
+\end{definition}
+
+\noindent Next, I introduce the concept of \emph{restricted universal
+spanner.}
+\begin{definition}
+Given a string relation $R$ and a sequence of variables$\overrightarrow{x}=x_{1},...,x_{k}$
+with their corrsesponding set $X=\left\{ x_{1},...,x_{k}\right\} $,
+the $R-\textrm{restricted}$ universal spanner over $\overrightarrow{x}$
+is $\Upsilon_{\overrightarrow{x}}^{R}:=\varsigma_{\overrightarrow{x}}^{R}\Upsilon_{X}$.
+\end{definition}
+
+\noindent Selectability of a string relation $R$ by a class of spanners
+$C$ corresponds to the presence in $C$ of all the possible $R-\textrm{restricted}$
+universal spanners, under some conditions.
+\begin{proposition}
+Given a string relation $R$ and a class of spanners $C$ containing
+all the possible universal spanners and closed under natural join,
+$R$ is selectable by $C$ if and only if, for every $\overrightarrow{x}=x_{1},...,x_{k}\in\textrm{SVars}^{k}$,
+$\Upsilon_{\overrightarrow{x}}^{R}\in C$.
+\end{proposition}
+
+\noindent In the case of regular spanners, the class of string relations
+that they can select is exactly $\textrm{REC}$.
+\begin{theorem}
+The class of string relations selectable by $\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}\right\rrbracket $
+is $\textrm{REC}$.
+\end{theorem}
+
+\noindent The relation ``$=$'' is not in $\textrm{REC}$, thus
+it is not selectable by regular spanners, nonetheless it is important
+for selection predicates in AQL, which is why regular spanners are
+not enough to model its core. In the following Subsection, by using
+the notions and results presented so far, I describe the spanners
+that are identified in REF as the core of AQL: \emph{core spanners}.
+
+
+\subsection{Core Spanners}
+
+An expression in the core of AQL belongs to $\textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }$.
+Consequently, a core spanner is defined as follows.
+\begin{definition}
+A core spanner is a document spanner belonging to $\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket $.
+\end{definition}
+
+\noindent Thanks to Theorems \ref{.rgx=00003Dvstk}, \ref{.setext=00003Dset}
+and \ref{.stkext=00003Dset} we can easily see that $\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{stk}}}}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket $.
+This shows that core spanners can be reduced to regular spanners extended
+with the algebra $\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} $.
+But the following lemma tells us an algebra with fewer operators is
+also sufficient.
+\begin{lemma}
+$\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}^{\left\{ \pi,\varsigma^{=}\right\} }\right\rrbracket $.
+\end{lemma}
+
+\noindent Another lemma, known as the \emph{core simplification lemma},
+gives a even more simple way of representing core spanners.
+\begin{lemma}
+$\mathbf{(Core\,Simplification\,Lemma)}$ Every core spanner can be
+defined by an expression of the form
+
+\begin{equation}
+\pi_{V}SA
+\end{equation}
+
+
+\noindent where:
+\begin{itemize}
+\item $A$ is a vset-automaton;
+\item $V\subseteq\textrm{SVars}\left(A\right)$;
+\item $S$ is a sequence of string selections $\varsigma_{x,y}^{=}$, for
+$x,y\in\textrm{SVars}\left(A\right)$.
+\end{itemize}
+\end{lemma}
+
+\noindent Now I look at which string relations can be simulated by
+core spanners. In the next definition, I define three string relations
+of relevance.
+\begin{definition}
+Given two strings $\mathbf{s},\mathbf{t}\in\varSigma^{\ast}$:
+\begin{itemize}
+\item $\mathbf{s}\sqsubseteq\mathbf{t}$ if $\mathbf{s}$ is a (consecutive)
+substring of t (i.e. $\mathbf{s}=\mathbf{t}_{\left[i,j\right\rangle }$);
+\item $\mathbf{s}\sqsubseteq_{\textrm{prf}}\mathbf{t}$ if $\mathbf{s}$
+is a prefix of t (i.e. $\mathbf{s}=\mathbf{t}_{\left[1,j\right\rangle }$);
+\item $\mathbf{s}\sqsubseteq_{\textrm{sfx}}\mathbf{t}$if $\mathbf{s}$
+is a suffix of t (i.e. $\mathbf{s}=\mathbf{t}_{\left[1,\left|\mathbf{t}\right|+1\right\rangle }$).
+\end{itemize}
+\end{definition}
+
+\begin{proposition}
+\noindent All the string relations in $\textrm{REC}$, $\mathbf{\sqsubseteq}$,
+$\sqsubseteq_{\textrm{prf}}$ and $\sqsubseteq_{\textrm{sfx}}$ are
+selectable by the core spanners.
+\end{proposition}
+
+
+\subsection{Difference}
+
+The difference operator is defined as follows.
+\begin{definition}
+Given two union compatible document spanners $P_{1}$ and $P_{2}$,
+their difference is the spanner $P_{1}\setminus P_{2}$, for which
+we have:
+\begin{itemize}
+\item $\textrm{SVars}\left(P_{1}\setminus P_{2}\right)=\textrm{SVars}\left(P_{1}\right)$;
+\item given a string $\mathbf{s}$, $\left(P_{1}\setminus P_{2}\right)\left(\mathbf{s}\right)=\left(P_{1}\right)\setminus\left(P_{2}\right)\left(\mathbf{s}\right)$.
+\end{itemize}
+\end{definition}
+
+\noindent It can be shown that regular spanners are closed under difference.
+\begin{theorem}
+\label{.setdiff=00003Dset}$\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}^{\left\{ \setminus\right\} }\right\rrbracket =\left\llbracket \textrm{\ensuremath{\textrm{VA}_{\textrm{set}}}}\right\rrbracket $.
+\end{theorem}
+
+\noindent Despite the result of of Theorem \ref{.setdiff=00003Dset},
+core spanners are not closed under difference, which is why this operator
+has not been considered so far.
+\begin{theorem}
+$\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket \subsetneq\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=},\setminus\right\} }\right\rrbracket $.
+\end{theorem}
 
 \include{conclusion}
 

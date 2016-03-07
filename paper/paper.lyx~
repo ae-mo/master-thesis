@@ -1807,6 +1807,7 @@ Span Selection Predicates
 \end_layout
 
 \begin_layout Standard
+\noindent
 Consider two spans 
 \begin_inset Formula $s_{1},s_{2}$
 \end_inset
@@ -2277,6 +2278,40 @@ Additionally, we might use
 \end_inset
 
  (with a slight abuse of notation).
+ The language 
+\begin_inset Formula $\mathcal{L}\left(\gamma\right)$
+\end_inset
+
+of a regular expression 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ is the set of strings 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ over 
+\begin_inset Formula $\varSigma$
+\end_inset
+
+ that are matched by that expression.
+ A language 
+\begin_inset Formula $L$
+\end_inset
+
+ is 
+\emph on
+regular
+\emph default
+ if 
+\begin_inset Formula $L=\mathcal{L}\left(\gamma\right)$
+\end_inset
+
+ for some regular expression 
+\begin_inset Formula $\gamma$
+\end_inset
+
+.
  We also need the definition of a 
 \emph on
 string relation
@@ -2290,6 +2325,48 @@ A n-ary string relation is a subset of
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+\noindent
+An interesting class of string relations is that of recognizable relations,
+ denotes as 
+\begin_inset Formula $\textrm{REC}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Definition
+Given a k-ary string relation 
+\begin_inset Formula $R$
+\end_inset
+
+, 
+\begin_inset Formula $R$
+\end_inset
+
+ is recognizable if it is representable by a finite union the form:
+\begin_inset Formula 
+\begin{equation}
+\bigcup L_{1}\times...\times L_{k}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+where each 
+\begin_inset Formula $L$
+\end_inset
+
+
+\begin_inset Formula $_{i}$
+\end_inset
+
+ is a regular language.
 \end_layout
 
 \begin_layout Standard
@@ -2851,6 +2928,11 @@ The spanner represented by a regex formula
 \end_inset
 
 .
+ The class of regex formulas is referred to as 
+\begin_inset Formula $\textrm{RGX}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3347,6 +3429,15 @@ The set of all possible accepting runs of a vstk-automaton
  appears in the stack for the last time.
 \end_layout
 
+\begin_layout Standard
+\noindent
+The class of variable stack automata is called 
+\begin_inset Formula $\textrm{VA}_{\textrm{stk}}$
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Subsubsection
 Variable Set Automata
 \end_layout
@@ -3710,10 +3801,22 @@ and
 \end_inset
 
  are defined as for vstk-automata.
+ The class of variable set automata is called 
+\begin_inset Formula $\textrm{VA}_{\textrm{stk}}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
 Algebras of Spanners
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Algebras-of-Spanners"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3777,6 +3880,1023 @@ A finite set of spanner operators forms a
 \emph on
 spanner algebra
 \emph default
+.
+ In the following, give definitions for each of the listed spanner operators.
+\end_layout
+
+\begin_layout Subsubsection
+Union
+\end_layout
+
+\begin_layout Standard
+Before giving the definition of the union operator, we need to introduce
+ the concept of 
+\emph on
+union compatible spanners.
+\end_layout
+
+\begin_layout Definition
+Given two document spanner 
+\begin_inset Formula $P_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $P_{2}$
+\end_inset
+
+, they are union compatible if and only if 
+\begin_inset Formula $\textrm{SVars}\left(P_{1}\right)=\textrm{SVars}\left(P_{2}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+The definition of union of two spanners is as follows.
+\end_layout
+
+\begin_layout Definition
+Given two union compatible document spanners 
+\begin_inset Formula $P_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $P_{2}$
+\end_inset
+
+, their union is the spanner denoted as 
+\begin_inset Formula $P_{1}\cup P_{2}$
+\end_inset
+
+, for which we have that:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\textrm{SVars}\left(P_{1}\cup P_{2}\right)=\textrm{SVars}\left(P_{1}\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(P_{1}\cup P_{2}\right)\left(\mathbf{s}\right)=P_{1}\left(\mathbf{s}\right)\cup P_{2}\left(\mathbf{s}\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+Projection
+\end_layout
+
+\begin_layout Definition
+Given a document spanner 
+\begin_inset Formula $P$
+\end_inset
+
+ and a set of span variables 
+\begin_inset Formula $Y\subseteq\textrm{SVars}\left(P\right)$
+\end_inset
+
+, the projection of 
+\begin_inset Formula $P$
+\end_inset
+
+ over 
+\begin_inset Formula $Y$
+\end_inset
+
+ is the spanner denoted as 
+\begin_inset Formula $\pi_{Y}P$
+\end_inset
+
+, satisfying 
+\begin_inset Formula $\textrm{SVars}\left(\pi_{Y}P\right)=Y$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+As the name and the definition suggest, the projection of a document spanner
+ 
+\begin_inset Formula $P$
+\end_inset
+
+ over a subset of its span variables 
+\begin_inset Formula $Y$
+\end_inset
+
+ is obtained by reducing the domain of each of the spanner's output 
+\begin_inset Formula $s-\textrm{tuples}$
+\end_inset
+
+ to 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Natural Join
+\end_layout
+
+\begin_layout Definition
+Given two document spanners 
+\begin_inset Formula $P_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $P_{2}$
+\end_inset
+
+, their natural join is the spanner denoted as 
+\begin_inset Formula $P_{1}\bowtie P_{2}$
+\end_inset
+
+, for which we have that:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\textrm{SVars}\left(P_{1}\bowtie P_{2}\right)=\textrm{SVars}\left(P_{1}\right)\cup\textrm{SVars}\left(P_{2}\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(P_{1}\bowtie P_{2}\right)\left(\mathbf{s}\right)$
+\end_inset
+
+ consists of all the 
+\begin_inset Formula $\mathbf{s}-\textrm{tuples}$
+\end_inset
+
+ 
+\begin_inset Formula $\mu$
+\end_inset
+
+ agreeing with some 
+\begin_inset Formula $\mu_{1}\in P_{1}\left(\mathbf{s}\right)$
+\end_inset
+
+ and some 
+\begin_inset Formula $\mu_{2}\in P_{2}\left(\mathbf{s}\right)$
+\end_inset
+
+.
+ Note that this implies that 
+\begin_inset Formula $\mu_{1},\mu_{2}$
+\end_inset
+
+ agree on variables that are common to 
+\begin_inset Formula $P_{1},P_{2}$
+\end_inset
+
+: 
+\begin_inset Formula $\forall x\in\textrm{SVars}\left(P_{1}\right)\cap\textrm{SVars}\left(P_{2}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\mu_{1}\left(x\right)=\mu_{2}\left(x\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+String Selection
+\end_layout
+
+\begin_layout Definition
+Given a document spanner 
+\begin_inset Formula $P$
+\end_inset
+
+ and a k-ary string relation 
+\begin_inset Formula $R$
+\end_inset
+
+, the string selection operation according to 
+\begin_inset Formula $R$
+\end_inset
+
+ is denoted as 
+\begin_inset Formula $\varsigma^{R}$
+\end_inset
+
+, and is parametrized by 
+\begin_inset Formula $x_{1},...,x_{k}\in\textrm{SVars}\left(P\right)$
+\end_inset
+
+.
+ We have that, given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ and a spanner 
+\begin_inset Formula $P':=\varsigma_{x_{1},...,x_{k}}^{R}P$
+\end_inset
+
+, 
+\begin_inset Formula $P'\left(\mathbf{s}\right)$
+\end_inset
+
+ consists of all the 
+\begin_inset Formula $\mathbf{s}-\textrm{tuples}$
+\end_inset
+
+ 
+\begin_inset Formula $\mu$
+\end_inset
+
+ such that 
+\begin_inset Formula $\left(\mathbf{s}_{\mu\left(x_{1}\right)},...,\mathbf{s}_{\mu\left(x_{k}\right)}\right)\in R$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+In the remainder of this document, the only string selection operator I
+ consider is 
+\begin_inset Formula $\varsigma_{x,y}^{=}$
+\end_inset
+
+ which, given a spanner 
+\begin_inset Formula $P$
+\end_inset
+
+, restricts 
+\begin_inset Formula $P\left(\mathbf{s}\right)$
+\end_inset
+
+ to those 
+\begin_inset Formula $\mathbf{s}-\textrm{tuples}$
+\end_inset
+
+ that satisfy 
+\begin_inset Formula $\mathbf{s}_{\mu\left(x\right)}=\mathbf{s}_{\mu\left(y\right)}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+I now introduce some additional notation.
+ Given a generic class of spanner representations 
+\begin_inset Formula $\textrm{SR}$
+\end_inset
+
+, the set of all the spannners that can be represented by 
+\begin_inset Formula $\textrm{SR}$
+\end_inset
+
+ is denoted as 
+\begin_inset Formula $\left\llbracket \textrm{SR}\right\rrbracket $
+\end_inset
+
+.
+ Formally, we have that 
+\begin_inset Formula $\left\llbracket \textrm{SR}\right\rrbracket =\left\{ \left\llbracket r\right\rrbracket \mid\in\textrm{SR}\right\} $
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $O$
+\end_inset
+
+ be a spanner algebra.
+ I denote by 
+\begin_inset Formula $\textrm{SR}^{O}$
+\end_inset
+
+ the closure of 
+\begin_inset Formula $\textrm{SR}$
+\end_inset
+
+ under 
+\begin_inset Formula $O$
+\end_inset
+
+, that is: the class of spanner represantations obtained by applying (compositio
+ns of) operators contained in 
+\begin_inset Formula $O$
+\end_inset
+
+ to the represantations in 
+\begin_inset Formula $\textrm{SR}$
+\end_inset
+
+.
+ The corresponding set of spanners is referred to as 
+\begin_inset Formula $\left\llbracket \textrm{SR}^{O}\right\rrbracket $
+\end_inset
+
+.
+ We are ready to start reasoning on the expressive power of the spanner
+ representations that we defined.
+\end_layout
+
+\begin_layout Proposition
+The following hold:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+every document spanner represented in the classes 
+\begin_inset Formula $\textrm{RGX}$
+\end_inset
+
+ and 
+\begin_inset Formula $\textrm{VA}_{\textrm{stk}}$
+\end_inset
+
+ is hierarchical, that is: 
+\begin_inset Formula $\left\llbracket \textrm{\textrm{RGX}}\right\rrbracket ,\left\llbracket \textrm{\textrm{VA}_{\textrm{stk}}}\right\rrbracket \subseteq\mathbf{HS}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Enumerate
+there exist some spanners represented in 
+\begin_inset Formula $\textrm{VA}_{\textrm{set}}$
+\end_inset
+
+ that are not hierarchical: 
+\begin_inset Formula $\left\llbracket \textrm{\textrm{VA}_{set}}\right\rrbracket \nsubseteq\mathbf{HS}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Enumerate
+the operators 
+\begin_inset Formula $\cup$
+\end_inset
+
+, 
+\begin_inset Formula $\pi$
+\end_inset
+
+, 
+\begin_inset Formula $\varsigma^{R}$
+\end_inset
+
+ preserve the property of being hierarchical, while 
+\begin_inset Formula $\bowtie$
+\end_inset
+
+ does not, thus we have that:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+given a class of spanner representations 
+\begin_inset Formula $\textrm{SR}$
+\end_inset
+
+, 
+\begin_inset Formula $\left\llbracket \textrm{SR}\right\rrbracket \subseteq\mathbf{HS}\Rightarrow\left\llbracket \textrm{SR}^{\left\{ \cup,\pi,\varsigma^{R}\right\} }\right\rrbracket \subseteq\mathbf{HS};$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+there exist two hierarchical spanners 
+\begin_inset Formula $P_{1},P_{2}$
+\end_inset
+
+ such that 
+\begin_inset Formula $P_{1}\bowtie P_{2}\notin\mathbf{HS}$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+\noindent
+In the next Subsection, I discuss the class of 
+\emph on
+regular spanners
+\emph default
+, which plays a central role in the discussion of the class of spanners
+ that constitute the core of AQL.
+\end_layout
+
+\begin_layout Subsection
+Regular Spanners
+\end_layout
+
+\begin_layout Standard
+A regular spanner is defined as follows.
+\end_layout
+
+\begin_layout Definition
+A spanner is regular if it can be defined by a vset-automaton.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Let us now see how regular spanners are related to the other basic spanner
+ classes.
+ A preliminary result is that regex formulas and vstk-automata have the
+ same expressive power.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset CommandInset label
+LatexCommand label
+name ".rgx=vstk"
+
+\end_inset
+
+
+\begin_inset Formula $\left\llbracket \textrm{\textrm{RGX}}\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{stk}}}\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+It turns out that the spanners expressed by representations in 
+\begin_inset Formula $\textrm{\textrm{VA}_{\textrm{stk}}}$
+\end_inset
+
+(
+\begin_inset Formula $\textrm{\textrm{RGX}}$
+\end_inset
+
+) are exactly those that are both regular and hierarchical.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset Formula $\left\llbracket \textrm{\textrm{VA}_{\textrm{stk}}}\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}\right\rrbracket \cap\mathbf{HS}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+For what concerns the algebraic operators I presented in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Algebras-of-Spanners"
+
+\end_inset
+
+, it can be shown that union, projection and join don't increase the expressive
+ power of regular spanners.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset CommandInset label
+LatexCommand label
+name ".setext=set"
+
+\end_inset
+
+
+\begin_inset Formula $\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}^{\left\{ \cup,\pi,\bowtie\right\} }\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+On the other hand, the same operators make the spanners represented in 
+\begin_inset Formula $\textrm{\textrm{VA}_{\textrm{stk}}}$
+\end_inset
+
+ equivalent to regular spanners.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset CommandInset label
+LatexCommand label
+name ".stkext=set"
+
+\end_inset
+
+
+\begin_inset Formula $\left\llbracket \textrm{\textrm{VA}_{\textrm{stk}}}^{\left\{ \cup,\pi,\bowtie\right\} }\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Finally, I look at which string relations can be simulated by regular spanners.
+ Let us start by defining the concept of 
+\emph on
+selectable string relation
+\emph default
+.
+\end_layout
+
+\begin_layout Definition
+Given a string relation 
+\begin_inset Formula $R$
+\end_inset
+
+ and a class of spanners 
+\begin_inset Formula $C$
+\end_inset
+
+, 
+\begin_inset Formula $R$
+\end_inset
+
+ is selectable by 
+\begin_inset Formula $C$
+\end_inset
+
+ if for every document spanner 
+\begin_inset Formula $P\in C$
+\end_inset
+
+ and for every 
+\begin_inset Formula $\overrightarrow{x}=x_{1},...,x_{k}$
+\end_inset
+
+, 
+\begin_inset Formula $x_{i}\in\textrm{SVars}\left(P\right)$
+\end_inset
+
+, we have that 
+\begin_inset Formula $\varsigma_{\overrightarrow{x}}^{R}P\in C$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Next, I introduce the concept of 
+\emph on
+restricted universal spanner.
+\end_layout
+
+\begin_layout Definition
+Given a string relation 
+\begin_inset Formula $R$
+\end_inset
+
+ and a sequence of variables
+\begin_inset Formula $\overrightarrow{x}=x_{1},...,x_{k}$
+\end_inset
+
+ with their corrsesponding set 
+\begin_inset Formula $X=\left\{ x_{1},...,x_{k}\right\} $
+\end_inset
+
+, the 
+\begin_inset Formula $R-\textrm{restricted}$
+\end_inset
+
+ universal spanner over 
+\begin_inset Formula $\overrightarrow{x}$
+\end_inset
+
+ is 
+\begin_inset Formula $\Upsilon_{\overrightarrow{x}}^{R}:=\varsigma_{\overrightarrow{x}}^{R}\Upsilon_{X}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Selectability of a string relation 
+\begin_inset Formula $R$
+\end_inset
+
+ by a class of spanners 
+\begin_inset Formula $C$
+\end_inset
+
+ corresponds to the presence in 
+\begin_inset Formula $C$
+\end_inset
+
+ of all the possible 
+\begin_inset Formula $R-\textrm{restricted}$
+\end_inset
+
+ universal spanners, under some conditions.
+\end_layout
+
+\begin_layout Proposition
+Given a string relation 
+\begin_inset Formula $R$
+\end_inset
+
+ and a class of spanners 
+\begin_inset Formula $C$
+\end_inset
+
+ containing all the possible universal spanners and closed under natural
+ join, 
+\begin_inset Formula $R$
+\end_inset
+
+ is selectable by 
+\begin_inset Formula $C$
+\end_inset
+
+ if and only if, for every 
+\begin_inset Formula $\overrightarrow{x}=x_{1},...,x_{k}\in\textrm{SVars}^{k}$
+\end_inset
+
+, 
+\begin_inset Formula $\Upsilon_{\overrightarrow{x}}^{R}\in C$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+In the case of regular spanners, the class of string relations that they
+ can select is exactly 
+\begin_inset Formula $\textrm{REC}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Theorem
+The class of string relations selectable by 
+\begin_inset Formula $\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}\right\rrbracket $
+\end_inset
+
+ is 
+\begin_inset Formula $\textrm{REC}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+The relation 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $=$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ is not in 
+\begin_inset Formula $\textrm{REC}$
+\end_inset
+
+, thus it is not selectable by regular spanners, nonetheless it is important
+ for selection predicates in AQL, which is why regular spanners are not
+ enough to model its core.
+ In the following Subsection, by using the notions and results presented
+ so far, I describe the spanners that are identified in REF as the core
+ of AQL: 
+\emph on
+core spanners
+\emph default
+.
+\end_layout
+
+\begin_layout Subsection
+Core Spanners
+\end_layout
+
+\begin_layout Standard
+An expression in the core of AQL belongs to 
+\begin_inset Formula $\textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }$
+\end_inset
+
+.
+ Consequently, a core spanner is defined as follows.
+\end_layout
+
+\begin_layout Definition
+A core spanner is a document spanner belonging to 
+\begin_inset Formula $\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Thanks to Theorems 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference ".rgx=vstk"
+
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference ".setext=set"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference ".stkext=set"
+
+\end_inset
+
+ we can easily see that 
+\begin_inset Formula $\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{stk}}}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket $
+\end_inset
+
+.
+ This shows that core spanners can be reduced to regular spanners extended
+ with the algebra 
+\begin_inset Formula $\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} $
+\end_inset
+
+.
+ But the following lemma tells us an algebra with fewer operators is also
+ sufficient.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Formula $\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}^{\left\{ \pi,\varsigma^{=}\right\} }\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Another lemma, known as the 
+\emph on
+core simplification lemma
+\emph default
+, gives a even more simple way of representing core spanners.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Formula $\mathbf{(Core\,Simplification\,Lemma)}$
+\end_inset
+
+ Every core spanner can be defined by an expression of the form
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Formula 
+\begin{equation}
+\pi_{V}SA
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+\noindent
+where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $A$
+\end_inset
+
+ is a vset-automaton;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $V\subseteq\textrm{SVars}\left(A\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $S$
+\end_inset
+
+ is a sequence of string selections 
+\begin_inset Formula $\varsigma_{x,y}^{=}$
+\end_inset
+
+, for 
+\begin_inset Formula $x,y\in\textrm{SVars}\left(A\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\noindent
+Now I look at which string relations can be simulated by core spanners.
+ In the next definition, I define three string relations of relevance.
+\end_layout
+
+\begin_layout Definition
+Given two strings 
+\begin_inset Formula $\mathbf{s},\mathbf{t}\in\varSigma^{\ast}$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{s}\sqsubseteq\mathbf{t}$
+\end_inset
+
+ if 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is a (consecutive) substring of t (i.e.
+ 
+\begin_inset Formula $\mathbf{s}=\mathbf{t}_{\left[i,j\right\rangle }$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{s}\sqsubseteq_{\textrm{prf}}\mathbf{t}$
+\end_inset
+
+ if 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is a prefix of t (i.e.
+ 
+\begin_inset Formula $\mathbf{s}=\mathbf{t}_{\left[1,j\right\rangle }$
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{s}\sqsubseteq_{\textrm{sfx}}\mathbf{t}$
+\end_inset
+
+if 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is a suffix of t (i.e.
+ 
+\begin_inset Formula $\mathbf{s}=\mathbf{t}_{\left[1,\left|\mathbf{t}\right|+1\right\rangle }$
+\end_inset
+
+).
+\end_layout
+
+\end_deeper
+\begin_layout Proposition
+\noindent
+All the string relations in 
+\begin_inset Formula $\textrm{REC}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{\sqsubseteq}$
+\end_inset
+
+, 
+\begin_inset Formula $\sqsubseteq_{\textrm{prf}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\sqsubseteq_{\textrm{sfx}}$
+\end_inset
+
+ are selectable by the core spanners.
+\end_layout
+
+\begin_layout Subsection
+Difference
+\end_layout
+
+\begin_layout Standard
+The difference operator is defined as follows.
+\end_layout
+
+\begin_layout Definition
+Given two union compatible document spanners 
+\begin_inset Formula $P_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $P_{2}$
+\end_inset
+
+, their difference is the spanner 
+\begin_inset Formula $P_{1}\setminus P_{2}$
+\end_inset
+
+, for which we have:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\textrm{SVars}\left(P_{1}\setminus P_{2}\right)=\textrm{SVars}\left(P_{1}\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(P_{1}\setminus P_{2}\right)\left(\mathbf{s}\right)=\left(P_{1}\right)\setminus\left(P_{2}\right)\left(\mathbf{s}\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\noindent
+It can be shown that regular spanners are closed under difference.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset CommandInset label
+LatexCommand label
+name ".setdiff=set"
+
+\end_inset
+
+
+\begin_inset Formula $\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}^{\left\{ \setminus\right\} }\right\rrbracket =\left\llbracket \textrm{\textrm{VA}_{\textrm{set}}}\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Despite the result of of Theorem 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference ".setdiff=set"
+
+\end_inset
+
+, core spanners are not closed under difference, which is why this operator
+ has not been considered so far.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset Formula $\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket \subsetneq\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=},\setminus\right\} }\right\rrbracket $
+\end_inset
+
 .
 \end_layout
 
