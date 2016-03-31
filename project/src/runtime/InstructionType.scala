@@ -1,5 +1,5 @@
 package runtime
 
 object InstructionType extends Enumeration{
-  val CHAR, MATCH, JMP, SPLIT = Value
+  val CHAR, MATCH, JMP, SPLIT, SAVE = Value
 }
