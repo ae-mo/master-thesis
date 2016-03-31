@@ -44,6 +44,18 @@ class runtimeTestSuite extends FunSuite {
     rgx4(9) = new Instruction(InstructionType.SPLIT, -1, -1, 9, rgx4(8), rgx4(10))
     rgx4(7) = new Instruction(InstructionType.JMP, -1, -1, 7, rgx4(5), null)
     rgx4(0) = new Instruction(InstructionType.SPLIT, -1, -1, 0, rgx4(1), rgx4(5))
+    
+    // matches /a+//b/
+    val rgx5 = new Array[Instruction](8)
+    
+    rgx5(1) = new Instruction(InstructionType.CHAR, 97, -1, 1, null, null)
+    rgx5(5) = new Instruction(InstructionType.CHAR, 98, -1, 5, null, null)
+    rgx5(7) = new Instruction(InstructionType.MATCH, -1, -1, 7, null, null)
+    rgx5(0) = new Instruction(InstructionType.SAVE, -1, 0, 0, rgx5(1), null)
+    rgx5(4) = new Instruction(InstructionType.SAVE, -1, 2, 4, rgx5(5), null)
+    rgx5(3) = new Instruction(InstructionType.SAVE, -1, 1, 3, rgx5(4), null)
+    rgx5(6) = new Instruction(InstructionType.SAVE, -1, 3, 6, rgx5(7), null)
+    rgx5(2) = new Instruction(InstructionType.SPLIT, -1, -1, 2, rgx5(1), rgx5(3))      
   }
   
   def strings = new {
@@ -121,6 +133,19 @@ class runtimeTestSuite extends FunSuite {
     
     vm.evaluate(progs.rgx4, strings.str4) 
     assert(!runtime.matched)
+  }
+  
+  
+  test("The VM should say rgx5 return submatches (0,2) (2,3) on str3") {
+    
+    val saved:Array[Int] = vm.evaluate(progs.rgx5, strings.str3) 
+    assert(runtime.matched)
+    
+    assert(saved(0) == 0)
+    assert(saved(1) == 1)
+    assert(saved(2) == 1)
+    assert(saved(3) == 2)
+    
   }
   
 }

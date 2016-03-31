@@ -1,6 +1,6 @@
 package runtime
 
-import scala.collection.mutable.Stack
+import scala.collection.mutable.MutableList
 /**
  * Represents a virtual machine for regular expression programs executions.
  */
@@ -22,8 +22,8 @@ object vm {
 	def evaluate(prog: Array[Instruction], input: Array[Int]):Array[Int] =  {
 
 			val len = prog.length
-			var cList = new Stack[Thread]()
-			var nList = Stack[Thread]()
+			var cList = new MutableList[Thread]()
+			var nList = MutableList[Thread]()
 			var present = new Array[Boolean](len)
 			var saved:Array[Int] = null
 			var matched = false
@@ -38,9 +38,9 @@ object vm {
 				var j = 0
 
 				var stop = false
-				while(cList.length > 0 && !stop) {
+				while(j < cList.length) {
 
-					var t = cList.pop
+					var t = cList(j)
 
 					val pc = t.pc
 
@@ -53,10 +53,14 @@ object vm {
 						}
 
 						case InstructionType.MATCH => {
-						  
-							saved = t.saved.clone()
-							matched = true
-							stop = true
+						  if(i == input.length - 1) {
+						    
+						    saved = t.saved.clone()
+							  matched = true
+							  j = cList.length
+						    
+						  }
+							
 						}
 
 						case _ => {
@@ -72,7 +76,7 @@ object vm {
 				}
 
 				cList = nList
-				nList = Stack[Thread]()
+				nList = MutableList[Thread]()
 				present = new Array[Boolean](len)
 
 			}
@@ -91,7 +95,7 @@ object vm {
 	 * @param i the current input character
 	 * @param saved the current array of saved string pointers
 	 */
-	def addThread(l:Stack[Thread], p:Array[Boolean],  instr:Instruction, i:Int, saved:Array[Int]) {
+	def addThread(l:MutableList[Thread], p:Array[Boolean],  instr:Instruction, i:Int, saved:Array[Int]) {
 
 		instr.opCode match {
 
@@ -118,7 +122,7 @@ object vm {
 		case _ => {
 
 		  if(!p(instr.num))
-				new Thread(instr, saved.clone) +: l;
+				l += new Thread(instr, saved.clone) ;
 		}
 
 		}

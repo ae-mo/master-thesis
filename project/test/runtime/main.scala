@@ -18,8 +18,8 @@ object main {
     rgx4(0) = new Instruction(InstructionType.SPLIT, -1, -1, 0, rgx4(1), rgx4(5))
     
     val str1 = new Array[Int](3)
-    str1(0) = 97
-    str1(1) = 98
+    str1(0) = 98
+    str1(1) = 97
     str1(2) = -1
     
     def main(args: Array[String]) {
