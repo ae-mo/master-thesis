@@ -1,9 +1,6 @@
 package runtime
 
 import scala.collection.mutable.MutableList
-/**
- * Represents a virtual machine for regular expression programs executions.
- */
 
 package object runtime {
   
@@ -11,6 +8,9 @@ package object runtime {
   
 }
 
+/**
+ * Represents a virtual machine for regular expression programs executions.
+ */
 object vm {
 
 	/**
@@ -19,7 +19,7 @@ object vm {
 	 * @param input the input for the program
 	 * @param saved a list of saved input indices for submatch tracking
 	 */
-	def evaluate(prog: Array[Instruction], input: Array[Int]):Array[Int] =  {
+	def evaluate(prog: Array[Instruction], input: Array[Char]):Array[Int] =  {
 
 			val len = prog.length
 			var cList = new MutableList[Thread]()
@@ -49,7 +49,25 @@ object vm {
 						case InstructionType.CHAR => {
 
 							if(sp == pc.c)
-								addThread(nList, present, prog(pc.num + 1), i, t.saved)
+								addThread(nList, present, prog(pc.num + 1), i+1, t.saved)
+						}
+						
+						case InstructionType.DIGIT => {
+
+						  if(sp >= '0' && sp <= '9')
+								addThread(nList, present, prog(pc.num + 1), i+1, t.saved)
+						}
+						
+						case InstructionType.WHITESPACE => {
+
+						  if(sp == '\t' || sp == '\r' || sp == '\n' || sp == '\f' || sp == ' ')
+								addThread(nList, present, prog(pc.num + 1), i+1, t.saved)
+						}
+						
+						case InstructionType.DOT => {
+						  
+						  if(sp != '\0')
+								addThread(nList, present, prog(pc.num + 1), i+1, t.saved)
 						}
 
 						case InstructionType.MATCH => {
