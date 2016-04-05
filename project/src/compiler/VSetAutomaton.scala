@@ -27,84 +27,88 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     
     import scala.collection.mutable.ArrayBuffer
      
-    var transitionGraph = this.transitionFunction
+    var newTransitionGraph = this.transitionFunction.clone
     var initial = this.initial
     var nrStates = this.nrStates
     var finalStates = this.finalStates
     
     // normalize the automaton
-    val(a, b, c, d) = normalize(nrStates, initial, transitionGraph, finalStates)
+    val(a, b, c, d) = normalize(nrStates, initial, newTransitionGraph, finalStates)
     
     nrStates = a
     initial = b
-    transitionGraph = c
+    newTransitionGraph = c
     finalStates = d
     
-    var statesToProcess = nrStates - initial - finalStates.size
+    var oldTransitionGraph: Map[Int, Map[Int, String]] = null
     
-    var oldTransitionGraph = transitionGraph
-    var newTransitionGraph: Map[Int, Map[Int, String]] = null
+    // compute the weights for each state
+    var weights = computeWeights(nrStates, initial, newTransitionGraph, finalStates)
+    
+    var statesToProcess = nrStates -  weights.count(_ == Int.MaxValue)
+    
+    println()
     
     // eliminate states
     while(statesToProcess > 0) {
-      newTransitionGraph = Map[Int, Map[Int, String]]()
-      // compute the weights for each state
-      val weights = computeWeights(nrStates, initial, oldTransitionGraph, finalStates)
       
-      val q = weights.zipWithIndex.min._2
+     oldTransitionGraph = newTransitionGraph.clone
       
+     val q = weights.zipWithIndex.min._2
+        
       // Compute the label of each new arc after elimination of q
-      for((s1, t1) <- oldTransitionGraph) {
-       for((s2, t2) <- oldTransitionGraph){
+      for((s1, t1) <- oldTransitionGraph if (t1.contains(q) && s1 != q)) {
+       for((s2, t2) <- oldTransitionGraph(q) if (s2 != q)){
          
-         if(t1.contains(q) && oldTransitionGraph(q).contains(s2)) {
+         println()
+
           
-          var alphas1s2 = ""
-          var alphaqq = ""
+        var alphas1s2 = ""
+        var alphaqq = ""
+        
+        // check if there's an arc between s1, s2
+        if(t1.contains(s2)) {
           
-          if(oldTransitionGraph(s1).contains(s2)) {
-            
-            alphas1s2 = "(" + oldTransitionGraph(s1)(s2) + ")"
-            
-          }
-            
-            
-          if(oldTransitionGraph(s1).contains(s1))
-            alphaqq = "(" + oldTransitionGraph(s1)(s1) + ")"
-            
-          val alphas1q = "(" + t1(q) + ")"
-          val alphaqs2 = "(" + oldTransitionGraph(q)(s2) + ")"
+          alphas1s2 = "(" + oldTransitionGraph(s1)(s2) + ")"
           
-          if(!newTransitionGraph.contains(s1))
-           newTransitionGraph = newTransitionGraph + (s1 -> Map[Int, String]())
-          
-          var newTransition = ""
-          if(alphas1s2 != "")
-            newTransition = newTransition + alphas1s2 + "|"
-            
-          newTransition = newTransition + "(" + alphas1q
-          
-          if(alphaqq != "")
-            newTransition = newTransition + alphaqq + "*"
-          
-          newTransition = newTransition + alphaqs2 + ")"
-          
-          
-          
-          newTransitionGraph(s1) = newTransitionGraph(s1) + (s2 -> newTransition)
         }
-        else if(!t1.contains(q)) {
           
-          newTransitionGraph = newTransitionGraph + (s1 -> t1)
+        // Check if q has an arc to itself
+        if(oldTransitionGraph(q).contains(q)) {
           
+          alphaqq = "(" + oldTransitionGraph(q)(q) + ")"
         }
         
-       }        
+        
+        val alphas1q = "(" + t1(q) + ")"
+        val alphaqs2 = "(" + oldTransitionGraph(q)(s2) + ")"
+        
+        // compose the new transition between s1, s2
+        var newTransition = ""
+        if(alphas1s2 != "")
+          newTransition = newTransition + alphas1s2 + "|"
+          
+        newTransition = newTransition + "(" + alphas1q
+        
+        if(alphaqq != "")
+          newTransition = newTransition + alphaqq + "*"
+        
+        newTransition = newTransition + alphaqs2 + ")"
+        
+        // add new transition to s2
+        newTransitionGraph(s1) += (s2 -> newTransition)
+
+       }
+       
+       // eliminate old transitions
+        newTransitionGraph(s1) -= q
         
       }
       
-      oldTransitionGraph = newTransitionGraph
+      newTransitionGraph -= q
+      
       statesToProcess = statesToProcess - 1
+      weights = computeWeights(nrStates, initial, newTransitionGraph, finalStates)
       
     }
     
@@ -174,6 +178,8 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
    */
   def computeWeights(n: Int, i: Int, tr:Map[Int, Map[Int, String]], f: Array[Int]): Array[Int] = {
     
+    import scala.util.control.Breaks._
+    
     var transitionGraph = tr
     var initial = i
     var nrStates = n
@@ -189,8 +195,21 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
       var lengthOut:Int = 0
       var lengthSelf:Int = 0
       
+      var setOp = false
+      
+      // check if state i has an incoming transition with a set operation
+      for((s1, t1) <- transitionGraph) {
+        
+        if(t1.contains(i) && t1(i).matches("._(in)|(out)")) {
+          
+          setOp = true
+          weights(i) = Int.MaxValue
+          break
+        }
+        
+      }
       // compute lengthOut, l
-      if(transitionGraph.contains(i)) {
+      if(transitionGraph.contains(i) && !setOp) {
         
         l = transitionGraph(i).size
         
