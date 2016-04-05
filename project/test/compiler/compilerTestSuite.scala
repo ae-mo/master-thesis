@@ -38,15 +38,28 @@ class compilerTestSuite extends FunSuite {
     
   }
   
-  test("VSetAReader should correclty transform sampleVSet1 into a ") {
+  test("stateElimination() should correctly eliminate the states of sampleVSet1") {
     
     val (nrStates, initial, transitionFunction, finalStates) = VSetAFileReader.getVSetA(files.sampleVSet1)
     
     val a = new VSetAutomaton(nrStates, initial, transitionFunction, finalStates)
     
-    val transitionGraph = a.stateElimination()
+    val (nrStates2, initial2, newTransitionGraph, finalStates2) = a.stateElimination()
     
-    println(transitionGraph(0)(3))
+    assert(transitionFunction(0)(1) == "x_in")
+    assert(transitionFunction(0)(4) == "y_in")
+    assert(transitionFunction(1)(3) == "((a)(x_out))")
+    assert(transitionFunction(4)(3) == "((b)(y_out))")
+    
+  }
+  
+  test("toVSetPathUnion() should correctly sampleVSet1 into a vset path union") {
+    
+    val (nrStates, initial, transitionFunction, finalStates) = VSetAFileReader.getVSetA(files.sampleVSet1)
+    
+    val a = new VSetAutomaton(nrStates, initial, transitionFunction, finalStates)
+    
+    val (transitionGraph, finalStates2) = a.toVSetPathUnion()
     
   }
   

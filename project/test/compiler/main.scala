@@ -10,7 +10,7 @@ object main {
       
       val a = new VSetAutomaton(nrStates, initial, transitionFunction, finalStates)
     
-      a.stateElimination()
+      a.toVSetPathUnion()
     
     }
     

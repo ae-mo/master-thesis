@@ -1,6 +1,7 @@
 package compiler
 
 import scala.collection.mutable.Map
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Represents a vset-automaton.
@@ -14,16 +15,61 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   
   def union(other: VSetAutomaton): VSetAutomaton {}
   
-  def toVSetPathUntion(): Map[Int, Map[Int, String]] {
+  
+  */
+  
+  /*
+   * Transforms the vset-automaton into a vset path union.
+   */
+  def toVSetPathUnion():(ArrayBuffer[ArrayBuffer[(String, Int)]], Array[Int]) = {
     
+    val (nrStates, initial, transitionGraph, finalStates) = stateElimination()
     
+    var pathsToProcess = 1
+    var pathsUnion = new ArrayBuffer[ArrayBuffer[(String, Int)]]()
+    
+    pathsUnion += new ArrayBuffer[(String, Int)]()
+    pathsUnion(0) += (("", 0))
+    
+    // Grow the paths iteratively
+    while(pathsToProcess > 0) {
+      
+      var newPaths = new ArrayBuffer[ArrayBuffer[(String, Int)]]()
+      
+      for(path <- pathsUnion) {
+        
+        val (e, s) = path.last
+       
+        if(!finalStates.contains(s)) {
+          
+          for((t, e1) <- transitionGraph(s)) {
+          
+            newPaths += path.clone
+            newPaths.last += ((e1, t))
+            
+            if(!finalStates.contains(t))
+              pathsToProcess += 1
+            else pathsToProcess -= 1
+            
+          }
+            
+        }
+        
+      }
+      
+      path += newPaths(0).last
+      pathsToProcess -= 1    
+      pathsUnion.appendAll(newPaths.tail)
+      
+    }
+    
+    (pathsUnion, finalStates)
     
   }
-  */
   /**
    *Eliminates all the states that don't have incoming transitions with span open/close operations. 
    */
-  def stateElimination(): Map[Int, Map[Int, String]] = {
+  def stateElimination(): (Int, Int, Map[Int, Map[Int, String]], Array[Int]) = {
     
     import scala.collection.mutable.ArrayBuffer
      
@@ -46,8 +92,6 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     var weights = computeWeights(nrStates, initial, newTransitionGraph, finalStates)
     
     var statesToProcess = nrStates -  weights.count(_ == Int.MaxValue)
-    
-    println()
     
     // eliminate states
     while(statesToProcess > 0) {
@@ -112,7 +156,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
       
     }
     
-    newTransitionGraph
+    (nrStates, initial, newTransitionGraph, finalStates)
     
   } 
   
@@ -204,7 +248,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
           
           setOp = true
           weights(i) = Int.MaxValue
-          break
+
         }
         
       }
