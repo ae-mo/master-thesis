@@ -8,3 +8,4 @@ x y
 0 y_in 4
 4 b 5
 5 y_out 3
+3 epsilon 0

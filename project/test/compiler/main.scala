@@ -6,9 +6,9 @@ object main {
     
     def main(args: Array[String]) {
     
-      val (nrStates, initial, transitionFunction, finalStates) = VSetAFileReader.getVSetA(sampleVSet1)
+      val (nrStates, initial, transitionFunction,vars, finalStates) = VSetAFileReader.getVSetA(sampleVSet1)
       
-      val a = new VSetAutomaton(nrStates, initial, transitionFunction, finalStates)
+      val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
     
       a.toVSetPathUnion()
     

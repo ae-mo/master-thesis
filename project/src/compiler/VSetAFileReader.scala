@@ -11,7 +11,7 @@ object VSetAFileReader {
    * Returns the vset-automaton contained in the given file.
    * @param file the file name
    */
-  def getVSetA(file: String): (Int, Int, Map[Int, Map[Int, String]], Array[Int]) =  {
+  def getVSetA(file: String): (Int, Int, Map[Int, Map[Int, String]], Array[String], Array[Int]) =  {
     
       import scala.io.Source
       
@@ -29,6 +29,9 @@ object VSetAFileReader {
       val finalStatesTok = finalStatesStr.split("\\s+") 
       val finalStates = finalStatesTok.map(_.toInt)
       
+      val varsStr = lineIterator.next()
+      val varsTok = varsStr.split("\\s+") 
+      
       val transitionPattern = "(\\d+)\\s(.+)\\s(\\d+)".r
       
       var transitionFunction = Map[Int, Map[Int, String]]()
@@ -44,7 +47,7 @@ object VSetAFileReader {
         
       }
       
-      (nrStates, initial, transitionFunction, finalStates)
+      (nrStates, initial, transitionFunction, varsTok, finalStates)
   }
   
   

@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
  * Represents a vset-automaton.
 */
 
-class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:Map[Int, Map[Int, String]], val finalStates: Array[Int]) {
+class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:Map[Int, Map[Int, String]], val vars: Array[String], val finalStates: Array[Int]) {
   
 /*  def project(vars: Array[Int]): VSetAutomaton {}
   
@@ -23,47 +23,100 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
    */
   def toVSetPathUnion():(ArrayBuffer[ArrayBuffer[(String, Int)]], Array[Int]) = {
     
-    val (nrStates, initial, transitionGraph, finalStates) = stateElimination()
+    val (nrStates, initial, transitionGraph, finalStates2) = stateElimination()
     
     var pathsToProcess = 1
+    
+    var availablePathVars = new ArrayBuffer[Map[String, Boolean]]()
     var pathsUnion = new ArrayBuffer[ArrayBuffer[(String, Int)]]()
     
+    var firstPathVars = Map[String, Boolean]()
+    
+    for(v <- vars)
+      firstPathVars += (v -> true)
+      
+    availablePathVars += firstPathVars
+    
     pathsUnion += new ArrayBuffer[(String, Int)]()
-    pathsUnion(0) += (("", 0))
+    pathsUnion(0) += (("", initial))
     
     // Grow the paths iteratively
     while(pathsToProcess > 0) {
       
-      var newPaths = new ArrayBuffer[ArrayBuffer[(String, Int)]]()
+      var newPaths:ArrayBuffer[ArrayBuffer[(String, Int)]] = null
+      var newPathVars:ArrayBuffer[Map[String, Boolean]] = null
       
-      for(path <- pathsUnion) {
+      // Advance each path by one transition, spawning new paths if there are >1 possible branches
+      for(i <- 0 until pathsUnion.length) {
+        
+        var path = pathsUnion(i)
+        var pathVars = availablePathVars(i)
+        
+        newPaths =  new ArrayBuffer[ArrayBuffer[(String, Int)]]()
+        newPathVars = new ArrayBuffer[Map[String, Boolean]]()
         
         val (e, s) = path.last
-       
-        if(!finalStates.contains(s)) {
+        
+        // If we haven't reached a final state in the current path
+        if(!finalStates2.contains(s)) {
           
           for((t, e1) <- transitionGraph(s)) {
-          
-            newPaths += path.clone
-            newPaths.last += ((e1, t))
             
-            if(!finalStates.contains(t))
-              pathsToProcess += 1
-            else pathsToProcess -= 1
+            var discard = false
+            var out = false
+            var v:String = null
+            
+            // If a branch tries to open a variable, allow it only if it's still available and remove it
+            // from available vars for that branch, otherwise discard branch
+            if(e1.matches(".+._in.+")) {
+              
+              val openedVar = ".+(.)_in.+".r
+              val openedVar(x) = e1
+              v = x
+              
+              if(pathVars(x)) {
+                out = true
+              }
+              
+              else discard = true
+              
+            }     
+            
+            // If we didn't discard the new branch, make it a path
+            if(!discard) {
+             
+              newPaths += path.clone
+              newPaths.last += ((e1, t))
+              
+              newPathVars += pathVars.clone
+              
+              if(out)
+                newPathVars.last(v) = false
+             
+              
+            }
             
           }
-            
+          
+          // Add the new paths to the path union
+          path += newPaths(0).last
+          pathsToProcess += newPaths.tail.size
+          pathsUnion.appendAll(newPaths.tail)
+          
+          // Add the availlable variables for the new paths
+          availablePathVars(i) = newPathVars(0)
+          availablePathVars.appendAll(newPathVars.tail)
+
+          
         }
+        else
+          pathsToProcess -=1
         
       }
       
-      path += newPaths(0).last
-      pathsToProcess -= 1    
-      pathsUnion.appendAll(newPaths.tail)
-      
     }
     
-    (pathsUnion, finalStates)
+    (pathsUnion, finalStates2)
     
   }
   /**
@@ -175,40 +228,45 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     var finalStates = f
     
     // initial state without incoming transitions
-    for((q, t) <- transitionFunction) {
+    breakable { 
       
-      if(q != 0) {
-        
-        if(t.contains(0)) {
-         
-          nrStates = nrStates +1
-          initial = nrStates
-          transitionGraph = transitionGraph + (nrStates ->  Map[Int, String]())
-          transitionGraph(nrStates) = transitionGraph(nrStates) + (0 -> "")
+      for((q, t) <- transitionFunction) {
+      
+        if(q != 0) {
           
-          break
-          
+          if(t.contains(0)) {
+           
+            initial = nrStates
+            transitionGraph = transitionGraph + (nrStates ->  Map[Int, String]())
+            transitionGraph(nrStates) = transitionGraph(nrStates) + (0 -> "epsilon")
+            nrStates = nrStates +1
+            
+            break
+            
+          }
+            
         }
-          
+        
       }
       
     }
     
+    
     // unique final state without outgoing transitions
     if(this.finalStates.length > 1 || transitionFunction.contains(this.finalStates(0))) {
-      
-      nrStates = nrStates +1  
+       
       
       for(q <- this.finalStates) {
         
         if(!transitionGraph.contains(q))
          transitionGraph = transitionGraph + (q -> Map[Int, String]())
       
-        transitionGraph(q) = transitionGraph(q) + (nrStates -> "")
+        transitionGraph(q) = transitionGraph(q) + (nrStates -> "epsilon")
       }
       
       finalStates = new Array[Int](1)
       finalStates(0) = nrStates
+      nrStates = nrStates +1 
       
     }
     
@@ -244,7 +302,14 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
       // check if state i has an incoming transition with a set operation
       for((s1, t1) <- transitionGraph) {
         
-        if(t1.contains(i) && t1(i).matches("._(in)|(out)")) {
+//        println(t1.contains(i))
+//        if(t1.contains(i)) {
+//          println(t1(i))
+//          println(t1(i).matches("(._in)|(._out)"))
+//        }
+//        
+        
+        if(t1.contains(i) && t1(i).matches("(._in)|(._out)")) {
           
           setOp = true
           weights(i) = Int.MaxValue
@@ -305,6 +370,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     
     var cleaned = expr.replaceAll("\\\\", "")
     cleaned = cleaned.replaceAll("(._in)|(._out)", "a")
+    cleaned = cleaned.replaceAll("epsilon", "a")
     
     cleaned.length()
     
