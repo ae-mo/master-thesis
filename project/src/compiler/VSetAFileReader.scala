@@ -43,7 +43,10 @@ object VSetAFileReader {
         if(!transitionFunction.contains(state1.toInt))
          transitionFunction = transitionFunction + (state1.toInt -> Map[Int, String]())
           
-        transitionFunction(state1.toInt) = transitionFunction(state1.toInt) + (state2.toInt -> label)
+        if(transitionFunction(state1.toInt).contains(state2.toInt))
+          transitionFunction(state1.toInt)(state2.toInt) += "|" + label 
+        else
+          transitionFunction(state1.toInt) = transitionFunction(state1.toInt) + (state2.toInt -> label)
         
       }
       

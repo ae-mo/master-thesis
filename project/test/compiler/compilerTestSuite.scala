@@ -8,6 +8,7 @@ class compilerTestSuite extends FunSuite {
     
     val sampleVSet1 = "test/compiler/sampleVSet1.txt"
     val sampleVSet2 = "test/compiler/sampleVSet2.txt"
+    val sampleVSet3 = "test/compiler/sampleVSet3.txt"
     
   }
   
@@ -65,7 +66,7 @@ class compilerTestSuite extends FunSuite {
     
     val (pathUnion, finalStates2) = a.toVSetPathUnion()
     
-     assert(pathUnion.toString() == "ArrayBuffer(ArrayBuffer((,0), (y_in,4), (((b)(y_out)),3)), ArrayBuffer((,0), (x_in,1), (((a)(x_out)),3)))")
+     assert(pathUnion.size == 0)
     
     
   }
@@ -78,6 +79,20 @@ class compilerTestSuite extends FunSuite {
     
     val (pathUnion, finalStates2) = a.toVSetPathUnion()
     
-    assert(pathUnion.toString() == "ArrayBuffer(ArrayBuffer((,6), (((epsilon)(y_in)),4), (((b)(y_out)),3), (epsilon,7)), ArrayBuffer((,6), (((epsilon)(x_in)),1), (((a)(x_out)),3), (((epsilon)(y_in)),4), (((b)(y_out)),3), (epsilon,7)), ArrayBuffer((,6), (((epsilon)(y_in)),4), (((b)(y_out)),3), (((epsilon)(x_in)),1), (((a)(x_out)),3), (epsilon,7)), ArrayBuffer((,6), (((epsilon)(x_in)),1), (((a)(x_out)),3), (epsilon,7)))")
+    assert(pathUnion.toString() == "ArrayBuffer(ArrayBuffer((,null,6), (((epsilon)),Map(x -> in),1), (((a)),Map(x -> out),3), (((epsilon)),Map(y -> in),4), (((b)),Map(y -> out),3), (epsilon,Map(),7)), ArrayBuffer((,null,6), (((epsilon)),Map(y -> in),4), (((b)),Map(y -> out),3), (((epsilon)),Map(x -> in),1), (((a)),Map(x -> out),3), (epsilon,Map(),7)))")
   }
+  
+   test("toVSetPathUnion() should correctly transform sampleVSet3 into a vset path union") {
+     
+    val (nrStates, initial, transitionFunction, vars, finalStates) = VSetAFileReader.getVSetA(files.sampleVSet3)
+    
+    val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
+    
+    val (pathUnion, finalStates2) = a.toVSetPathUnion()
+    
+    assert(pathUnion.size == 6)
+    
+     
+   }
+   
 }

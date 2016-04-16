@@ -1,18 +1,23 @@
 package compiler
 
-object main {
+import dk.brics.automaton.RegExp
+
+object main{
   
-    val sampleVSet1 = "test/compiler/sampleVSet1.txt"
-    
+    val sampleVSet = "test/compiler/sampleVSet5.txt"
+  
     def main(args: Array[String]) {
-    
-      val (nrStates, initial, transitionFunction,vars, finalStates) = VSetAFileReader.getVSetA(sampleVSet1)
+      
+      val (nrStates, initial, transitionFunction, vars, finalStates) = VSetAFileReader.getVSetA(sampleVSet)
       
       val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
-    
-      a.toVSetPathUnion()
-    
+      
+      val (pathUnion, finalStates2) = a.toVSetPathUnion
+      
+      val hPU = a.toHybridPathUnion(pathUnion)
+      
+      val lPU = a.toLexicographicPathUnion(hPU)
+
     }
     
-  
 }
