@@ -4,7 +4,7 @@ import dk.brics.automaton.RegExp
 
 object main{
   
-    val sampleVSet = "test/compiler/sampleVSet5.txt"
+    val sampleVSet = "test/compiler/sampleVSet6.txt"
   
     def main(args: Array[String]) {
       

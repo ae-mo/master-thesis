@@ -148,31 +148,40 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 			for(path <- currentPathUnion) {
 			  var noEps = path.clone
 			  var epsRemoved = false
+			  var newPaths = 0
 			  // Remove all epsilon transitions
-				for(i <- path.length -1 to 2 by -1) {
-
-					val (a, o, t) = noEps(i)
-					// Check if the language of the automaton accepts only the empty string
-					if(a.isEmptyString) {
-
-						// eliminate the epsilon transition and add its variable ops
-						// to the previous transition
-						var part1 = if(i > 1) noEps.slice(0, i-1) else new ArrayBuffer[(Automaton,  Map[String, String], Int)]()
-						val part2 = if (i < noEps.length) noEps.slice(i+1, noEps.length) else null
-						val (a1, o1, t1) = noEps(i - 1)
-						val newOps = o ++ o1
-						part1 += ((a1, newOps, t1))
-						noEps = part1 ++ part2
-						epsRemoved = true
-
-					}
+			  if(noEps.length > 1)  {
+  				for(i <- path.length -1 to 1 by -1) {
+  
+  					val (a, o, t) = noEps(i)
+  					// Check if the language of the automaton accepts only the empty string
+  					if(a.isEmptyString) {
+  
+  						// eliminate the epsilon transition and add its variable ops
+  						// to the previous transition
+  						var part1 = if(i > 1) noEps.slice(0, i-1).clone else new ArrayBuffer[(Automaton,  Map[String, String], Int)]()
+  						val part2 = if (i < noEps.length) noEps.slice(i+1, noEps.length).clone else new ArrayBuffer[(Automaton,  Map[String, String], Int)]()
+  						val (a1, o1, t1) = noEps(i - 1)
+  						val newOps = o ++ o1
+  						
+  						// Fix variables opened and closed at the same time
+  						val commonVars = o.keySet.intersect(o1.keySet)
+  						for(v <- commonVars) {
+  						  
+  						  newOps(v) = "inout"
+  						}
+  						
+  						part1 += ((a1, newOps, t1))
+  						noEps = part1 ++ part2
+  						epsRemoved = true
+  
+  					}
 							
 				}
-			  
-			  var newPaths = 0
+			    
 			  // Remove the empty string from the languages of the transitions, keep both languages
 			  // in different paths
-				for(i <- 2 until noEps.length) {  
+				for(i <- 1 until noEps.length) {  
 				  
 				 val (a, o, t) = noEps(i)
 				  
@@ -181,17 +190,17 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 
            
            //create a new path with the automaton not accepting the empty string anymore
-           var part1 = path.slice(0, i)
-					 val part2 = if (i < path.length) path.slice(i+1, path.length) else null
+           var part1 = noEps.slice(0, i).clone
+					 val part2 = if (i < path.length -1) noEps.slice(i+1, noEps.length).clone else new ArrayBuffer[(Automaton,  Map[String, String], Int)]()
            val a1 = a.minus(epsAut)
            
            // Assemble the new paths
-           val newPath1 = part1
-           newPath1 += ((epsAut, o, t))
-           newPath1 ++= part2
-           val newPath2 = part1
-           newPath2 += ((a1, o, t))
-           newPath2 ++= part2
+           val newPath1 = part1.clone
+           newPath1 += ((epsAut.clone, o.clone, t))
+           newPath1 ++= part2.clone
+           val newPath2 = part1.clone
+           newPath2 += ((a1, o.clone, t))
+           newPath2 ++= part2.clone
            nextPathUnion += newPath1
            nextPathUnion += newPath2
            
@@ -204,6 +213,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
          }
  
        }
+			}
 			 
 			 // If no transitions accepting the empty string were discovered,
 			 // simply add the original path
@@ -211,8 +221,11 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 			   nextPathUnion += noEps
 			   
 			}
-		  
+
 		  currentPathUnion = nextPathUnion 
+		  // Duplicates can occur! (Combinatorics)
+		  currentPathUnion = currentPathUnion.distinct
+		  
 		  nextPathUnion = new ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]]()
 		}
 
@@ -305,9 +318,9 @@ def toVSetPathUnion():(ArrayBuffer[ArrayBuffer[(String,  Map[String, String], In
 
 															// If a branch tries to open a variable, allow it only if it's still available and remove it
 															// from available vars for that branch, otherwise discard branch
-															if(e1.matches(".+._in.+")) {
+															if(e1.matches(".*._in.*")) {
 
-																val openedVar = ".+(.)_in.+".r
+																val openedVar = ".*(.)_in.*".r
 																		val openedVar(x) = e1
 																		v = x
 
@@ -316,24 +329,24 @@ def toVSetPathUnion():(ArrayBuffer[ArrayBuffer[(String,  Map[String, String], In
 
 																					ops += ((x, "in"))
 
-																					val varPattern = "\\(._in\\)"
+																					val varPattern = "(\\()?._in(\\))?"
 
-																					e2 = e1.replaceAll(varPattern, "")
+																					e2 = e1.replaceAll(varPattern, "()")
 
 																		}
 
 																		else discard = true
 
 															}
-															else if (e1.matches(".+._out.+")) {
+															else if (e1.matches(".*._out.*")) {
 
-																val closeCommand = ".+(.)_out.+".r
+																val closeCommand = ".*(.)_out.*".r
 																		val closeCommand(x) = e1
 
 																		ops += ((x, "out"))
 
-																		val varPattern = "\\(._out\\)"
-																		e2 =  e1.replaceAll(varPattern, "")
+																		val varPattern = "(\\()?._out(\\))?"
+																		e2 =  e1.replaceAll(varPattern, "()")
 
 															}
 
