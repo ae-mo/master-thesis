@@ -1,10 +1,10 @@
-package runtime
+package be.ac.ulb.amorcian.arc.runtime
 
 object main {
   
-    val rgx4 = new Array[Instruction](11)
-    
+  
     // matches "a*|b*c+"
+    var rgx4 = new Array[Instruction](11)
     rgx4(2) = new Instruction(InstructionType.CHAR, 'a', -1, 2, null, null)
     rgx4(4) = new Instruction(InstructionType.MATCH, -1, -1, 4, null, null)
     rgx4(6) = new Instruction(InstructionType.CHAR, 'b', -1, 6, null, null)

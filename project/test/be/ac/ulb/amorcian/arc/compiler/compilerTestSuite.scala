@@ -1,4 +1,4 @@
-package compiler
+package be.ac.ulb.amorcian.arc.compiler
 
 import org.scalatest.FunSuite
 
@@ -64,9 +64,9 @@ class compilerTestSuite extends FunSuite {
     
     val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
     
-    val (pathUnion, finalStates2) = a.toVSetPathUnion()
+    val pU = a.toVSetPathUnion()
     
-     assert(pathUnion.size == 0)
+     assert(pU.pathUnion.size == 0)
     
     
   }
@@ -77,9 +77,9 @@ class compilerTestSuite extends FunSuite {
     
     val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
     
-    val (pathUnion, finalStates2) = a.toVSetPathUnion()
+    val pU = a.toVSetPathUnion()
     
-    assert(pathUnion.toString() == "ArrayBuffer(ArrayBuffer((,null,6), (((epsilon)),Map(x -> in),1), (((a)),Map(x -> out),3), (((epsilon)),Map(y -> in),4), (((b)),Map(y -> out),3), (epsilon,Map(),7)), ArrayBuffer((,null,6), (((epsilon)),Map(y -> in),4), (((b)),Map(y -> out),3), (((epsilon)),Map(x -> in),1), (((a)),Map(x -> out),3), (epsilon,Map(),7)))")
+    assert(pU.pathUnion.toString() == "ArrayBuffer(ArrayBuffer((,null,6), (((epsilon)),Map(x -> in),1), (((a)),Map(x -> out),3), (((epsilon)),Map(y -> in),4), (((b)),Map(y -> out),3), (epsilon,Map(),7)), ArrayBuffer((,null,6), (((epsilon)),Map(y -> in),4), (((b)),Map(y -> out),3), (((epsilon)),Map(x -> in),1), (((a)),Map(x -> out),3), (epsilon,Map(),7)))")
   }
   
    test("toVSetPathUnion() should correctly transform sampleVSet3 into a vset path union") {
@@ -88,9 +88,9 @@ class compilerTestSuite extends FunSuite {
     
     val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
     
-    val (pathUnion, finalStates2) = a.toVSetPathUnion()
+    val pU = a.toVSetPathUnion()
     
-    assert(pathUnion.size == 6)
+    assert(pU.pathUnion.size == 6)
     
      
    }

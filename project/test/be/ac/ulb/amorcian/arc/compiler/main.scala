@@ -1,10 +1,10 @@
-package compiler
+package be.ac.ulb.amorcian.arc.compiler
 
 import dk.brics.automaton.RegExp
 
 object main{
   
-    val sampleVSet = "test/compiler/sampleVSet6.txt"
+    val sampleVSet = "test/be/ac/ulb/amorcian/arc/compiler/sampleVSet6.txt"
   
     def main(args: Array[String]) {
       
@@ -12,11 +12,11 @@ object main{
       
       val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
       
-      val (pathUnion, finalStates2) = a.toVSetPathUnion
+      val pU = a.toVSetPathUnion
       
-      val hPU = a.toHybridPathUnion(pathUnion)
+      val hPU = pU.toHybridPathUnion
       
-      val lPU = a.toLexicographicPathUnion(hPU)
+      val lPU = hPU.toLexicographicPathUnion
 
     }
     

@@ -1,4 +1,4 @@
-package runtime
+package be.ac.ulb.amorcian.arc.runtime
 
 import org.scalatest.FunSuite
 

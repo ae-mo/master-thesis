@@ -1,4 +1,4 @@
-package compiler
+package be.ac.ulb.amorcian.arc.compiler
 
 import scala.collection.mutable.Map
 
