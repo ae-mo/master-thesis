@@ -121,7 +121,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 
 					}
 
-			new VSetPathUnion(newPathUnion, vars, pU.finalStates)
+			new VSetPathUnion(newPathUnion, pU.finalStates)
 
 	}
 
@@ -260,7 +260,7 @@ def toVSetPathUnion():VSetPathUnion = {
 
 		}
 
-		new VSetPathUnion(pathsUnion, vars, finalStates2)
+		new VSetPathUnion(pathsUnion, finalStates2)
 
 }
 /**

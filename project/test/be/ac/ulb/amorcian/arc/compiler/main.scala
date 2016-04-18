@@ -17,8 +17,6 @@ object main{
       val hPU = pU.toHybridPathUnion
       
       val lPU = hPU.toLexicographicPathUnion
-      
-      val a1 = lPU.toVSetAutomaton()
 
     }
     

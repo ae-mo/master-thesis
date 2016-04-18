@@ -1,0 +1,95 @@
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage[style=authoryear,backend=biber]{biblatex}
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+
+\title{MEMO-H-504\\
+Report of the Meeting of 04/08/16}
+
+
+\author{Andrea Morciano}
+
+\maketitle
+\noindent The people present at the meeting were me, my advisor prof.
+Stijn Vansummeren and my supervisor Martin Ugarte.\medskip{}
+
+
+\noindent I did a presentation divided into three parts:
+\begin{itemize}
+\item \noindent my work so far;
+\item \noindent the current challenges in my work;
+\item \noindent Q\&A.
+\end{itemize}
+
+\section{My Work}
+
+I wrote two introductory chapters of my thesis. The first one is a
+generic overview of Information Extraction and its techniques. The
+second is a description of SystemT and its query language AQL. For
+the most part of this chapter I describe the formal model for AQL's
+core, based on document spanners. My paper is written in Lyx, that
+is a document editor based on Latex. It can output PDF documents and
+Latex files as well. Martin installed this software on his machine,
+in order to be able to directly modify my document.\medskip{}
+For what concerns the practical part, I presented the approach that
+I chose to evaluate NFAs: a virtual machine that advances all the
+branches of execution in lockstep, and that easily supports submatch
+extraction. I provided an example, on which we discussed on how this
+runtime could realize the execution of a vset-automaton: it should
+output all the matches it finds, not only the longest one, which is
+determined according to the greedy leftmost policy. I also showed
+how I transform a vset-automaton into a vset path union.
+
+
+\section{Current Challenges}
+
+We further discussed how to execute a vset automaton. There are two
+main possibilities: 
+\begin{enumerate}
+\item using a vset path union (possibly optimized in some way) which has
+the property to guarantee that, in each path, each span variable is
+opened and closed exactly once;
+\item executing the vset-automaton directly. This requires a modification
+of the runtime, because each thread needs to keep track of the available
+variables, in order to die if there is an atttempt to open a variable
+more than once or if upon match some available variables remain (preventing
+the match).
+\end{enumerate}
+We agreed that exploring the convenience of the two approaches could
+be a contribution to the research on the topic. Also trying different
+runtimes (e.g. OBDDs) could be interesting.\medskip{}
+We also spoke about how to perform the intersection of two vset automata.
+This operation is needed to implement the $\bowtie$ operator. I presented
+some software libraries that can interesect ordinary FSA, but we agreed
+that they don't understand vset-automata, that are equipped which
+special $\varepsilon$-transitions, i.e. variable operations. Thus,
+implementing FSA intersection from scratch would be better. Finally,
+we briefly discussed on how to translate a vset-automaton in the format
+required by the runtime.
+
+
+\section{Q\&A}
+
+I asked an opinion on the priority of the tasks I have to perform
+and we agreed to concentrate on the ways of executing a vset-automaton
+first. We then discussed how to obtain production code using LMS and
+LLVM. We also talked about the deployment of SystemT on the machine
+of the department, although prof. Vansummeren noticed that a performance
+comparison between my system and BigInsight (the platform containing
+SystemT) would be of little use, as BigInsights is a much more sophsticated
+system. Anyway we agreed to put me in contact with the administrator
+of the machine.\medskip{}
+I stated that I want to present my thesis at the second session. This
+implies using LMS in my work, and having performed experiments with
+the system by the beginning of July.
+\end{document}

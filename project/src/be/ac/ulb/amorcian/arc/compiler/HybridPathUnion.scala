@@ -7,7 +7,7 @@ import dk.brics.automaton.State
 import dk.brics.automaton.Transition
 import dk.brics.automaton.RegExp
 
-class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]], var vars: Array[String]) {
+class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]]) {
   
   /**
 	 * Makes a hybrid path union lexicographic.
@@ -114,110 +114,21 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 		  nextPathUnion = new ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]]()
 		}
 
-	  new HybridPathUnion(currentPathUnion, vars)
+	  new HybridPathUnion(currentPathUnion)
 
   }
 	
 	/**
 	 * Converts the hybrid path union into a vset-automaton.
 	 */
-	def toVSetAutomaton(): VSetAutomaton = {
+	def toVSetAutomaton() = {
 	  
-	  var sc = 0
-	  var initial = 0
-	  var transitionFunction = Map[Int, Map[Int, String]]()
-	  var finalStates = new ArrayBuffer[Int]()
-	  
-	  transitionFunction += ((0, Map[Int, String]()))
-	  
-	  var a1:VSetAutomaton = null
-	  var a1Old:VSetAutomaton = null
-	  var eOld = ""
+	  val sc = 0
 	  // Process all the edges of all the paths
 	  for(p <- pathUnion) {
-
-	    // The first edge in the path will always be an epsilon-transition.
+	    
 	    val (a, ops, t) = p(0)
-	    var e = flattenVarOps(ops)
-	    if(e != "") {
-	      sc += 1
-	      transitionFunction(0)+= ((sc, e))
-	    }
-	    
-	    
-	    // Process all the other edges.
-	    for(i <- 1 until p.length) {
-	      
-	      val (a, ops, t) = p(i)
-	      
-	      // If there were no variable operations in the previous edge
-	      // and the previous automaton exists,
-	      // connect all the final states of the previous automaton to
-	      // a new state
-	      if(eOld == "" && a1Old != null) {
-	        
-	       sc+= 1
-	       for(s <- a1Old.finalStates) {
-	         
-	         if(!transitionFunction.contains(s))
-	           transitionFunction += ((s, Map[Int, String]()))
-	           
-	         transitionFunction(s) += ((sc, "()"))
-	       }
-	       
-	      }
-	      
-	      // Convert the automaton of the current edge and add its transitions
-	      if(!a.isEmptyString()) {
-	        
-	        val (na, nsc) = convertEdge(a, sc)
-	        transitionFunction ++= na.transitionFunction
-	        sc = nsc
-	        a1 = na
-	        
-	      }
-	      
-	      // Flatten the variable operations and make a new transition with them
-	      e = flattenVarOps(ops)
-        if(e != "") {
-	       sc += 1
-	       
-	       if(a1 != null)
-  	       for(s <- a1.finalStates) {
-  	         
-  	         transitionFunction(s)+= ((sc, e))
-  	         
-  	       }
-	       else
-	         transitionFunction(sc - 1) += ((sc, e))
-	       
-        }
-	        
-	      
-	      
-	    }
-	    
-	    // Determine the final states at the end of this path.
-	    if(e != "")
-	      finalStates += sc
-	    else
-	      finalStates ++= a1.finalStates
-	      
-	      a1Old = a1
-	      eOld = e
-	      
-	  }
-	  
-	  new VSetAutomaton(sc + 1, initial, transitionFunction, vars, finalStates.toArray)
-	  
-	}
-	
-	/**
-	 * Flattens a map of variable operation into a string.
-	 */
-	def flattenVarOps(ops: Map[String, String]):String = {
-	  
-	   var e = ""
+	    var e = ""
 	    
 	    for((v, op) <- ops) {
 	      
@@ -228,13 +139,15 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 	        case "out" => e += "," + v + "_out"
 	        case "inout" => e += "," + v + "_in" + "," + v + "_out"
 	        case _ => ""
-	      }   
+	      }
+	      
 	      
 	    }
-	   
-	   e.stripPrefix(",")
+	    
+	  }
 	  
 	}
+	
 	
 	/**
 	 * Converts an automaton edge into a vset-automaton, using a state counter to number its states.
@@ -242,36 +155,30 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 	def convertEdge(e: Automaton, stateCounter: Int):(VSetAutomaton, Int) = {
 	  
 	  import scala.collection.JavaConversions.asScalaSet
-	  import scala.collection.mutable.SortedSet
 	  
-	  var eStates:scala.collection.mutable.Set[State] = e.getStates
+	  val eStates:scala.collection.mutable.Set[State] = e.getStates
 	  val eAccept:scala.collection.mutable.Set[State]  = e.getAcceptStates
 	  val eInitial = e.getInitialState 
-	  eStates -= eInitial
 	  var sc = stateCounter
 	  var stateMap = Map[State, Int]()
 	  
 	  var initial = 0
 	  var transitionFunction = Map[Int, Map[Int, String]]()
 	  var finalStates = new ArrayBuffer[Int]()
-	  
-	  // Treat the initial state separatedly.
-	  initial = sc
-	  stateMap += ((eInitial, sc))
-	  if(eAccept.contains(eInitial))
-	    finalStates += sc
-	  
+	    
 	  // Map the states to new states according to the state counter.
 	  for(s <- eStates) {
-
-	     // Map it to a new state
-       sc += 1
-       stateMap += ((s, sc))
-
+	    
+	    sc += 1
+	    stateMap += ((s, sc))
+	    
+	    // If it is the initial state
+	    if(s.compareTo(eInitial) == 0)
+	      initial = sc
+	    
 	    // If it is an accepting state
-	    if(eAccept.contains(s)) 
+	    if(eAccept.contains(s))
 	      finalStates += sc
-	      
 	  }
 	  
 	  // Add the transitions to the transition function.
@@ -290,14 +197,11 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 	        
 	      val min = t.getMin
 	      val max = t.getMax
-
+	      
 	      // Create a transition for each character in the range (maybe leave it implicit?).
-	      for(c <- Set(min to max)) {
+	      for(c <- min to max) {
 	        
-	        if(!transitionFunction(n).contains(nd))
-	          transitionFunction(n) += ((nd, c.charAt(0).toString()))
-	        else
-	          transitionFunction(n)(nd) += "|" + c.charAt(0).toString()
+	        transitionFunction(n) += ((nd, c.toString()))
 	      }
 	    }
 	  }
