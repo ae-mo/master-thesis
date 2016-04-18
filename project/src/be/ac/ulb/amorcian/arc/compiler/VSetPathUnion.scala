@@ -5,7 +5,7 @@ import scala.collection.mutable.ArrayBuffer
 import dk.brics.automaton.Automaton
 import dk.brics.automaton.RegExp
 
-class VSetPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(String,  Map[String, String], Int)]], var finalStates:Array[Int]) {
+class VSetPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(String,  Map[String, String], Int)]], var vars:Array[String], var finalStates:Array[Int]) {
   
   /**
    * Transforms a vset path union into an hybrid path union.
@@ -31,7 +31,7 @@ class VSetPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(String,  Map[String,
   
   				}
   
-  		new HybridPathUnion(hybridPathUnion)
+  		new HybridPathUnion(hybridPathUnion, vars)
   
   }
 }
