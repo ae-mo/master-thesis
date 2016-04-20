@@ -5,6 +5,9 @@ import scala.collection.mutable.ArrayBuffer
 import dk.brics.automaton.Automaton
 import dk.brics.automaton.RegExp
 
+import be.ac.ulb.amorcian.arc.runtime.Instruction
+import be.ac.ulb.amorcian.arc.runtime.InstructionType
+
 /**
  * Represents a vset-automaton.
  */
@@ -123,6 +126,161 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 
 			new VSetPathUnion(newPathUnion, vars, pU.finalStates)
 
+	}
+	
+	/**
+	 * Translates the vset-atomaton into a NFA program.
+	 */
+	def toNFAProgram(program:ArrayBuffer[Instruction], visitedStates:Map[Int, Int], s:Int, pc:Int): (Int, ArrayBuffer[Instruction]) = {
+	  
+	  var npc = pc 
+	  var jumps = new ArrayBuffer[Instruction]()
+	  
+	  visitedStates+= ((s, npc))
+	  
+	  // A final state translates into a match operation, and it 
+	  // doesn't go through the previous block because it doesn't have 
+	  // outgoing transitions
+	  if(finalStates.contains(s)) {
+	    
+	    program += new Instruction(InstructionType.MATCH, -1, -1, npc, null, null)
+      npc += 1
+	  }
+	  else {
+	    
+	    var j = 0
+	    var oldSplit:Instruction = null
+	    
+	    for((t, e) <- transitionFunction(s)) {
+	      
+	      var instr:Instruction = null
+	      var jmp:Instruction = null
+	      var split:Instruction = null
+	      
+  	    
+  	    // If there are >1 outgoing transitions for the current state, we need to put
+    	  // splits
+    	  if(transitionFunction(s).size > 1 && j < transitionFunction.size - 1) { 
+    	    
+    	    split = new Instruction(InstructionType.SPLIT, -1, -1, npc, null, null)
+    	    program += split
+  	      npc += 1
+  	      
+  	      // If it is not the first split, connect the previous to this
+  	      if(oldSplit != null) {
+  	        
+  	        oldSplit.y = split
+  	      }
+    	  }
+	      
+	      val varPatternIn = "(.)_in".r
+  	    val varPatternOut = "(.)_out".r
+  	    val varPattern= ".*(._).*".r
+  	    
+  	    // Find out the type of label and add corresponding instruction to the program
+  	    e match {
+  	      
+  	      case "\\d" => {
+  	        
+  	        instr = new Instruction(InstructionType.DIGIT, -1, -1, npc, null, null)
+  	        program += instr
+  	      }
+  	      case "." => {
+  	        
+  	        instr = new Instruction(InstructionType.DOT, -1, -1, npc, null, null)
+  	        program += instr
+  	      }
+  	      
+  	      case "\\s" => {
+  	        
+  	        instr = new Instruction(InstructionType.WHITESPACE, -1, -1, npc, null, null)
+  	        program += instr
+  	      }
+  	      
+  	      case varPattern(va) => {
+  	        
+  	         val varOps = e.split(",") 
+  	         
+  	         for(w <- 0 until varOps.length) {
+  	           
+  	           val vO = varOps(w)
+  	           var in = true
+  	           var v = ""
+  	           if(vO.matches("._in")) {
+  	             
+  	             val varPatternIn(x) = vO
+  	             v = x
+  	           }
+  	           else {
+  	             
+  	             val varPatternOut(x) = vO
+  	             v = x
+  	             in = false
+  	           }
+  	           
+  	           var i = v.toInt
+  	           
+  	           // Because each variable has two places
+  	           // in the array of saved pointers
+  	           i *= 2
+  	           
+  	           // If we are closing a variable
+  	           if(!in)
+  	             i += 1
+
+  	           program += new Instruction(InstructionType.SAVE, -1, i, npc, null, null)
+  	           
+  	           if(w == 0)
+  	             instr = program.last
+  	         }
+  	         
+  	      }
+  	      
+  	      case "\\(\\)" => {
+  	        
+  	        // do nothing!
+  	      }
+  	      case _ => {
+  	        
+  	        instr = new Instruction(InstructionType.CHAR, e.charAt(0), -1, npc, null, null)
+  	        program += instr
+  	      }
+  
+  	    }
+  	    
+  	    // if we placed a split, connect it to the first instruction
+  	    if(split != null) {
+  	      split.x = instr
+  	      oldSplit = split
+  	    }
+  	    
+  	    npc +=1
+  	    if(visitedStates.contains(t)) {
+  	      
+  	      program += new Instruction(InstructionType.JMP, -1, -1, npc, program(visitedStates(t)), null)
+  	    }
+  	    else {
+  	      
+  	      // Recur
+    	    val (n1pc, lastJumps) = toNFAProgram(program, visitedStates, t, npc)
+    	    npc = n1pc
+
+    	    // Jump to the end of the alternatives
+    	    jumps += new Instruction(InstructionType.JMP, -1, -1, npc, null, null)
+    	    program += jumps.last
+    	    
+    	    // Connect the jumps of the inner code to the outer code
+    	    for(jmp <- lastJumps) {
+    	      jmp.x = program.last
+    	    }
+  	    }
+  	    
+  	    
+  	  }
+	  }
+  	  
+
+	  (npc, jumps)
 	}
 
 

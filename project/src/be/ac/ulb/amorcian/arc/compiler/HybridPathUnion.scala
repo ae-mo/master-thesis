@@ -118,6 +118,8 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 
   }
 	
+	
+	
 	/**
 	 * Converts the hybrid path union into a vset-automaton.
 	 */
