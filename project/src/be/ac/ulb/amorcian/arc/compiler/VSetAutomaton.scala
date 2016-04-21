@@ -160,7 +160,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	    
   	    // If there are >1 outgoing transitions for the current state, we need to put
     	  // splits
-    	  if(transitionFunction(s).size > 1 && j < transitionFunction.size - 1) { 
+    	  if(transitionFunction(s).size > 1 && j < transitionFunction(s).size - 1) { 
     	    
     	    split = new Instruction(InstructionType.SPLIT, -1, -1, npc, null, null)
     	    program += split
@@ -171,7 +171,9 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	        
   	        oldSplit.y = split
   	      }
+
     	  }
+    	  else split = null
 	      
 	      val varPatternIn = "(.)_in".r
   	    val varPatternOut = "(.)_out".r
@@ -184,17 +186,20 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	        
   	        instr = new Instruction(InstructionType.DIGIT, -1, -1, npc, null, null)
   	        program += instr
+  	        npc +=1
   	      }
   	      case "." => {
   	        
   	        instr = new Instruction(InstructionType.DOT, -1, -1, npc, null, null)
   	        program += instr
+  	        npc +=1
   	      }
   	      
   	      case "\\s" => {
   	        
   	        instr = new Instruction(InstructionType.WHITESPACE, -1, -1, npc, null, null)
   	        program += instr
+  	        npc +=1
   	      }
   	      
   	      case varPattern(va) => {
@@ -229,6 +234,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	             i += 1
 
   	           program += new Instruction(InstructionType.SAVE, -1, i, npc, null, null)
+  	           npc +=1
   	           
   	           if(w == 0)
   	             instr = program.last
@@ -244,6 +250,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	        
   	        instr = new Instruction(InstructionType.CHAR, e.charAt(0), -1, npc, null, null)
   	        program += instr
+  	        npc +=1
   	      }
   
   	    }
@@ -253,11 +260,16 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	      split.x = instr
   	      oldSplit = split
   	    }
+  	    else if(oldSplit != null) {
+  	      
+  	      oldSplit.y = instr
+  	    }
   	    
-  	    npc +=1
+  	    
   	    if(visitedStates.contains(t)) {
   	      
   	      program += new Instruction(InstructionType.JMP, -1, -1, npc, program(visitedStates(t)), null)
+  	      npc += 1
   	    }
   	    else {
   	      
@@ -268,14 +280,14 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     	    // Jump to the end of the alternatives
     	    jumps += new Instruction(InstructionType.JMP, -1, -1, npc, null, null)
     	    program += jumps.last
-    	    
+    	    npc+=1
     	    // Connect the jumps of the inner code to the outer code
     	    for(jmp <- lastJumps) {
     	      jmp.x = program.last
     	    }
   	    }
   	    
-  	    
+  	    j += 1
   	  }
 	  }
   	  

@@ -33,6 +33,8 @@ object main{
       
       for(ins <- program) {
         
+        print(ins.num + " ")
+        
         ins.opCode match {
           
           case InstructionType.CHAR => {
