@@ -16,80 +16,423 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 
 	/* 
 
-  def join(other: VSetAutomaton): VSetAutomaton {}
-
   def union(other: VSetAutomaton): VSetAutomaton {}
 
 
 	 */
 
 	/**
-	 * Joins the vset automaton with another one.
+	 * Joins the vset-automaton with another one.
 	 */
-	def join(other: VSetAutomaton):(ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]], Array[Int]) = {
+	def join(other: VSetAutomaton) = {
+	    
+	  import scala.util.control.Breaks._
+    // Get the common variables
+    val commonVars = this.vars.toSet.intersect(other.vars.toSet)
+    
+    var initial:(Int, Int) = null
+    var trFuncsIntersection = Map[(Int, Int), Map[(Int, Int), String]]()
+    var finalStates = new ArrayBuffer[(Int, Int)]()
+    
+		// Make both automata lexicographic
+		val a1 = this.toVSetPathUnion().toHybridPathUnion().toLexicographicPathUnion().toVSetAutomaton()
+		val a2 = other.toVSetPathUnion().toHybridPathUnion().toLexicographicPathUnion().toVSetAutomaton()
+		
+		val varPatternIn = "(.)_in".r
+    val varPatternOut = "(.)_out".r
+    val varPattern= ".*(._).*".r
+		
+    // Conditional creation of a new state pair
+    val createIfNotExists = (s1: Int, s2: Int)  => if(!trFuncsIntersection.contains((s1, s2)))
+                                                      trFuncsIntersection += (((s1, s2), Map[(Int, Int), String]()))
+    
+    // Conditional creation of a transition with empty label
+    val emptyStringIfNotExists = (s1: Int, s2: Int, t1: Int, t2: Int)  => if(!trFuncsIntersection((s1, s2)).contains((t1, t2)))
+                                                                              trFuncsIntersection((s1, s2)) += (((t1, t2), ""))
+                                                                              
+    // Deletion of a transition
+    val deleteIfExists = (s1: Int, s2: Int, t1: Int, t2: Int)  => if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((t1, t2)))
+                                                                              trFuncsIntersection((s1, s2)) -= ((t1, t2))                                                                           
+    // Add a choice in a transition's label
+    val addChoice = (s1: Int, s2: Int, t1: Int, t2: Int, choice:String)  => if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((t1, t2)))
+                                                                              trFuncsIntersection((s1, s2))((t1, t2)) += "|" + choice
+                                                                            else {
+                                                                              createIfNotExists(s1, s2)
+                                                                              trFuncsIntersection((s1, s2)) += (((t1, t2), choice))
+                                                                            }
+    
+    // Add a variable operation in a transition's label
+    val addVarOp = (s1: Int, s2: Int, t1: Int, t2: Int, v:String, varOp:String, i:Int) => if(!commonVars.contains(v)) {
+                                                                                       if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((t1, t2)))
+                                                                                          trFuncsIntersection((s1, s2))(if(i == 1) ((t1, s2)) else ((s1, t2))) += "," + varOp
+                                                                                       else {
+                                                                                         createIfNotExists(s1, s2)
+                                                                                         trFuncsIntersection((s1, s2)) += ((if(i == 1) ((t1, s2)) else ((s1, t2)), varOp))
+                                                                                       }
+                                                                                  }
+                                                                                  else {
+                                                                                    
+                                                                                    deleteIfExists(s1, s2, t1, t2)
+                                                                                    break
+                                                                                  }
+		// Perform the cross product
+		for((s1, ts1)<- a1.transitionFunction; (s2, ts2)<- a2.transitionFunction) {
+		  
+		  // The state pair is the initial state only if both components are
+		  if(a1.initial == s1 && a2.initial == s2)
+		    initial = ((s1, s2))
+		  
+		  // The state pair is a finals state only if both components are
+		  if(a1.finalStates.contains(s1) && a2.finalStates.contains(s2))
+		    finalStates += ((s1, s2))
+		  
+		  breakable {
+		    
+		    // Intersect the outgoing transitions of the two states
+    	  for((t1, e1) <- ts1; (t2, e2) <- ts2) { 
+    	    
+    	    // Obtain the single tokens of the labels
+          val toks1 = tokenizeEdge(e1)
+          val toks2 = tokenizeEdge(e2)
+          
+          // Confront the tokens
+          for (tok <- toks1; tok2 <-toks2) {
+            
+            tok match {
+              
+              case "." => {
+    
+                  if(tok2 != "\\n"  && tok2 !="()" && !tok2.matches(varPattern.toString)) {
+                    
+                    addChoice(s1, s2, t1, t2, tok2)
+                  }
+                  else if(tok2.matches(varPattern.toString)) {
+                    val varPattern(x)= tok2
+                    addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                  }
+                  else if(tok2 == "()") {
+                    
+                    createIfNotExists(s1, s2)
+                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                  }
+    
+              }
+              case "\\d" => {
+    
+                  if(tok2.matches("\\d") || tok2 == "\\d") {
+                    
+                    addChoice(s1, s2, t1, t2, tok2)
+                  }
+                  else if(tok2 == ".") {
+                    
+                    createIfNotExists(s1, s2) 
+                    trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
+                  }
+                  else if(tok2.matches(varPattern.toString)) {
+                    val varPattern(x)= tok2
+                    addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                  }
+                  else if(tok2 == "()") {
+                    
+                    createIfNotExists(s1, s2)
+                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                  }
+    
+              }
+              case "\\s" => {
+    
+                  if(tok2.matches("\\s") || tok2 == "\\s") {
+                    
+                    addChoice(s1, s2, t1, t2, tok2)
+                  }
+                  else if(tok2 == ".") {
+                    
+                    createIfNotExists(s1, s2) 
+                    trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
+                  }
+                  else if(tok2.matches(varPattern.toString)) {
+                    val varPattern(x)= tok2
+                    addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                  }
+                  else if(tok2 == "()") {
+                    
+                    createIfNotExists(s1, s2)
+                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                  }
+    
+              }
+              case "()" => {
+                
+                if(tok2 == "()") {
+                  
+                  createIfNotExists(s1, s2) 
+                  trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
+                }
+                else {
+                  
+                  createIfNotExists(s1, s2) 
+                  trFuncsIntersection((s1, s2)) += (((t1, s2), tok))
+                }
+              }
+              
+              case varPattern(x) => {
+                
+                val otherContains = toks2.contains(tok)
+                val isCommonVar = commonVars.contains(x)
+                
+                if(otherContains) {
+                  
+                  createIfNotExists(s1, s2)
+                  emptyStringIfNotExists(s1, s2, t1, t2)
+                  trFuncsIntersection((s1, s2))((t1, t2)) += "," + tok
+                }
+                else if(!isCommonVar) {
+         
+                  addVarOp(s1, s2, t1, t2, x, tok, 1)
+                }
+                else {
+                  
+                  deleteIfExists(s1, s2, t1, s2)
+                  break
+                }
+              }
+              
+              // tok is a simple char, so check all the possibilities of the other token
+              case _ => {
+                
+                tok2 match {
+                  
+                  case "." => {
+                    
+                    if(tok != "\\n") {
+                      addChoice(s1, s2, t1, t2, tok)
+                    }
+                  }
+                  case "\\d" => {
+                    
+                    if(tok.matches("\\d") ){
+                      addChoice(s1, s2, t1, t2, tok)
+                    }
+                  }
+                  case "\\s" => {
+                    
+                     if(tok.matches("\\s")){
+                      addChoice(s1, s2, t1, t2, tok)
+                    }
+                  }
+                  case "()" => {
+                    
+                    createIfNotExists(s1, s2) 
+                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                  }
+                  case varPattern(x) => {
+                    
+                    val varPattern(x)= tok2
+                    addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                  }
+                  
+                  // tok2 is a simple char too
+                  case _ => {
+                    
+                    if(tok == tok2)
+                      addChoice(s1, s2, t1, t2, tok)
+                  }
+                }
+              }
+            }
+          }
+    	  }
+		  }
+		}
+		
+		var oldNoUnreachableTF = trFuncsIntersection
+		var noUnreachableTF = Map[(Int, Int), Map[(Int, Int), String]]()
+		
+		// Remove all states with no incoming transitions (except the initial) iteratively
+		var canChange = true
+		
+		while(canChange) {
+		  
+		  canChange = false
+		  for((s, ts) <- oldNoUnreachableTF if (s, ts) != initial) {
+		  
+  		  var remove = true
+  		  for((s1, ts1) <- oldNoUnreachableTF) {
+  		    
+  		    if(ts1.contains(s))
+  		      remove = false
+  		  }
+  		  if(!remove)
+  		    noUnreachableTF += ((s, ts))
+  		  else {
+  		    if(finalStates.contains(s))
+  		      finalStates -= s
+  		    canChange = true
+  		  } 
+  		    
+  		}
+		  
+		  if(canChange) {
+		    
+		    oldNoUnreachableTF = noUnreachableTF
+        noUnreachableTF = Map[(Int, Int), Map[(Int, Int), String]]()
+		  }
+		}
+		
+		var oldNoDeadTF = noUnreachableTF
+		var noDeadTF = Map[(Int, Int), Map[(Int, Int), String]]()
+		
+		// Remove all states with no outgoing transitions (except the finals) iteratively
+		canChange = true
+		
+		while(canChange) {
+		  
+		  canChange = false
+		  
+		  // Remove all transitions pointing to dead states
+		  for((s, ts) <- oldNoDeadTF) {
+		  
+  		 for((t, e) <- ts if (!finalStates.contains(t) && !oldNoDeadTF.contains(t)))
+  		   oldNoDeadTF(s) -= t
+  		   canChange = true
+  		}
+		  
+		  // Copy only the states with >1 outgoing transition
+		  for((s, ts) <- oldNoDeadTF) {
+		    
+		    if(ts.size == 0)
+		      canChange = true
+		    else
+		      noDeadTF += ((s, ts))
+		  }
+		  
+		  if(canChange) {
+		    
+		    oldNoDeadTF = noDeadTF
+        noDeadTF = Map[(Int, Int), Map[(Int, Int), String]]()
+		  }
+		}
+		
+		// If the intersection is empty, return null, otherwise rename each state with a unique integer
+		if(noDeadTF.size == 0 || noDeadTF(initial).size == 0 || finalStates.size == 0)
+		  null
+		else {
+		  
+		  var visitedStates= Map[(Int, Int), Int]()
+		  var stateCounter = 0
+		  var transitionFunction = Map[Int, Map[Int, String]]()
+		  
+		  // The new initial state is 0
+		  val newInitial = 0 
+		  stateCounter += 1
+		  
+		  var newFinalStates = ArrayBuffer[Int]()
+		  
+		  // Rename each state in the map and its targets
+		  for((s , ts) <- noDeadTF) {
+		    
+		    var s1 = Map[Int, String]()
+		    
+		    if(visitedStates.contains(s))
+		      transitionFunction += ((visitedStates(s), s1))
+		    else {
+		      
+		      transitionFunction += ((stateCounter, s1))
+		      visitedStates += ((s, stateCounter))
+		      stateCounter +=1
+		      
+		    }
+		    
+		    for((t, e) <- ts) {
+		      
+		      if(visitedStates.contains(t))
+  		      s1 += ((visitedStates(t), e))
+  		    else {
+  		      
+  		      s1 += ((stateCounter, e))
+  		      visitedStates += ((t, stateCounter))
+  		      stateCounter +=1
+  		      
+  		    }
+		    }
+		    
+		    // Update the final states
+		    for(s <- finalStates) {
+		      
+		      if(visitedStates.contains(s))
+		        newFinalStates += visitedStates(s)
+		      else {
+		        
+		        newFinalStates += stateCounter
+		        stateCounter += 1
+		      }
+		    }
+		  }
+		  
+		  // Return the automaton that is the join of the two original ones
+		  new VSetAutomaton(stateCounter, newInitial, transitionFunction, a1.vars ++ a2.vars, newFinalStates.toArray)
+		}
+	}
+	
+	/**
+	 * Extracts the variables from a series of variable operations.
+	 */
+	def extractVars(ops:ArrayBuffer[String]):Set[String] = {
+	  
+	  var vars = new ArrayBuffer[String]()
+	  
+	  val openPattern = "(.)_in".r
+	  val closePattern = "(.)_out".r
+	  
+	  for(op <- ops) {
+	    
+	    op match {
+	      
+	      case openPattern(x) => {
+	        
+	        vars += x
+	      }
+	      
+	      case closePattern(x) => {
+	        
+	        vars+= x
+	      }
+	    }
+	    
+	  }
+	  vars.toSet
+	}
+	
+	/**
+	 * Breaks an edge into tokens.
+	 */
+	def tokenizeEdge(e: String): ArrayBuffer[String] = {
+	  
+	  var tokens = new ArrayBuffer[String]()
+	  
+	  val choicePattern = "(.\\|)".r
+	  val varPattern= ".*(._).*".r
+	  
+	  e match {
+	    
+      case varPattern(x) => {
+        
+        val varOps = e.split(",")
+        tokens ++= varOps
+      }
+      
+      case choicePattern(x) => {
+        
+        val toks = e.split("\\|")
+        tokens ++= toks
+      }
+      case _ => {
+        tokens += e
+      }
 
-			val pT = this.toVSetPathUnion()
-					val pO = other.toVSetPathUnion()
-
-					// Replace each transition with an automaton
-					var hPT = pT.toHybridPathUnion
-					var hPO = pO.toHybridPathUnion
-
-					var lexPathUnion = new ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]]()
-					// Automaton accepting only the empty string
-					val epsAut = (new RegExp("()")).toAutomaton()
-
-					// Make the paths lexicographic
-					for(path <- hPT.pathUnion) {
-
-						var newPaths = new ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]]()
-
-								for(i <- 0 until path.length) {
-
-									val (a, o, t) = path(i)
-
-											// Check if the language of the automaton contains the empty string
-											if(a.getShortestExample(true) == "()") {
-
-												// eliminate the epsilon transition and add its variable ops
-												// to the previous transition
-												var part1 = path.slice(0, i-2)
-														val part2 = path.slice(i+1, path.length -1)
-														val (a1, o1, t1) = path(i)
-														val newOps = o ++ o1
-														part1 += ((a, newOps, t))
-														val newPath = part1 ++ part2
-														newPaths += newPath
-
-														// If it doesn't accept only the empty string
-														if(a.getSingleton != null) {
-
-															//create a new path with the automaton not accepting the empty string anymore
-															val a1 = a.minus(epsAut)
-																	part1 += path(i-1)
-																	part1 += ((a1, o, t))
-																	val newPath = part1 ++ part2
-																	newPaths += newPath
-
-														}
-
-											}
-
-								}
-
-
-					}
-
-
-
-			var join = new ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]]()
-
-					for (pathT <- hPT.pathUnion; pathO <- hPO.pathUnion) {
-
-					} 
-
-			(new ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]](), Array[Int]())
-
+	  }
+	  
+	  tokens
 	}
 
 	/**

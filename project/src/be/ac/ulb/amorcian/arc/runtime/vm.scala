@@ -9,7 +9,7 @@ package object runtime {
 }
 
 /**
- * Represents a virtual machine for regular expression programs executions.
+ * Represents a virtual machine for regular expression programs execution.
  */
 object vm {
 
@@ -66,7 +66,7 @@ object vm {
 						
 						case InstructionType.DOT => {
 						  
-						  if(sp != '\0')
+						  if(sp != '\0' && sp != '\n')
 								addThread(nList, present, prog(pc.num + 1), i+1, t.saved)
 						}
 
