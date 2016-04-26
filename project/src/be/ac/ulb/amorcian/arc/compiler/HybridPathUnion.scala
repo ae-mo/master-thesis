@@ -192,11 +192,7 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
   	       }
 	       else
 	         transitionFunction(sc - 1) += ((sc, e))
-	       
-        }
-	        
-	      
-	      
+        }  
 	    }
 	    
 	    // Determine the final states at the end of this path.

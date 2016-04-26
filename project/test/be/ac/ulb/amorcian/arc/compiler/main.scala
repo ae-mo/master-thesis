@@ -9,27 +9,26 @@ import be.ac.ulb.amorcian.arc.runtime.InstructionType
 object main{
   
     val sampleVSet = "test/be/ac/ulb/amorcian/arc/compiler/sampleVSet6.txt"
+    val sampleVSet2 = "test/be/ac/ulb/amorcian/arc/compiler/sampleVSet7.txt"
   
     def main(args: Array[String]) {
       
       val (nrStates, initial, transitionFunction, vars, finalStates) = VSetAFileReader.getVSetA(sampleVSet)
       
       val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
+
+      val (nrStates2, initial2, transitionFunction2, vars2, finalStates2) = VSetAFileReader.getVSetA(sampleVSet2)
       
-      val pU = a.toVSetPathUnion
+      val a2 = new VSetAutomaton(nrStates2, initial2, transitionFunction2, vars2, finalStates2)
+
+      val a3 = a.join(a2)
       
-      val hPU = pU.toHybridPathUnion
+      val a4 = a3.toVSetPathUnion().toHybridPathUnion().toVSetAutomaton()
       
-      val lPU = hPU.toLexicographicPathUnion
-      
-      val a1 = lPU.toVSetAutomaton()
-      
-      var program = new ArrayBuffer[Instruction]()
-      val pc = 0
-      val s = 0
-      var visitedStates = Map[Int, Int]()
-      
-      a1.toNFAProgram(program, visitedStates, s, pc)
+      println("hey")
+    }
+    
+    def printProgram(program: ArrayBuffer[Instruction]) = {
       
       for(ins <- program) {
         
@@ -79,7 +78,6 @@ object main{
 	
         }
       }
-
     }
     
 }

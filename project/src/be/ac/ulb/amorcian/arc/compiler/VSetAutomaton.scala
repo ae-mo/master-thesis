@@ -38,60 +38,75 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 		val a1 = this.toVSetPathUnion().toHybridPathUnion().toLexicographicPathUnion().toVSetAutomaton()
 		val a2 = other.toVSetPathUnion().toHybridPathUnion().toLexicographicPathUnion().toVSetAutomaton()
 		
-		val varPatternIn = "(.)_in".r
-    val varPatternOut = "(.)_out".r
+		
     val varPattern= ".*(._).*".r
+    val varPatternExtr= ".*(.)_.*".r
+    
+    // Make a state final if its components are final
+    val makeFinalIf = (t1: Int, t2: Int) => {
+      
+                                              if(a1.finalStates.contains(t1) && a2.finalStates.contains(t2))
+                                                finalStates += ((t1, t2))
+                                            }
 		
     // Conditional creation of a new state pair
     val createIfNotExists = (s1: Int, s2: Int)  => if(!trFuncsIntersection.contains((s1, s2)))
                                                       trFuncsIntersection += (((s1, s2), Map[(Int, Int), String]()))
     
     // Conditional creation of a transition with empty label
-    val emptyStringIfNotExists = (s1: Int, s2: Int, t1: Int, t2: Int)  => if(!trFuncsIntersection((s1, s2)).contains((t1, t2)))
+    val emptyStringIfNotExists = (s1: Int, s2: Int, t1: Int, t2: Int)  => if(!trFuncsIntersection((s1, s2)).contains((t1, t2))) {
                                                                               trFuncsIntersection((s1, s2)) += (((t1, t2), ""))
-                                                                              
+                                                                              makeFinalIf(t1, t2)
+                                                                          }
     // Deletion of a transition
     val deleteIfExists = (s1: Int, s2: Int, t1: Int, t2: Int)  => if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((t1, t2)))
                                                                               trFuncsIntersection((s1, s2)) -= ((t1, t2))                                                                           
     // Add a choice in a transition's label
-    val addChoice = (s1: Int, s2: Int, t1: Int, t2: Int, choice:String)  => if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((t1, t2)))
+    val addChoice = (s1: Int, s2: Int, t1: Int, t2: Int, choice:String) => if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((t1, t2)))
                                                                               trFuncsIntersection((s1, s2))((t1, t2)) += "|" + choice
                                                                             else {
                                                                               createIfNotExists(s1, s2)
                                                                               trFuncsIntersection((s1, s2)) += (((t1, t2), choice))
+                                                                              makeFinalIf(t1, t2)
                                                                             }
     
+    
+    var isBreak = false
     // Add a variable operation in a transition's label
-    val addVarOp = (s1: Int, s2: Int, t1: Int, t2: Int, v:String, varOp:String, i:Int) => if(!commonVars.contains(v)) {
-                                                                                       if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((t1, t2)))
-                                                                                          trFuncsIntersection((s1, s2))(if(i == 1) ((t1, s2)) else ((s1, t2))) += "," + varOp
-                                                                                       else {
-                                                                                         createIfNotExists(s1, s2)
-                                                                                         trFuncsIntersection((s1, s2)) += ((if(i == 1) ((t1, s2)) else ((s1, t2)), varOp))
-                                                                                       }
-                                                                                  }
-                                                                                  else {
-                                                                                    
-                                                                                    deleteIfExists(s1, s2, t1, t2)
-                                                                                    break
-                                                                                  }
+    val addVarOp = (s1: Int, s2: Int, t1: Int, t2: Int, v:String, varOp:String, i:Int) => {
+                                                                                            val z1 = if(i == 1) t1 else s1
+                                                                                            val z2 = if(i == 1) s2 else t2
+                                                                                            if(!commonVars.contains(v)) {
+                                                                                             if(trFuncsIntersection.contains((s1, s2)) && trFuncsIntersection((s1, s2)).contains((z1, z2)))
+                                                                                                trFuncsIntersection((s1, s2))((z1, z2)) += "," + varOp
+                                                                                             else {
+                                                                                               createIfNotExists(s1, s2)
+                                                                                               trFuncsIntersection((s1, s2)) += (((z1, z2), varOp))
+                                                                                               makeFinalIf(z1, z2)
+                                                                                             }
+                                                                                            }
+                                                                                            else {
+                                                                                              
+                                                                                              deleteIfExists(s1, s2, z1, z2)
+                                                                                              isBreak = true
+                                                                                            }
+      
+                                                                                          } 
 		// Perform the cross product
 		for((s1, ts1)<- a1.transitionFunction; (s2, ts2)<- a2.transitionFunction) {
 		  
 		  // The state pair is the initial state only if both components are
 		  if(a1.initial == s1 && a2.initial == s2)
 		    initial = ((s1, s2))
-		  
-		  // The state pair is a finals state only if both components are
-		  if(a1.finalStates.contains(s1) && a2.finalStates.contains(s2))
-		    finalStates += ((s1, s2))
-		  
-		  breakable {
 		    
-		    // Intersect the outgoing transitions of the two states
-    	  for((t1, e1) <- ts1; (t2, e2) <- ts2) { 
-    	    
-    	    // Obtain the single tokens of the labels
+		  makeFinalIf(s1, s2)
+		    
+	    // Intersect the outgoing transitions of the two states
+  	  for((t1, e1) <- ts1; (t2, e2) <- ts2) { 
+  	   
+  	    breakable {
+  	      
+  	      // Obtain the single tokens of the labels
           val toks1 = tokenizeEdge(e1)
           val toks2 = tokenizeEdge(e2)
           
@@ -107,13 +122,18 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                     addChoice(s1, s2, t1, t2, tok2)
                   }
                   else if(tok2.matches(varPattern.toString)) {
-                    val varPattern(x)= tok2
+                    val varPatternExtr(x)= tok2
                     addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                    if(isBreak) {
+                      isBreak = false
+                      break
+                    }
                   }
                   else if(tok2 == "()") {
                     
                     createIfNotExists(s1, s2)
                     trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                    makeFinalIf(s1, t2)
                   }
     
               }
@@ -127,15 +147,21 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                     
                     createIfNotExists(s1, s2) 
                     trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
+                    makeFinalIf(t1, t2)
                   }
                   else if(tok2.matches(varPattern.toString)) {
-                    val varPattern(x)= tok2
+                    val varPatternExtr(x)= tok2
                     addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                    if(isBreak) {
+                      isBreak = false
+                      break
+                    }
                   }
                   else if(tok2 == "()") {
                     
                     createIfNotExists(s1, s2)
                     trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                    makeFinalIf(s1, t2)
                   }
     
               }
@@ -149,15 +175,21 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                     
                     createIfNotExists(s1, s2) 
                     trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
+                    makeFinalIf(t1, t2)
                   }
                   else if(tok2.matches(varPattern.toString)) {
-                    val varPattern(x)= tok2
+                    val varPatternExtr(x)= tok2
                     addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                    if(isBreak) {
+                      isBreak = false
+                      break
+                    }
                   }
                   else if(tok2 == "()") {
                     
                     createIfNotExists(s1, s2)
                     trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                    makeFinalIf(s1, t2)
                   }
     
               }
@@ -167,20 +199,24 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                   
                   createIfNotExists(s1, s2) 
                   trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
+                  makeFinalIf(t1, t2)
                 }
                 else {
                   
                   createIfNotExists(s1, s2) 
                   trFuncsIntersection((s1, s2)) += (((t1, s2), tok))
+                  makeFinalIf(t1, s2)
                 }
               }
               
               case varPattern(x) => {
                 
+                val varPatternExtr(x)= tok
                 val otherContains = toks2.contains(tok)
+                val sameOp = tok2 == tok
                 val isCommonVar = commonVars.contains(x)
                 
-                if(otherContains) {
+                if(sameOp) {
                   
                   createIfNotExists(s1, s2)
                   emptyStringIfNotExists(s1, s2, t1, t2)
@@ -189,8 +225,12 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                 else if(!isCommonVar) {
          
                   addVarOp(s1, s2, t1, t2, x, tok, 1)
+                  if(isBreak) {
+                      isBreak = false
+                      break
+                    }
                 }
-                else {
+                else if(!otherContains){
                   
                   deleteIfExists(s1, s2, t1, s2)
                   break
@@ -224,11 +264,16 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                     
                     createIfNotExists(s1, s2) 
                     trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
+                    makeFinalIf(s1, t2)
                   }
                   case varPattern(x) => {
                     
-                    val varPattern(x)= tok2
+                    val varPatternExtr(x)= tok2
                     addVarOp(s1, s2, t1, t2, x, tok2, 2)
+                    if(isBreak) {
+                      isBreak = false
+                      break
+                    }
                   }
                   
                   // tok2 is a simple char too
@@ -241,8 +286,8 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
               }
             }
           }
-    	  }
-		  }
+  	    }
+  	  }
 		}
 		
 		var oldNoUnreachableTF = trFuncsIntersection
@@ -254,23 +299,31 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 		while(canChange) {
 		  
 		  canChange = false
-		  for((s, ts) <- oldNoUnreachableTF if (s, ts) != initial) {
-		  
-  		  var remove = true
-  		  for((s1, ts1) <- oldNoUnreachableTF) {
-  		    
-  		    if(ts1.contains(s))
-  		      remove = false
-  		  }
-  		  if(!remove)
-  		    noUnreachableTF += ((s, ts))
-  		  else {
-  		    if(finalStates.contains(s))
-  		      finalStates -= s
-  		    canChange = true
-  		  } 
-  		    
-  		}
+		  for((s, ts) <- oldNoUnreachableTF) {
+		    
+		    if (s != initial) {
+		      
+		      var remove = true
+    		  for((s1, ts1) <- oldNoUnreachableTF) {
+    		    
+    		    if(ts1.contains(s))
+    		      remove = false
+      		  }
+      		  if(!remove)
+      		    noUnreachableTF += ((s, ts))
+      		  else {
+      		    if(finalStates.contains(s))
+      		      finalStates -= s
+      		    canChange = true
+      		  } 
+      		    
+      	}
+		    else {
+		      
+		      noUnreachableTF += ((s, ts))
+		    }
+		  }
+  		  
 		  
 		  if(canChange) {
 		    
@@ -292,9 +345,12 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 		  // Remove all transitions pointing to dead states
 		  for((s, ts) <- oldNoDeadTF) {
 		  
-  		 for((t, e) <- ts if (!finalStates.contains(t) && !oldNoDeadTF.contains(t)))
+  		 for((t, e) <- ts if (!finalStates.contains(t) && !oldNoDeadTF.contains(t))) {
+  		   
   		   oldNoDeadTF(s) -= t
   		   canChange = true
+  		 }
+  		   
   		}
 		  
 		  // Copy only the states with >1 outgoing transition
@@ -313,61 +369,60 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 		  }
 		}
 		
+		var visitedStates= Map[(Int, Int), Int]()
+		var stateCounter = 0
+		var newFinalStates = ArrayBuffer[Int]()
+		var transitionFunction = Map[Int, Map[Int, String]]()
+		
+		// Renames the given state and its successor states
+		val renameStateAndSuccessors = (s:(Int, Int), ts:Map[(Int, Int), String]) => {
+                                                                            		  var s1 = Map[Int, String]()
+
+                                                                          		    if(visitedStates.contains(s))
+                                                                          		      transitionFunction += ((visitedStates(s), s1))
+                                                                          		    else {
+                                                                          		      
+                                                                          		      transitionFunction += ((stateCounter, s1))
+                                                                          		      visitedStates += ((s, stateCounter))
+                                                                          		      stateCounter +=1 
+                                                                          		    }
+                                                                          		    
+                                                                          		    for((t, e) <- ts) {
+                                                                          		      
+                                                                          		      if(visitedStates.contains(t))
+                                                                            		      s1 += ((visitedStates(t), e))
+                                                                            		    else {
+                                                                            		      
+                                                                            		      s1 += ((stateCounter, e))
+                                                                            		      visitedStates += ((t, stateCounter))
+                                                                            		      stateCounter +=1   
+                                                                            		    }
+                                                                          		    }
+                                                                          		    
+                                                                            		}
+		
 		// If the intersection is empty, return null, otherwise rename each state with a unique integer
 		if(noDeadTF.size == 0 || noDeadTF(initial).size == 0 || finalStates.size == 0)
 		  null
 		else {
-		  
-		  var visitedStates= Map[(Int, Int), Int]()
-		  var stateCounter = 0
-		  var transitionFunction = Map[Int, Map[Int, String]]()
-		  
+
 		  // The new initial state is 0
-		  val newInitial = 0 
-		  stateCounter += 1
-		  
-		  var newFinalStates = ArrayBuffer[Int]()
+		  val newInitial = 0
+		  renameStateAndSuccessors(initial, noDeadTF(initial))
 		  
 		  // Rename each state in the map and its targets
-		  for((s , ts) <- noDeadTF) {
+		  for((s , ts) <- noDeadTF; if (s != initial) ) {
 		    
-		    var s1 = Map[Int, String]()
-		    
-		    if(visitedStates.contains(s))
-		      transitionFunction += ((visitedStates(s), s1))
-		    else {
-		      
-		      transitionFunction += ((stateCounter, s1))
-		      visitedStates += ((s, stateCounter))
-		      stateCounter +=1
-		      
-		    }
-		    
-		    for((t, e) <- ts) {
-		      
-		      if(visitedStates.contains(t))
-  		      s1 += ((visitedStates(t), e))
-  		    else {
-  		      
-  		      s1 += ((stateCounter, e))
-  		      visitedStates += ((t, stateCounter))
-  		      stateCounter +=1
-  		      
-  		    }
-		    }
-		    
-		    // Update the final states
-		    for(s <- finalStates) {
-		      
-		      if(visitedStates.contains(s))
-		        newFinalStates += visitedStates(s)
-		      else {
-		        
-		        newFinalStates += stateCounter
-		        stateCounter += 1
-		      }
-		    }
+		    renameStateAndSuccessors(s, ts)
 		  }
+		  
+		  // Update the final states
+	    for(s <- finalStates) {
+	      
+	      if(visitedStates.contains(s))
+	        newFinalStates += visitedStates(s)
+
+	    }
 		  
 		  // Return the automaton that is the join of the two original ones
 		  new VSetAutomaton(stateCounter, newInitial, transitionFunction, a1.vars ++ a2.vars, newFinalStates.toArray)
@@ -646,134 +701,152 @@ def toVSetPathUnion():VSetPathUnion = {
 
 		val (nrStates, initial, transitionGraph, finalStates2) = stateElimination()
 
-				var pathsToProcess = 1
+		var pathsToProcess = 1
 
-				var availablePathVars = new ArrayBuffer[Map[String, Boolean]]()
-				var pathsUnion = new ArrayBuffer[ArrayBuffer[(String, Map[String, String], Int)]]()
+		var availablePathVars = new ArrayBuffer[Map[String, Boolean]]()
+		var pathsUnion = new ArrayBuffer[ArrayBuffer[(String, Map[String, String], Int)]]()
 
-				var firstPathVars = Map[String, Boolean]()
+		var pathsToRemove:ArrayBuffer[Int] = null
+		
+		var firstPathVars = Map[String, Boolean]()
 
-				for(v <- vars)
-					firstPathVars += (v -> true)
+		for(v <- vars)
+			firstPathVars += (v -> true)
 
-					availablePathVars += firstPathVars
+		availablePathVars += firstPathVars
 
-					pathsUnion += new ArrayBuffer[(String, Map[String, String], Int)]()
-					pathsUnion(0) += (("", null,initial))
+		pathsUnion += new ArrayBuffer[(String, Map[String, String], Int)]()
+		pathsUnion(0) += (("", null,initial))
 
-					// Grow the paths iteratively
-					while(pathsToProcess > 0) {
+		// Grow the paths iteratively
+		while(pathsToProcess > 0) {
 
-						var newPaths:ArrayBuffer[ArrayBuffer[(String,  Map[String, String], Int)]] = null
-								var newPathVars:ArrayBuffer[Map[String, Boolean]] = null
+			var newPaths:ArrayBuffer[ArrayBuffer[(String,  Map[String, String], Int)]] = null
+			var newPathVars:ArrayBuffer[Map[String, Boolean]] = null
+			
+			pathsToRemove = ArrayBuffer[Int]()
 
-								// Advance each path by one transition, spawning new paths if there are >1 possible branches
-								for(i <- 0 until pathsUnion.length) {
+			// Advance each path by one transition, spawning new paths if there are >1 possible branches
+			for(i <- 0 until pathsUnion.length) {
 
-									var path = pathsUnion(i)
-											var pathVars = availablePathVars(i)
+				var path = pathsUnion(i)
+				var pathVars = availablePathVars(i)
 
-											newPaths =  new ArrayBuffer[ArrayBuffer[(String,  Map[String, String], Int)]]()
-											newPathVars = new ArrayBuffer[Map[String, Boolean]]()
+				newPaths =  new ArrayBuffer[ArrayBuffer[(String,  Map[String, String], Int)]]()
+				newPathVars = new ArrayBuffer[Map[String, Boolean]]()
 
-											val (e, varOps, s) = path.last
+				val (e, varOps, s) = path.last
 
-											// If we haven't reached a final state in the current path
-											if(!finalStates2.contains(s)) {
+				// If we haven't reached a final state in the current path and
+				// there are outgoing transitions
+				if(!finalStates2.contains(s) && transitionGraph(s).size > 0) {
+				  
+				  // Advance the current path, spawn new paths for each additional branch
+					for((t, e1) <- transitionGraph(s)) {
 
-												// Contains the variable operations to be performed at each transition
+						var ops = Map[String, String]()
 
+						var discard = false
+						var out = false
+						var v:String = null
+						var e2 = e1
 
-												for((t, e1) <- transitionGraph(s)) {
+						// If a branch tries to open a variable, allow it only if it's still available and remove it
+						// from available vars for that branch, otherwise discard branch
+						while(e2.matches(".*._in.*")) {
 
-													var ops = Map[String, String]()
+							val openedVar = ".*(.)_in.*".r
+							val openedVar(x) = e2
+							v = x
 
-															var discard = false
-															var out = false
-															var v:String = null
-															var e2 = e1
+							if(pathVars(x)) {
+								out = true 
+								
+								if(!ops.contains(x))
+								  ops += ((x, "in"))
+								else
+								  ops += ((x, "inout"))
 
-															// If a branch tries to open a variable, allow it only if it's still available and remove it
-															// from available vars for that branch, otherwise discard branch
-															if(e1.matches(".*._in.*")) {
+								val varPattern = "(\\()?,?" + x + "_in(\\))?"
 
-																val openedVar = ".*(.)_in.*".r
-																		val openedVar(x) = e1
-																		v = x
+								e2 = e2.replaceAll(varPattern, "()")
 
-																		if(pathVars(x)) {
-																			out = true 
+							}
 
-																					ops += ((x, "in"))
+							else discard = true
 
-																					val varPattern = "(\\()?._in(\\))?"
+						}
+						
+						while(e2.matches(".*._out.*")) {
 
-																					e2 = e1.replaceAll(varPattern, "()")
+							val closeCommand = ".*(.)_out.*".r
+							val closeCommand(x) = e2
 
-																		}
+							if(!ops.contains(x))
+								  ops += ((x, "out"))
+								else
+								  ops += ((x, "inout"))
 
-																		else discard = true
+							val varPattern = "(\\()?,?" + x + "_out(\\))?"
+							e2 =  e2.replaceAll(varPattern, "()")
 
-															}
-															else if (e1.matches(".*._out.*")) {
+						}
 
-																val closeCommand = ".*(.)_out.*".r
-																		val closeCommand(x) = e1
+						// If we didn't discard the new branch, make it a path
+						if(!discard) {
 
-																		ops += ((x, "out"))
+							newPaths += path.clone
+							newPaths.last += ((e2, ops, t))
 
-																		val varPattern = "(\\()?._out(\\))?"
-																		e2 =  e1.replaceAll(varPattern, "()")
+							newPathVars += pathVars.clone
 
-															}
-
-
-													// If we didn't discard the new branch, make it a path
-													if(!discard) {
-
-														newPaths += path.clone
-																newPaths.last += ((e2, ops, t))
-
-																newPathVars += pathVars.clone
-
-																if(out)
-																	newPathVars.last(v) = false
-
-
-													}
-
-												}
-
-												// Add the new paths to the path union
-												path += newPaths(0).last
-														pathsToProcess += newPaths.tail.size
-														pathsUnion.appendAll(newPaths.tail)
-
-														// Add the available variables for the new paths
-														availablePathVars(i) = newPathVars(0)
-														availablePathVars.appendAll(newPathVars.tail)
+							if(out)
+								newPathVars.last(v) = false
 
 
-											}
-											else
-												pathsToProcess -=1
-
-								}
+						}
 
 					}
 
-		// Prune paths that don't consume all the available variables
-		for(i <- pathsUnion.length-1 to 0 by -1) {
+					// Add the new paths to the path union
+					pathsToProcess += newPaths.tail.size
+					path += newPaths(0).last
+          pathsUnion.appendAll(newPaths.tail)
 
-			if(availablePathVars(i).values.exists(_ == true)) {
+					// Add the available variables for the new paths
+					availablePathVars(i) = newPathVars(0)
+					availablePathVars.appendAll(newPathVars.tail)
 
-				pathsUnion.remove(i)
 
+				}
+				else {
+				  
+				  pathsToProcess -=1
+				  
+				  if (transitionGraph.contains(s) && transitionGraph(s).size <= 0 && !finalStates2.contains(s))
+				    pathsToRemove += i
+				}
 			}
-
+			
+			pathsToRemove = pathsToRemove.sortBy(- _)
+			
+			// Remove paths that will never lead to a final state
+			for(j<- pathsToRemove)
+			  pathsUnion.remove(j)
 		}
 
-		new VSetPathUnion(pathsUnion, vars, finalStates2)
+    // Prune paths that don't consume all the available variables
+    for(i <- pathsUnion.length-1 to 0 by -1) {
+    
+    	if(availablePathVars(i).values.exists(_ == true)) {
+    
+    		pathsUnion.remove(i)
+    
+    	}
+    
+    }
+    
+    new VSetPathUnion(pathsUnion, vars, finalStates2)
 
 }
 /**
