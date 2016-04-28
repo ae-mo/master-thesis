@@ -13,13 +13,59 @@ import be.ac.ulb.amorcian.arc.runtime.InstructionType
  */
 
 class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:Map[Int, Map[Int, String]], val vars: Array[String], val finalStates: Array[Int]) {
+  
+  /**
+   * Returns the union of this vset-automaton with another.
+   */
+  def union(other: VSetAutomaton):VSetAutomaton = {
+    
+    // If they don't have the same variable set,
+    // they are not union compatible
+    if(this.vars.toSet != other.vars.toSet)
+      return null
+    
+    val newInitial = 0
+    var newTransitionFunction = Map[Int, Map[Int, String]]()
+    var newFinalStates = new ArrayBuffer[Int]()
+    
+    // Shifts a state only if it is not the initial one
+    val shiftIfNotInitial = (s: Int) => if(s == other.initial) 0 else this.nrStates - 1 + s
+ 
+    // Adds a state entry to the new transition function only if the state provided is not the inital state,
+    // in which case it adds its transitions to the already existing entry
+    val addIfNotInitial = (s:Int, ts:Map[Int, String]) => if(s == other.initial) newTransitionFunction(this.initial) ++= ts
+                                                          else newTransitionFunction += ((s, ts))
 
-	/* 
-
-  def union(other: VSetAutomaton): VSetAutomaton {}
-
-
-	 */
+    newTransitionFunction = this.transitionFunction.clone
+    
+    // Shift all the key-value pairs of the other
+    // by the number of states of this
+    // and add them to the new transition function
+    for((s, ts) <- other.transitionFunction) {
+      
+      var s1 = shiftIfNotInitial(s)
+      
+      var ts1 = Map[Int, String]()
+      
+      for((t, e) <- ts) {
+        
+        var t1 = shiftIfNotInitial(t)
+        
+        ts1 += ((t1, e))
+      }
+      
+      addIfNotInitial(s1, ts1)
+    }
+    
+    // Final states of this don't change
+    newFinalStates ++= this.finalStates
+    
+    // Final states of the other are shifted
+    for(f <- other.finalStates)
+      newFinalStates += shiftIfNotInitial(f)
+    
+    new VSetAutomaton(this.nrStates + other.nrStates, newInitial, newTransitionFunction, vars, newFinalStates.toArray)
+  }
 
 	/**
 	 * Joins the vset-automaton with another one.
@@ -425,7 +471,10 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 	    }
 		  
 		  // Return the automaton that is the join of the two original ones
-		  new VSetAutomaton(stateCounter, newInitial, transitionFunction, a1.vars ++ a2.vars, newFinalStates.toArray)
+		  val a3 = new VSetAutomaton(stateCounter, newInitial, transitionFunction, a1.vars ++ a2.vars.diff(a1.vars), newFinalStates.toArray)
+		  
+		  // This removes all remaining dead paths
+		  a3.toVSetPathUnion.toHybridPathUnion().toVSetAutomaton()
 		}
 	}
 	

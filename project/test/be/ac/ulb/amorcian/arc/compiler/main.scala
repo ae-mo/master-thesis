@@ -21,11 +21,10 @@ object main{
       
       val a2 = new VSetAutomaton(nrStates2, initial2, transitionFunction2, vars2, finalStates2)
 
-      val a3 = a.join(a2)
-      
-      val a4 = a3.toVSetPathUnion().toHybridPathUnion().toVSetAutomaton()
+      val a3 = a.union(a2)
       
       println("hey")
+
     }
     
     def printProgram(program: ArrayBuffer[Instruction]) = {
