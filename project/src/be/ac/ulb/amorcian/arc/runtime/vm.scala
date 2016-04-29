@@ -1,6 +1,7 @@
 package be.ac.ulb.amorcian.arc.runtime
 
 import scala.collection.mutable.MutableList
+import scala.lms.common._
 
 package object runtime {
   
@@ -140,7 +141,7 @@ object vm {
 		case _ => {
 
 		  if(!p(instr.num))
-				l += new Thread(instr, saved.clone) ;
+				l += new Thread(instr, saved.clone)
 		}
 
 		}
