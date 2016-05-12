@@ -15,7 +15,9 @@ object main{
 
       val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
 
-      a.epsilonClosure()
+      val b = a.epsilonClosure()
+
+			b.prune()
 
       println("hey")
 

@@ -176,12 +176,6 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                       break
                     }
                   }
-                  else if(tok2 == "()") {
-
-                    createIfNotExists(s1, s2)
-                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
-                    makeFinalIf(s1, t2)
-                  }
 
               }
               case "\\d" => {
@@ -203,12 +197,6 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                       isBreak = false
                       break
                     }
-                  }
-                  else if(tok2 == "()") {
-
-                    createIfNotExists(s1, s2)
-                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
-                    makeFinalIf(s1, t2)
                   }
 
               }
@@ -232,12 +220,6 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                       break
                     }
                   }
-                  else if(tok2 == "()") {
-
-                    createIfNotExists(s1, s2)
-                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
-                    makeFinalIf(s1, t2)
-                  }
 
               }
               case "()" => {
@@ -247,12 +229,6 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                   createIfNotExists(s1, s2)
                   trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
                   makeFinalIf(t1, t2)
-                }
-                else {
-
-                  createIfNotExists(s1, s2)
-                  trFuncsIntersection((s1, s2)) += (((t1, s2), tok))
-                  makeFinalIf(t1, s2)
                 }
               }
 
@@ -307,12 +283,6 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                       addChoice(s1, s2, t1, t2, tok)
                     }
                   }
-                  case "()" => {
-
-                    createIfNotExists(s1, s2)
-                    trFuncsIntersection((s1, s2)) += (((s1, t2), tok2))
-                    makeFinalIf(s1, t2)
-                  }
                   case varPattern(x) => {
 
                     val varPatternExtr(x)= tok2
@@ -323,7 +293,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                     }
                   }
 
-                  // tok2 is a simple char too
+                  // tok2 is a simple char too (or epsilon)
                   case _ => {
 
                     if(tok == tok2)
@@ -337,84 +307,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	  }
 		}
 
-		var oldNoUnreachableTF = trFuncsIntersection
-		var noUnreachableTF = Map[(Int, Int), Map[(Int, Int), String]]()
-
-		// Remove all states with no incoming transitions (except the initial) iteratively
-		var canChange = true
-
-		while(canChange) {
-
-		  canChange = false
-		  for((s, ts) <- oldNoUnreachableTF) {
-
-		    if (s != initial) {
-
-		      var remove = true
-    		  for((s1, ts1) <- oldNoUnreachableTF) {
-
-    		    if(ts1.contains(s))
-    		      remove = false
-      		  }
-      		  if(!remove)
-      		    noUnreachableTF += ((s, ts))
-      		  else {
-      		    if(finalStates.contains(s))
-      		      finalStates -= s
-      		    canChange = true
-      		  }
-
-      	}
-		    else {
-
-		      noUnreachableTF += ((s, ts))
-		    }
-		  }
-
-
-		  if(canChange) {
-
-		    oldNoUnreachableTF = noUnreachableTF
-        noUnreachableTF = Map[(Int, Int), Map[(Int, Int), String]]()
-		  }
-		}
-
-		var oldNoDeadTF = noUnreachableTF
-		var noDeadTF = Map[(Int, Int), Map[(Int, Int), String]]()
-
-		// Remove all states with no outgoing transitions (except the finals) iteratively
-		canChange = true
-
-		while(canChange) {
-
-		  canChange = false
-
-		  // Remove all transitions pointing to dead states
-		  for((s, ts) <- oldNoDeadTF) {
-
-  		 for((t, e) <- ts if (!finalStates.contains(t) && !oldNoDeadTF.contains(t))) {
-
-  		   oldNoDeadTF(s) -= t
-  		   canChange = true
-  		 }
-
-  		}
-
-		  // Copy only the states with >1 outgoing transition
-		  for((s, ts) <- oldNoDeadTF) {
-
-		    if(ts.size == 0)
-		      canChange = true
-		    else
-		      noDeadTF += ((s, ts))
-		  }
-
-		  if(canChange) {
-
-		    oldNoDeadTF = noDeadTF
-        noDeadTF = Map[(Int, Int), Map[(Int, Int), String]]()
-		  }
-		}
+    val newTrFuncsIntersection = prune(trFuncsIntersection, Array[(Int,Int)](initial), finalStates.toArray)
 
 		var visitedStates= Map[(Int, Int), Int]()
 		var stateCounter = 0
@@ -449,16 +342,16 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                                                                             		}
 
 		// If the intersection is empty, return null, otherwise rename each state with a unique integer
-		if(noDeadTF.size == 0 || noDeadTF(initial).size == 0 || finalStates.size == 0)
+		if(newTrFuncsIntersection.size == 0 || newTrFuncsIntersection(initial).size == 0 || finalStates.size == 0)
 		  null
 		else {
 
 		  // The new initial state is 0
 		  val newInitial = 0
-		  renameStateAndSuccessors(initial, noDeadTF(initial))
+		  renameStateAndSuccessors(initial, newTrFuncsIntersection(initial))
 
 		  // Rename each state in the map and its targets
-		  for((s , ts) <- noDeadTF; if (s != initial) ) {
+		  for((s , ts) <- newTrFuncsIntersection; if (s != initial) ) {
 
 		    renameStateAndSuccessors(s, ts)
 		  }
@@ -472,12 +365,109 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 	    }
 
 		  // Return the automaton that is the join of the two original ones
-		  val a3 = new VSetAutomaton(stateCounter, newInitial, transitionFunction, a1.vars ++ a2.vars.diff(a1.vars), newFinalStates.toArray)
+		  new VSetAutomaton(stateCounter, newInitial, transitionFunction, a1.vars ++ a2.vars.diff(a1.vars), newFinalStates.toArray)
 
-		  // This removes all remaining dead paths
-		  a3.toVSetPathUnion.toHybridPathUnion().toVSetAutomaton()
 		}
 	}
+
+  /**
+    * Prunes away unreachable and dead states in an intersection of two vset-automata.
+    */
+  def prune(transitionFunction: Map[(Int, Int), Map[(Int, Int,), String]], initials:Array[(Int, Int)], finalStates: Array[(Int, Int)]):
+    Map[(Int, Int), Map[(Int, Int,), String]] = {
+
+    // Two traversals will be performed one in the usual direction, that defined by a transition, and
+    // the other backwards.
+
+    // get all the states
+    var statesArray = transitionFunction.keySet
+
+    // Construct a map that keeps track of the visited states in each traversal
+    val visitedStates = statesArray.map(((_, ((false, false)))))(collection.breakOut): Map[(Int, Int), (Boolean, Boolean)]
+
+    // Reverse the transition function for the backward traversal
+    val reversedTF = Map[(Int, Int), Map[(Int, Int), String]]()
+
+      for((s, ts) <- transitionFunction)
+        for((t, e) <- ts) {
+          if(!reversedTF.contains(t))
+            reversedTF += ((t, Map[(Int, Int), String]()))
+          reversedTF(t) += ((s, e))
+        }
+
+    // forward traversal
+    traverse(transitionFunction, visitedStates, 1, initials)
+
+    // backward traversal
+    traverse(reversedTF, visitedStates, 2, finalStates)
+
+    val newTransitionFunction = Map[(Int, Int), Map[(Int, Int,), String]]()
+    // eliminate states not met in both traversals
+    for(s <- statesArray)
+      if((visitedStates(s)._1 && visitedStates(s)._2))
+        newTransitionFunction += ((s, transitionFunction(s)))
+
+    newTransitionFunction
+  }
+
+  /**
+    * Traverses the graph of the vset-automaton, marking the visited states.
+    * @param transitionFunction
+    * @param visitedStates
+    * @param n
+    * @param initials
+    */
+  def traverse(transitionFunction: Map[(Int, Int), Map[(Int, Int,), String]], visitedStates:Map[(Int, Int), (Boolean, Boolean)], n:Int, initials:Array[(Int, Int)]) = {
+
+    // The frontier contains the current states
+    var currentFrontier = new ArrayBuffer[(Int, Int)]()
+    currentFrontier ++= initials
+    var nextFrontier = new ArrayBuffer[(Int, Int)]()
+
+    // Initialize the traversal
+    for(i <- initials) {
+
+      if(n==1)
+        visitedStates(i) = ((true, false))
+      else
+        visitedStates(i) = ((visitedStates(i)._1, true))
+
+    }
+
+    // traversal: follow the transitions and mark
+    // the states met as visited (boolean in visitedStates)
+    while(currentFrontier.size > 0) {
+
+      // advance the frontier by adding all successors of
+      // the current states to the next frontier
+      for(s <- currentFrontier) {
+
+        for((t, e) <- transitionFunction(s)) {
+
+          if(n==1) {
+
+            // If we didn't visit this state yet,
+            // mark it as visited and add it to the next frontier
+            if(!visitedStates(t)._1) {
+              visitedStates(t) = (true, visitedStates(t)._2)
+              nextFrontier += t
+            }
+          }
+          else {
+
+            if(!visitedStates(t)._2) {
+              visitedStates(t) = (visitedStates(t)._1, true)
+              nextFrontier += t
+            }
+          }
+
+        }
+      }
+
+      currentFrontier = nextFrontier
+      nextFrontier = new ArrayBuffer[(Int, Int)]()
+    }
+  }
 
 	/**
 	 * Extracts the variables from a series of variable operations.
