@@ -1,0 +1,70 @@
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[11pt,american,draftfoot]{ulb_thesis}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+ \input{ulb_ntheorem.std}
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+$\textrm{SVOps}^{\vdash}=\left\{ x\vdash\mid x\in\textrm{SVars}\right\} $
+
+$\textrm{SVOps}^{\dashv}=\left\{ x\dashv\mid x\in\textrm{SVars}\right\} $
+\begin{definition}
+An extended \emph{variable-set automaton} (or \emph{eVset-automaton})
+is a tuple $\left(Q,q_{0},q_{f},\delta\right)$, where:
+\begin{itemize}
+\item $Q$ is a finite set of states;
+\item $q_{0}\in Q$ is the initial state;
+\item $q_{f}\in Q$ is an accepting state;
+\item $\delta$ is a finite transition relation consisting of triples, each
+having one of these forms:
+
+\begin{itemize}
+\item $\left(q,\sigma,q'\right)$, where $\sigma\in\varSigma$;
+\item $\left(q,S,q'\right)$, where $S\subseteq\left(\textrm{SVOps}^{\vdash}\cup\textrm{SVOps}^{\dashv}\right)$.
+\end{itemize}
+\end{itemize}
+\end{definition}
+
+\noindent 
+\begin{definition}
+\noindent For a string $\mathbf{s}=s_{1},\ldots,s_{n}$, a run $\rho=c_{0}\ldots c_{m}$
+on $\mathbf{s}$ of a (extended) variable-set automaton $A$ is \emph{well-behaved}
+if it satisfies the following conditions:
+\begin{itemize}
+\item $c_{j}=\left(q,V,Y,i\right)$ where $q\neq q_{f}$ for $j=0,\ldots,m-1$;
+\item either:
+
+\begin{itemize}
+\item $c_{m}=\left(q,V,Y,i\right)$ where $q\neq q_{f}$;
+\item $c_{m}=\left(q_{f},\textrm{Ø},\textrm{Ø},n+1\right)$.
+\end{itemize}
+\end{itemize}
+\end{definition}
+
+
+\begin{definition}
+\noindent A (extended) variable-set automaton is well-behaved if,
+for every string $\mathbf{s}\in\varSigma^{\ast}$, $\textrm{ARuns}\left(A,\mathbf{s}\right)$
+contains only well-behaved runs.
+\end{definition}
+
+\noindent 
+\begin{lemma}
+\noindent Given an extended varable-set automaton $A$, $A$ can be
+converted into an equivalent variable-set automaton $A'$ in polynomial
+time.\end{lemma}
+
+\begin{proof}
+Consider $A'=$\end{proof}
+
+
+\end{document}
