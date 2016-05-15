@@ -81,6 +81,22 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     var trFuncsIntersection = Map[(Int, Int), Map[(Int, Int), String]]()
     var finalStates = new ArrayBuffer[(Int, Int)]()
 
+    var size = 0
+    for((s, ts) <- this.transitionFunction)
+      size += ts.size
+    println("----------------THIS-------------------")
+    println("#states: " + this.transitionFunction.size)
+    println("#transitions: " + size)
+    println()
+
+    size = 0
+    for((s, ts) <- other.transitionFunction)
+      size += ts.size
+    println("----------------OTHER------------------")
+    println("#states: " + other.transitionFunction.size)
+    println("#transitions: " + size)
+    println()
+
 		// Perform epsilon closure on both automata
 		val a1 = this.epsilonClosure()
 		val a2 = other.epsilonClosure()
@@ -92,7 +108,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     // Make a state final if its components are final
     val makeFinalIf = (t1: Int, t2: Int) => {
 
-                                              if(a1.finalStates.contains(t1) && a2.finalStates.contains(t2))
+                                              if(a1.finalStates.contains(t1) && a2.finalStates.contains(t2) && !finalStates.contains((t1, t2)))
                                                 finalStates += ((t1, t2))
                                             }
 
@@ -186,9 +202,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                   }
                   else if(tok2 == ".") {
 
-                    createIfNotExists(s1, s2)
-                    trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
-                    makeFinalIf(t1, t2)
+                    addChoice(s1, s2, t1, t2, tok)
                   }
                   else if(tok2.matches(varPattern.toString)) {
                     val varPatternExtr(x)= tok2
@@ -208,9 +222,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                   }
                   else if(tok2 == ".") {
 
-                    createIfNotExists(s1, s2)
-                    trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
-                    makeFinalIf(t1, t2)
+                    addChoice(s1, s2, t1, t2, tok)
                   }
                   else if(tok2.matches(varPattern.toString)) {
                     val varPatternExtr(x)= tok2
@@ -226,9 +238,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 
                 if(tok2 == "()") {
 
-                  createIfNotExists(s1, s2)
-                  trFuncsIntersection((s1, s2)) += (((t1, t2), tok))
-                  makeFinalIf(t1, t2)
+                  addChoice(s1, s2, t1, t2, tok)
                 }
               }
 
@@ -307,8 +317,6 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   	  }
 		}
 
-    val newTrFuncsIntersection = prune(trFuncsIntersection, Array[(Int,Int)](initial), finalStates.toArray)
-
 		var visitedStates= Map[(Int, Int), Int]()
 		var stateCounter = 0
 		var newFinalStates = ArrayBuffer[Int]()
@@ -342,16 +350,16 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
                                                                             		}
 
 		// If the intersection is empty, return null, otherwise rename each state with a unique integer
-		if(newTrFuncsIntersection.size == 0 || newTrFuncsIntersection(initial).size == 0 || finalStates.size == 0)
+		if(trFuncsIntersection.size == 0 || trFuncsIntersection(initial).size == 0 || finalStates.size == 0)
 		  null
 		else {
 
 		  // The new initial state is 0
 		  val newInitial = 0
-		  renameStateAndSuccessors(initial, newTrFuncsIntersection(initial))
+		  renameStateAndSuccessors(initial, trFuncsIntersection(initial))
 
 		  // Rename each state in the map and its targets
-		  for((s , ts) <- newTrFuncsIntersection; if (s != initial) ) {
+		  for((s , ts) <- trFuncsIntersection; if (s != initial) ) {
 
 		    renameStateAndSuccessors(s, ts)
 		  }
@@ -364,8 +372,20 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 
 	    }
 
+
+      val newTrFuncsIntersection = prune(transitionFunction, Array[Int](newInitial), newFinalStates.toArray)
+
+      size = 0
+      for((s, ts) <- newTrFuncsIntersection)
+        size += ts.size
+
+      println("----------------RESULT-----------------")
+      println("#states: " + newTrFuncsIntersection.size)
+      println("#transitions: " + size)
+      println()
+
 		  // Return the automaton that is the join of the two original ones
-		  new VSetAutomaton(stateCounter, newInitial, transitionFunction, a1.vars ++ a2.vars.diff(a1.vars), newFinalStates.toArray)
+		  new VSetAutomaton(stateCounter, newInitial, newTrFuncsIntersection, a1.vars ++ a2.vars.diff(a1.vars), newFinalStates.toArray)
 
 		}
 	}
@@ -373,8 +393,8 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
   /**
     * Prunes away unreachable and dead states in an intersection of two vset-automata.
     */
-  def prune(transitionFunction: Map[(Int, Int), Map[(Int, Int,), String]], initials:Array[(Int, Int)], finalStates: Array[(Int, Int)]):
-    Map[(Int, Int), Map[(Int, Int,), String]] = {
+  def prune(transitionFunction: Map[Int, Map[Int, String]], initials:Array[Int], finalStates: Array[Int]):
+    Map[Int, Map[Int, String]] = {
 
     // Two traversals will be performed one in the usual direction, that defined by a transition, and
     // the other backwards.
@@ -383,15 +403,15 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     var statesArray = transitionFunction.keySet
 
     // Construct a map that keeps track of the visited states in each traversal
-    val visitedStates = statesArray.map(((_, ((false, false)))))(collection.breakOut): Map[(Int, Int), (Boolean, Boolean)]
+    val visitedStates = statesArray.map(((_, ((false, false)))))(collection.breakOut): Map[Int, (Boolean, Boolean)]
 
     // Reverse the transition function for the backward traversal
-    val reversedTF = Map[(Int, Int), Map[(Int, Int), String]]()
+    val reversedTF = Map[Int, Map[Int, String]]()
 
       for((s, ts) <- transitionFunction)
         for((t, e) <- ts) {
           if(!reversedTF.contains(t))
-            reversedTF += ((t, Map[(Int, Int), String]()))
+            reversedTF += ((t, Map[Int, String]()))
           reversedTF(t) += ((s, e))
         }
 
@@ -401,11 +421,19 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     // backward traversal
     traverse(reversedTF, visitedStates, 2, finalStates)
 
-    val newTransitionFunction = Map[(Int, Int), Map[(Int, Int,), String]]()
+    val newTransitionFunction = Map[Int, Map[Int, String]]()
+
     // eliminate states not met in both traversals
     for(s <- statesArray)
-      if((visitedStates(s)._1 && visitedStates(s)._2))
-        newTransitionFunction += ((s, transitionFunction(s)))
+      if((visitedStates(s)._1 && visitedStates(s)._2)) {
+
+        var newTs = Map[Int, String]()
+
+        for((t, e) <- transitionFunction(s); if (visitedStates(t)._1 && visitedStates(t)._2))
+          newTs += ((t, e))
+
+        newTransitionFunction += ((s, newTs))
+      }
 
     newTransitionFunction
   }
@@ -417,12 +445,12 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
     * @param n
     * @param initials
     */
-  def traverse(transitionFunction: Map[(Int, Int), Map[(Int, Int,), String]], visitedStates:Map[(Int, Int), (Boolean, Boolean)], n:Int, initials:Array[(Int, Int)]) = {
+  def traverse(transitionFunction: Map[Int, Map[Int, String]], visitedStates:Map[Int, (Boolean, Boolean)], n:Int, initials:Array[Int]) = {
 
     // The frontier contains the current states
-    var currentFrontier = new ArrayBuffer[(Int, Int)]()
+    var currentFrontier = new ArrayBuffer[Int]()
     currentFrontier ++= initials
-    var nextFrontier = new ArrayBuffer[(Int, Int)]()
+    var nextFrontier = new ArrayBuffer[Int]()
 
     // Initialize the traversal
     for(i <- initials) {
@@ -442,30 +470,33 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
       // the current states to the next frontier
       for(s <- currentFrontier) {
 
-        for((t, e) <- transitionFunction(s)) {
+        // In the backward traversal, examine only the states reached
+        // in the forward traversal
+        if((n != 1 && visitedStates(s)._1) || n == 1)
+          for((t, e) <- transitionFunction(s)) {
 
-          if(n==1) {
+            if(n==1) {
 
-            // If we didn't visit this state yet,
-            // mark it as visited and add it to the next frontier
-            if(!visitedStates(t)._1) {
-              visitedStates(t) = (true, visitedStates(t)._2)
-              nextFrontier += t
+              // If we didn't visit this state yet,
+              // mark it as visited and add it to the next frontier
+              if(!visitedStates(t)._1) {
+                visitedStates(t) = (true, visitedStates(t)._2)
+                nextFrontier += t
+              }
             }
-          }
-          else {
+            else {
 
-            if(!visitedStates(t)._2) {
-              visitedStates(t) = (visitedStates(t)._1, true)
-              nextFrontier += t
+              if(!visitedStates(t)._2) {
+                visitedStates(t) = (visitedStates(t)._1, true)
+                nextFrontier += t
+              }
             }
-          }
 
-        }
+          }
       }
 
       currentFrontier = nextFrontier
-      nextFrontier = new ArrayBuffer[(Int, Int)]()
+      nextFrontier = new ArrayBuffer[Int]()
     }
   }
 
@@ -505,7 +536,7 @@ class VSetAutomaton(val nrStates: Int, val initial: Int, val transitionFunction:
 
 	  var tokens = new ArrayBuffer[String]()
 
-	  val choicePattern = "(.\\|)".r
+	  val choicePattern = ".*(.\\|).*".r
 	  val varPattern= ".*(._).*".r
 
 	  e match {

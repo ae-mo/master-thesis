@@ -6,7 +6,7 @@ import be.ac.ulb.amorcian.arc.runtime.InstructionType
 
 object main{
 
-    val sampleVSet = "src/test/scala/be.ac.ulb.arc/compiler/sampleVSet8.txt"
+    val sampleVSet = "src/test/scala/be.ac.ulb.arc/compiler/sampleVSet6.txt"
     val sampleVSet2 = "src/test/scala/be.ac.ulb.arc/compiler/sampleVSet7.txt"
 
     def main(args: Array[String]) {
@@ -15,11 +15,11 @@ object main{
 
       val a = new VSetAutomaton(nrStates, initial, transitionFunction, vars, finalStates)
 
-      val b = a.epsilonClosure()
+			val (nrStates2, initial2, transitionFunction2, vars2, finalStates2) = VSetAFileReader.getVSetA(sampleVSet2)
 
-			b.prune()
+      val b = new VSetAutomaton(nrStates2, initial2, transitionFunction2, vars2, finalStates2)
 
-      println("hey")
+      a.join(b)
 
     }
 
