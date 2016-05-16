@@ -84,6 +84,14 @@
 
 \end_layout
 
+\begin_layout Standard
+SVOps
+\begin_inset Formula $=\textrm{SVOps}^{\vdash}\cup\textrm{SVOps}^{\dashv}$
+\end_inset
+
+
+\end_layout
+
 \begin_layout Definition
 An extended 
 \emph on
@@ -147,7 +155,7 @@ eVset-automaton
 \end_inset
 
 , where 
-\begin_inset Formula $S\subseteq\left(\textrm{SVOps}^{\vdash}\cup\textrm{SVOps}^{\dashv}\right)$
+\begin_inset Formula $S\subseteq\left(\textrm{SVOps}\right)$
 \end_inset
 
 .
@@ -225,6 +233,54 @@ either:
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+for every 
+\begin_inset Formula $c_{j},c_{j+1}$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{k},c_{k+1}$
+\end_inset
+
+, 
+\begin_inset Formula $j\neq k$
+\end_inset
+
+, such that 
+\begin_inset Formula $c_{j}$
+\end_inset
+
+ yelds 
+\begin_inset Formula $c_{j+1}$
+\end_inset
+
+ by applying transition 
+\begin_inset Formula $\left(q_{j},o,q_{j+1}\right)\in\delta$
+\end_inset
+
+ and the same holds for 
+\begin_inset Formula $c_{k},c_{k+1}$
+\end_inset
+
+ with transition 
+\begin_inset Formula $\left(q_{k},o',q_{k+1}\right)\in\delta$
+\end_inset
+
+ (
+\begin_inset Formula $o,o'\in\textrm{SVops}$
+\end_inset
+
+
+\begin_inset Formula $\left(A\right)$
+\end_inset
+
+), 
+\begin_inset Formula $o\neq o'$
+\end_inset
+
+;
+\end_layout
+
 \end_deeper
 \begin_layout --Separator--
 
@@ -251,7 +307,7 @@ A (extended) variable-set automaton is well-behaved if, for every string
 
 \begin_layout Lemma
 \noindent
-Given an extended varable-set automaton 
+Given an extended well-behaved varable-set automaton 
 \begin_inset Formula $A$
 \end_inset
 
@@ -259,7 +315,8 @@ Given an extended varable-set automaton
 \begin_inset Formula $A$
 \end_inset
 
- can be converted into an equivalent variable-set automaton 
+ can be converted into an equivalent well-behaved variable-set automaton
+ 
 \begin_inset Formula $A'$
 \end_inset
 
@@ -267,11 +324,411 @@ Given an extended varable-set automaton
 \end_layout
 
 \begin_layout Proof
-Consider 
+Without loss of generality, we consider an ordering of the symbols in 
+\begin_inset Formula $\textrm{SVOps}\left(A\right)$
+\end_inset
+
+ of the following form:
+\begin_inset Formula 
+\[
+x\vdash,\ldots,y\vdash,x\dashv,\ldots,y\dashv
+\]
+
+\end_inset
+
+ In this ordering, all insertion operations come before the deletion operations.
+ We define 
+\begin_inset Formula $o\prec o'$
+\end_inset
+
+, 
+\begin_inset Formula $o,o'\in\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, if 
+\begin_inset Formula $o$
+\end_inset
+
+ comes before 
+\begin_inset Formula $o'$
+\end_inset
+
+ (
+\emph on
+not
+\emph default
+ if they are equal) in the chosen ordering.
+ Consider 
 \begin_inset Formula $A'=$
 \end_inset
 
 
+\begin_inset Formula $\left(Q',q_{0}',q_{f}',\delta'\right)$
+\end_inset
+
+, with 
+\begin_inset Formula $\textrm{SVars}\left(A'\right)=\textrm{SVars}\left(A\right)$
+\end_inset
+
+, whose components are defined as follows:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q'=Q\cup Q^{\textrm{ops}}\cup Q^{\textrm{Ø}}$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q^{\textrm{ops}}=\left\{ q_{q',o,q''}\mid\exists\left(q',S,q''\right)\in\delta:o\in S\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Q^{\textrm{Ø}}=\left\{ q_{\textrm{q',Ø,q''}}\mid\exists\left(q',\textrm{Ø},q''\right)\in\delta\right\} $
+\end_inset
+
+;
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $q_{0}'=q_{0};$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}'=q_{f}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta'=\left(\delta\setminus\delta^{S}\right)\cup\delta^{\textrm{ops}}\cup\delta^{\textrm{Ø}}\cup\delta^{\varepsilon}$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\delta^{S}=\left\{ \left(q,S,q'\right)\in\delta\right\} ;$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{ops}}=\left\{ \left(q_{q',o,q''},o,q_{q',o',q''}\right)\mid\exists\left(q',S,q''\right)\in\delta:\left(o,o'\epsilon S\land o\prec o'\land\forall o''\in S:o\nprec o''\nprec o'\right)\right\} \cup\left\{ \left(q_{q',o,q''},o,q''\right)\mid\exists\left(q',S,q''\right)\in\delta:\left(o\epsilon S\land\forall o'\in S:o\nprec o'\right)\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{Ø}}=\left\{ \left(q_{\textrm{q',Ø,q''}},\varepsilon,q''\right)\mid\exists\left(q',\textrm{Ø},q''\right)\in\delta\right\} ;$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\varepsilon}=\left\{ \left(q,\varepsilon,q'\right)\mid\left(\exists\left(q',o,q''\right)\in\delta^{\textrm{ops}}:\forall\left(q',o',q''\right)\in\delta^{\textrm{ops}}:o'\nprec o\right)\lor\left(\exists\left(q',\varepsilon,q''\right)\in\delta^{\textrm{Ø}}\right)\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Proof
+This construction expands the transitions of 
+\begin_inset Formula $A$
+\end_inset
+
+ that are labeled with a set of variable operations into a sequence of transitio
+ns performing one operation at a time, taking care of putting the insertion
+ operations before the deletion ones, thus preserving well-behavedness.
+ It also substitutes transitions labeled with the empty set with ordinary
+ 
+\begin_inset Formula $\varepsilon-$
+\end_inset
+
+transitions.
+ To prove equivalence between 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $A'$
+\end_inset
+
+ it is sufficient to notice that for every string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, every run 
+\begin_inset Formula $\rho=c_{0},\ldots,c_{m}$
+\end_inset
+
+
+\begin_inset Formula $\in\textrm{ARuns}\left(A,\mathbf{s}\right)$
+\end_inset
+
+ can be put in correspondence with a run 
+\begin_inset Formula $\rho'\in\textrm{ARuns}\left(A',\mathbf{s}\right)$
+\end_inset
+
+.
+ Indeed, for every pair of consecutive configurations 
+\begin_inset Formula $c_{j}=\left(q_{j},V_{j},Y_{j},i_{j}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $c_{j+1}=\left(q_{j+1},V_{j+1},Y_{j+1},i_{j+1}\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $i_{j}=i_{j+1}$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(q,S,q'\right)$
+\end_inset
+
+
+\begin_inset Formula $\in\delta$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $V_{j}\neq V_{j+1}$
+\end_inset
+
+, replace 
+\begin_inset Formula $c_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $c_{j+1}$
+\end_inset
+
+ with a sequence 
+\begin_inset Formula $c_{j,1},\ldots,c_{j,k}$
+\end_inset
+
+ of configurations, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $c_{j,1}=c_{j}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $c_{j,k}=c_{j+1}$
+\end_inset
+
+; 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $c_{j,2}=\left(q_{j,2},V_{j,1},Y_{j,1},i_{j}\right)$
+\end_inset
+
+ (
+\begin_inset Formula $\left(q_{j,1},\varepsilon,q_{j,2}\right)\in\delta^{\varepsilon})$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+for every pair 
+\begin_inset Formula $c_{j,l}=\left(q_{j,l},V_{j,l},Y_{j,l},i_{j}\right),c_{j,l+1}=\left(q_{j,l+1},V_{j,l+1},Y_{j,l+1},i_{j}\right)$
+\end_inset
+
+, different from 
+\begin_inset Formula $c_{j,1},c_{j,2}$
+\end_inset
+
+, there exists a transition 
+\begin_inset Formula $\left(q_{j,l},o,q_{j,l+1}\right)\in\delta^{\textrm{ops}}$
+\end_inset
+
+ such that 
+\begin_inset Formula $o\in S$
+\end_inset
+
+ and 
+\begin_inset Formula $V_{j,l+1},Y_{j,l+1}$
+\end_inset
+
+ are obtained from 
+\begin_inset Formula $V_{j,l},Y_{j,l}$
+\end_inset
+
+ according to 
+\begin_inset Formula $o$
+\end_inset
+
+;
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $V_{j}=V_{j+1}$
+\end_inset
+
+, replace 
+\begin_inset Formula $c_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $c_{j+1}$
+\end_inset
+
+with 
+\begin_inset Formula $c_{j,1},c_{j,2},c_{j,3}$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $c_{j,1}$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{j,2}$
+\end_inset
+
+ are as in the previous case;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $c_{j,3}=c_{j+1}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+there exists a transition 
+\begin_inset Formula $\left(q_{j,2},\textrm{Ø},q_{j,3}\right)\in\delta^{\textrm{Ø}}$
+\end_inset
+
+ and 
+\begin_inset Formula $V_{j,3}=V_{j,l}$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j,3}=Y_{j,2}$
+\end_inset
+
+;
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $i_{j+1}=i_{j}+1$
+\end_inset
+
+, do nothing.
+\end_layout
+
+\end_deeper
+\begin_layout Proof
+After having applied this modifications to 
+\begin_inset Formula $\rho$
+\end_inset
+
+, the obtained run 
+\begin_inset Formula $\rho'$
+\end_inset
+
+ will be a valid run of 
+\begin_inset Formula $A'$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ and it will be accepting if and only if 
+\begin_inset Formula $\rho$
+\end_inset
+
+ was accepting, in which case it will return the same 
+\begin_inset Formula $\mathbf{s}-$
+\end_inset
+
+tuple returned by 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ This is because the only occasions where we actually modify 
+\begin_inset Formula $\rho$
+\end_inset
+
+ is when we are performing variable operations between a configuration and
+ the next one.
+ In this case, we are not advancing the string pointer.
+ The new series of configurations we put in place of the original pair doesn't
+ advance the pointer either, and it performs the exact variable operations
+ that were performed before the substitution, insertions first, thanks to
+ the way we constructed 
+\begin_inset Formula $A'$
+\end_inset
+
+.
+ Thus, for every pair of configurations 
+\begin_inset Formula $c_{j},c_{j+1}\in\rho$
+\end_inset
+
+ that we replace, 
+\begin_inset Formula $c_{j+2}$
+\end_inset
+
+ won't see any difference.
+ Also notice how the replaced sequence 
+\begin_inset Formula $c_{j,1},\ldots,c_{j,k}$
+\end_inset
+
+ is unique, and the sequence of operations from 
+\begin_inset Formula $c_{j,1}$
+\end_inset
+
+ to 
+\begin_inset Formula $c_{j,k}$
+\end_inset
+
+ respect the operation ordering that we chose.
 \end_layout
 
 \end_body
