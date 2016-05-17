@@ -1,0 +1,158 @@
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[11pt,american,draftfoot]{ulb_thesis}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+ \input{ulb_ntheorem.std}
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+$\textrm{SVOps}^{\vdash}=\left\{ x\vdash\mid x\in\textrm{SVars}\right\} $
+
+$\textrm{SVOps}^{\dashv}=\left\{ x\dashv\mid x\in\textrm{SVars}\right\} $
+
+SVOps$=\textrm{SVOps}^{\vdash}\cup\textrm{SVOps}^{\dashv}$
+\begin{definition}
+An extended \emph{variable-set automaton} (or \emph{eVset-automaton})
+is a tuple $\left(Q,q_{0},q_{f},\delta\right)$, where:
+\begin{itemize}
+\item $Q$ is a finite set of states;
+\item $q_{0}\in Q$ is the initial state;
+\item $q_{f}\in Q$ is an accepting state;
+\item $\delta$ is a finite transition relation consisting of triples, each
+having one of these forms:
+
+\begin{itemize}
+\item $\left(q,\sigma,q'\right)$, where $\sigma\in\varSigma$;
+\item $\left(q,S,q'\right)$, where $S\subseteq\left(\textrm{SVOps}\right)$.
+\end{itemize}
+\end{itemize}
+\end{definition}
+
+\noindent 
+\begin{definition}
+\noindent For a string $\mathbf{s}=s_{1},\ldots,s_{n}$, a run $\rho=c_{0}\ldots c_{m}$
+on $\mathbf{s}$ of a (extended) variable-set automaton $A$ is \emph{well-behaved}
+if it satisfies the following conditions:
+\begin{itemize}
+\item $c_{j}=\left(q,V,Y,i\right)$ where $q\neq q_{f}$ for $j=0,\ldots,m-1$;
+\item either:
+
+\begin{itemize}
+\item $c_{m}=\left(q,V,Y,i\right)$ where $q\neq q_{f}$;
+\item $c_{m}=\left(q_{f},\textrm{Ø},\textrm{Ø},n+1\right)$.
+\end{itemize}
+\item for every $c_{j},c_{j+1}$ and $c_{k},c_{k+1}$, $j\neq k$, such
+that $c_{j}$ yelds $c_{j+1}$ by applying transition $\left(q_{j},o,q_{j+1}\right)\in\delta$
+and the same holds for $c_{k},c_{k+1}$ with transition $\left(q_{k},o',q_{k+1}\right)\in\delta$
+($o,o'\in\textrm{SVops}$$\left(A\right)$), $o\neq o'$;
+\end{itemize}
+\end{definition}
+
+
+\begin{definition}
+\noindent A (extended) variable-set automaton is well-behaved if,
+for every string $\mathbf{s}\in\varSigma^{\ast}$, $\textrm{ARuns}\left(A,\mathbf{s}\right)$
+contains only well-behaved runs.
+\end{definition}
+
+\noindent 
+\begin{lemma}
+\noindent Given an extended well-behaved varable-set automaton $A$,
+$A$ can be converted into an equivalent well-behaved variable-set
+automaton $A'$ in polynomial time.\end{lemma}
+
+\begin{proof}
+Without loss of generality, we consider an ordering of the symbols
+in $\textrm{SVOps}\left(A\right)$ of the following form:
+\[
+x\vdash,\ldots,y\vdash,x\dashv,\ldots,y\dashv
+\]
+ In this ordering, all insertion operations come before the deletion
+operations. We define $o\prec o'$, $o,o'\in\textrm{SVOps}\left(A\right)$,
+if $o$ comes before $o'$ (\emph{not} if they are equal) in the chosen
+ordering. Consider $A'=$$\left(Q',q_{0}',q_{f}',\delta'\right)$,
+with $\textrm{SVars}\left(A'\right)=\textrm{SVars}\left(A\right)$,
+whose components are defined as follows:
+\begin{itemize}
+\item $Q'=Q\cup Q^{\textrm{ops}}\cup Q^{\textrm{Ø}}$, where:
+
+\begin{itemize}
+\item $Q^{\textrm{ops}}=\left\{ q_{q',o,q''}\mid\exists\left(q',S,q''\right)\in\delta:o\in S\right\} $;
+\item $Q^{\textrm{Ø}}=\left\{ q_{\textrm{q',Ø,q''}}\mid\exists\left(q',\textrm{Ø},q''\right)\in\delta\right\} $;
+\end{itemize}
+\item $q_{0}'=q_{0};$
+\item $q_{f}'=q_{f}$;
+\item $\delta'=\left(\delta\setminus\delta^{S}\right)\cup\delta^{\textrm{ops}}\cup\delta^{\textrm{Ø}}\cup\delta^{\varepsilon}$,
+where:
+
+\begin{itemize}
+\item $\delta^{S}=\left\{ \left(q,S,q'\right)\in\delta\right\} ;$
+\item $\delta^{\textrm{ops}}=\left\{ \left(q_{q',o,q''},o,q_{q',o',q''}\right)\mid\exists\left(q',S,q''\right)\in\delta:\left(o,o'\epsilon S\land o\prec o'\land\forall o''\in S:o\nprec o''\nprec o'\right)\right\} \cup\left\{ \left(q_{q',o,q''},o,q''\right)\mid\exists\left(q',S,q''\right)\in\delta:\left(o\epsilon S\land\forall o'\in S:o\nprec o'\right)\right\} $;
+\item $\delta^{\textrm{Ø}}=\left\{ \left(q_{\textrm{q',Ø,q''}},\varepsilon,q''\right)\mid\exists\left(q',\textrm{Ø},q''\right)\in\delta\right\} ;$
+\item $\delta^{\varepsilon}=\left\{ \left(q,\varepsilon,q'\right)\mid\left(\exists\left(q',o,q''\right)\in\delta^{\textrm{ops}}:\forall\left(q',o',q''\right)\in\delta^{\textrm{ops}}:o'\nprec o\right)\lor\left(\exists\left(q',\varepsilon,q''\right)\in\delta^{\textrm{Ø}}\right)\right\} $.
+\end{itemize}
+\end{itemize}
+This construction expands the transitions of $A$ that are labeled
+with a set of variable operations into a sequence of transitions performing
+one operation at a time, taking care of putting the insertion operations
+before the deletion ones, thus preserving well-behavedness. It also
+substitutes transitions labeled with the empty set with ordinary $\varepsilon-$transitions.
+To prove equivalence between $A$ and $A'$ it is sufficient to notice
+that for every string $\mathbf{s}$, every run $\rho=c_{0},\ldots,c_{m}$$\in\textrm{ARuns}\left(A,\mathbf{s}\right)$
+can be put in correspondence with a run $\rho'\in\textrm{ARuns}\left(A',\mathbf{s}\right)$.
+Indeed, for every pair of consecutive configurations $c_{j}=\left(q_{j},V_{j},Y_{j},i_{j}\right)$,
+$c_{j+1}=\left(q_{j+1},V_{j+1},Y_{j+1},i_{j+1}\right)$:
+\begin{itemize}
+\item if $i_{j}=i_{j+1}$ and $\left(q,S,q'\right)$$\in\delta$:
+
+\begin{itemize}
+\item if $V_{j}\neq V_{j+1}$, replace $c_{j}$, $c_{j+1}$ with a sequence
+$c_{j,1},\ldots,c_{j,k}$ of configurations, where:
+
+\begin{itemize}
+\item $c_{j,1}=c_{j}$;
+\item $c_{j,k}=c_{j+1}$; 
+\item $c_{j,2}=\left(q_{j,2},V_{j,1},Y_{j,1},i_{j}\right)$ ($\left(q_{j,1},\varepsilon,q_{j,2}\right)\in\delta^{\varepsilon})$;
+\item for every pair $c_{j,l}=\left(q_{j,l},V_{j,l},Y_{j,l},i_{j}\right),c_{j,l+1}=\left(q_{j,l+1},V_{j,l+1},Y_{j,l+1},i_{j}\right)$,
+different from $c_{j,1},c_{j,2}$, there exists a transition $\left(q_{j,l},o,q_{j,l+1}\right)\in\delta^{\textrm{ops}}$
+such that $o\in S$ and $V_{j,l+1},Y_{j,l+1}$ are obtained from $V_{j,l},Y_{j,l}$
+according to $o$;
+\end{itemize}
+\item if $V_{j}=V_{j+1}$, replace $c_{j}$, $c_{j+1}$with $c_{j,1},c_{j,2},c_{j,3}$,
+where:
+
+\begin{itemize}
+\item $c_{j,1}$ and $c_{j,2}$ are as in the previous case;
+\item $c_{j,3}=c_{j+1}$;
+\item there exists a transition $\left(q_{j,2},\textrm{Ø},q_{j,3}\right)\in\delta^{\textrm{Ø}}$
+and $V_{j,3}=V_{j,l}$, $Y_{j,3}=Y_{j,2}$;
+\end{itemize}
+\end{itemize}
+\item if $i_{j+1}=i_{j}+1$, do nothing.
+\end{itemize}
+After having applied this modifications to $\rho$, the obtained run
+$\rho'$ will be a valid run of $A'$ on $\mathbf{s}$ and it will
+be accepting if and only if $\rho$ was accepting, in which case it
+will return the same $\mathbf{s}-$tuple returned by $\rho$. This
+is because the only occasions where we actually modify $\rho$ is
+when we are performing variable operations between a configuration
+and the next one. In this case, we are not advancing the string pointer.
+The new series of configurations we put in place of the original pair
+doesn't advance the pointer either, and it performs the exact variable
+operations that were performed before the substitution, insertions
+first, thanks to the way we constructed $A'$. Thus, for every pair
+of configurations $c_{j},c_{j+1}\in\rho$ that we replace, $c_{j+2}$
+won't see any difference. Also notice how the replaced sequence $c_{j,1},\ldots,c_{j,k}$
+is unique, and the sequence of operations from $c_{j,1}$ to $c_{j,k}$
+respect the operation ordering that we chose.\end{proof}
+
+
+\end{document}
