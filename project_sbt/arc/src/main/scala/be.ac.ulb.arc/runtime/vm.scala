@@ -1,4 +1,4 @@
-package be.ac.ulb.amorcian.arc.runtime
+package be.ac.ulb.arc.runtime
 
 import scala.collection.mutable.MutableList
 
@@ -17,7 +17,6 @@ object vm {
 	 * Executes a regular expression program with a given input.
 	 * @param prog the program to execute
 	 * @param input the input for the program
-	 * @param saved a list of saved input indices for submatch tracking
 	 */
 	def evaluate(prog: Array[Instruction], input: Array[Char]):Array[Int] =  {
 

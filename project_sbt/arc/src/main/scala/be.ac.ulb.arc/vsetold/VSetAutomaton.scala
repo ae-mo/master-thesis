@@ -1,12 +1,8 @@
-package be.ac.ulb.amorcian.arc.compiler
+package be.ac.ulb.arc.vsetold
 
-import scala.collection.mutable.Map
-import scala.collection.mutable.ArrayBuffer
-import dk.brics.automaton.Automaton
-import dk.brics.automaton.RegExp
+import be.ac.ulb.arc.runtime.{Instruction, InstructionType}
 
-import be.ac.ulb.amorcian.arc.runtime.Instruction
-import be.ac.ulb.amorcian.arc.runtime.InstructionType
+import scala.collection.mutable.{ArrayBuffer, Map}
 
 /**
  * Represents a vset-automaton.
@@ -1011,8 +1007,6 @@ def toVSetPathUnion():VSetPathUnion = {
  */
 def stateElimination(): (Int, Int, Map[Int, Map[Int, String]], Array[Int]) = {
 
-		import scala.collection.mutable.ArrayBuffer
-
 		var newTransitionGraph = this.transitionFunction.clone
 		var initial = this.initial
 		var nrStates = this.nrStates
@@ -1168,8 +1162,6 @@ def normalize(n: Int, i: Int, tr:Map[Int, Map[Int, String]], f: Array[Int]):
   * @return an array of weights for each state
  */
 def computeWeights(n: Int, i: Int, tr:Map[Int, Map[Int, String]], f: Array[Int]): Array[Int] = {
-
-		import scala.util.control.Breaks._
 
 		var transitionGraph = tr
 		var initial = i
