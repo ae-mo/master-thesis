@@ -1,8 +1,8 @@
 package be.ac.ulb.arc.vset
 
 import scala.collection.mutable.ArrayBuffer
-import be.ac.ulb.arc.runtime.Instruction
-import be.ac.ulb.arc.runtime.InstructionType
+import be.ac.ulb.arc.runtimeold.Instruction
+import be.ac.ulb.arc.runtimeold.InstructionType
 
 import dk.brics.automaton.RegExp
 

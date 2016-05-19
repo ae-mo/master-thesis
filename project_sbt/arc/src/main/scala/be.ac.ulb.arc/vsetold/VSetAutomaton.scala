@@ -1,6 +1,6 @@
 package be.ac.ulb.arc.vsetold
 
-import be.ac.ulb.arc.runtime.{Instruction, InstructionType}
+import be.ac.ulb.arc.runtimeold.{Instruction, InstructionType}
 
 import scala.collection.mutable.{ArrayBuffer, Map}
 

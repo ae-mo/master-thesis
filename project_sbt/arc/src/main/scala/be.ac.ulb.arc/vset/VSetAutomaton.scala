@@ -343,6 +343,14 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
 
   }
 
+  /**
+    * Replaces state pairs with simple states in the provided state set and transition function.
+    * @param Q2
+    * @param q02
+    * @param qf2
+    * @param δ2
+    * @return
+    */
   def State2toState(Q2:StateSet[State2], q02:State2, qf2:State2, δ2:TransitionFunction[Transition[State2]])
   : (StateSet[State], Option[State], Option[State], TransitionFunction[Transition[State]]) = {
 
