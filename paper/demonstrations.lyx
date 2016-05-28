@@ -164,140 +164,24 @@ eVset-automaton
 \end_deeper
 \end_deeper
 \begin_layout --Separator--
-\noindent
 
 \end_layout
 
 \begin_layout Definition
 \noindent
-For a string 
-\begin_inset Formula $\mathbf{s}=s_{1},\ldots,s_{n}$
-\end_inset
-
-, a run 
-\begin_inset Formula $\rho=c_{0}\ldots c_{m}$
-\end_inset
-
- on 
-\begin_inset Formula $\mathbf{s}$
-\end_inset
-
- of a (extended) variable-set automaton 
+A (extended) variable-set automaton 
 \begin_inset Formula $A$
 \end_inset
 
- is 
-\emph on
-well-behaved
-\emph default
- if it satisfies the following conditions:
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-\begin_inset Formula $c_{j}=\left(q,V,Y,i\right)$
+ is well-behaved if every vset-path 
+\begin_inset Formula $p$
 \end_inset
 
- where 
-\begin_inset Formula $q\neq q_{f}$
+ of 
+\begin_inset Formula $A$
 \end_inset
 
- for 
-\begin_inset Formula $j=0,\ldots,m-1$
-\end_inset
-
-;
-\end_layout
-
-\begin_layout Itemize
-either:
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-\begin_inset Formula $c_{m}=\left(q,V,Y,i\right)$
-\end_inset
-
- where 
-\begin_inset Formula $q\neq q_{f}$
-\end_inset
-
-;
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $c_{m}=\left(q_{f},\textrm{Ø},\textrm{Ø},n+1\right)$
-\end_inset
-
-.
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-for every 
-\begin_inset Formula $c_{j},c_{j+1}$
-\end_inset
-
- and 
-\begin_inset Formula $c_{k},c_{k+1}$
-\end_inset
-
-, 
-\begin_inset Formula $j\neq k$
-\end_inset
-
-, such that 
-\begin_inset Formula $c_{j}$
-\end_inset
-
- yelds 
-\begin_inset Formula $c_{j+1}$
-\end_inset
-
- by applying transition 
-\begin_inset Formula $\left(q_{j},o,q_{j+1}\right)\in\delta$
-\end_inset
-
- and the same holds for 
-\begin_inset Formula $c_{k},c_{k+1}$
-\end_inset
-
- with transition 
-\begin_inset Formula $\left(q_{k},o',q_{k+1}\right)\in\delta$
-\end_inset
-
- (
-\begin_inset Formula $o,o'\in\textrm{SVops}$
-\end_inset
-
-
-\begin_inset Formula $\left(A\right)$
-\end_inset
-
-), 
-\begin_inset Formula $o\neq o'$
-\end_inset
-
-;
-\end_layout
-
-\end_deeper
-\begin_layout --Separator--
-
-\end_layout
-
-\begin_layout Definition
-\noindent
-A (extended) variable-set automaton is well-behaved if, for every string
- 
-\begin_inset Formula $\mathbf{s}\in\varSigma^{\ast}$
-\end_inset
-
-, 
-\begin_inset Formula $\textrm{ARuns}\left(A,\mathbf{s}\right)$
-\end_inset
-
- contains only well-behaved runs.
+ is well-behaved.
 \end_layout
 
 \begin_layout --Separator--
@@ -307,20 +191,19 @@ A (extended) variable-set automaton is well-behaved if, for every string
 
 \begin_layout Lemma
 \noindent
-Given an extended well-behaved varable-set automaton 
-\begin_inset Formula $A$
+Given an extended varable-set automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
 \end_inset
 
 , 
 \begin_inset Formula $A$
 \end_inset
 
- can be converted into an equivalent well-behaved variable-set automaton
- 
+ can be converted into an equivalent variable-set automaton 
 \begin_inset Formula $A'$
 \end_inset
 
- in polynomial time.
+ in polynomial time in a well-behavedness preserving manner.
 \end_layout
 
 \begin_layout Proof
@@ -729,6 +612,597 @@ tuple returned by
 \end_inset
 
  respect the operation ordering that we chose.
+ It can also easily be verified that well-behavedness is preserved.
+\end_layout
+
+\begin_layout Proof
+\noindent
+It remains to show that the construction of 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be carried in polynomial time.
+ Let us refer to the size of 
+\begin_inset Formula $A$
+\end_inset
+
+ as 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ We consider 
+\begin_inset Formula $n=\left|Q\right|+\left|\delta\right|+\left|\textrm{SVars}\left(A\right)\right|$
+\end_inset
+
+.
+ We can reasonably assume that the operations of adding a new state, adding
+ a new transition, removing a state and removing a transition take constant
+ time.
+ Thus, expanding a single transition of 
+\begin_inset Formula $A$
+\end_inset
+
+ takes 
+\begin_inset Formula $O\left(\left|\textrm{SVars}\left(A\right)\right|\right)=O\left(n\right)$
+\end_inset
+
+ time.
+ Expanding every transition that is needed will then take 
+\begin_inset Formula $O\left(\left|\textrm{SVars}\left(A\right)\right|\cdot\left|\delta\right|\right)=O\left(n^{2}\right)$
+\end_inset
+
+ time.
+\end_layout
+
+\begin_layout Proof
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\noindent
+Given a (extended) vset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a vset-path 
+\begin_inset Formula $p$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ is a sequence of transitions 
+\begin_inset Formula $t_{1},$
+\end_inset
+
+
+\begin_inset Formula $\ldots,t_{n}\in\delta$
+\end_inset
+
+, such that for every pair 
+\begin_inset Formula $t_{i},t_{i+1}$
+\end_inset
+
+, the destination state of 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+ equals the source state of 
+\begin_inset Formula $t_{i+1}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+\noindent
+Given a (extended) vset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a vset-path 
+\begin_inset Formula $p=t_{1},\ldots,t_{n}$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ is complete if:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $t_{1}$
+\end_inset
+
+ has 
+\begin_inset Formula $q_{0}$
+\end_inset
+
+ as source state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $t_{n}$
+\end_inset
+
+ has 
+\begin_inset Formula $q$
+\end_inset
+
+
+\begin_inset Formula $_{f}$
+\end_inset
+
+ as destination state;
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+\noindent
+Given a (extended) vset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a vset-path 
+\begin_inset Formula $p=t_{1},\ldots,t_{n}$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ is well-behaved if the following hold:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $p$
+\end_inset
+
+ is complete;
+\end_layout
+
+\begin_layout Itemize
+for every operation 
+\begin_inset Formula $o\in\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, 
+\begin_inset Formula $o$
+\end_inset
+
+ appears in exactly one transition 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+ of 
+\begin_inset Formula $p$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+for every pair 
+\begin_inset Formula $t_{i},t_{j}$
+\end_inset
+
+, if 
+\begin_inset Formula $x\vdash$
+\end_inset
+
+ appears in 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $\dashv x$
+\end_inset
+
+ appears in 
+\begin_inset Formula $t_{j}$
+\end_inset
+
+, then 
+\begin_inset Formula $i\leq j$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+\noindent
+Given an extended vset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, the epsilon-closure of 
+\begin_inset Formula $A$
+\end_inset
+
+ is an extended vset-automaton 
+\begin_inset Formula $A'=\left(Q',q_{0}',q_{f}',\delta'\right)$
+\end_inset
+
+ , where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q'=Q$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{0}'=q_{0}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}'=q_{f}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta\subseteq\delta'$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+for every sequence of triples 
+\begin_inset Formula $\left(q_{1},S_{1},q'_{1}\right),\ldots,\left(q_{n},S_{n},q'_{n}\right)\in\delta$
+\end_inset
+
+ such that 
+\begin_inset Formula $\forall i$
+\end_inset
+
+,
+\begin_inset Formula $1\leq i<n$
+\end_inset
+
+ we have 
+\begin_inset Formula $q'_{i}=q_{i+1}$
+\end_inset
+
+, 
+\begin_inset Formula $\delta'$
+\end_inset
+
+ contains a triple 
+\begin_inset Formula $\left(q_{1},\bigcup_{i}S_{i},q_{n}\right)$
+\end_inset
+
+ and no additional triples that don't belong to 
+\begin_inset Formula $\delta$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Theorem
+\noindent
+Given two extended vset-automata 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ that are union-compatible, a third vset-automaton 
+\begin_inset Formula $C$
+\end_inset
+
+ can be produced in polynomial time such that 
+\begin_inset Formula $\left\llbracket C\right\rrbracket =\left\llbracket A\right\rrbracket \cup\left\llbracket B\right\rrbracket $
+\end_inset
+
+, in a well-behavedness preserving manner.
+\end_layout
+
+\begin_layout Proof
+Let us consider 
+\begin_inset Formula $A$
+\end_inset
+
+ to be of the form 
+\begin_inset Formula $\left(Q^{A},q_{0}^{A},q_{f}^{A},\delta^{A}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ of the form 
+\begin_inset Formula $\left(Q^{B},q_{0}^{B},q_{f}^{B},\delta^{B}\right)$
+\end_inset
+
+.
+ We can take 
+\begin_inset Formula $C=\left(Q^{C},q_{0}^{C},q_{f}^{C},\delta^{C}\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q^{C}=Q^{A}\cup Q^{B}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{0}^{C}=q_{0}^{A}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}^{C}=q_{f}^{A}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{C}=\delta^{A}\cup\delta^{B}\cup\left\{ \left(q_{0}^{C},\textrm{Ø},q_{0}^{B}\right),\left(q_{f}^{B},\textrm{Ø},q_{f}^{C}\right)\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Proof
+In this construction, we allow to go from the initial state of 
+\begin_inset Formula $A$
+\end_inset
+
+ to the one of 
+\begin_inset Formula $B$
+\end_inset
+
+, and to go from the final state of 
+\begin_inset Formula $B$
+\end_inset
+
+ to the one of 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ Thus, given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, 
+\begin_inset Formula $C$
+\end_inset
+
+ can span exactly the 
+\begin_inset Formula $\left(V,\mathbf{s}\right)-$
+\end_inset
+
+tuples contained in 
+\begin_inset Formula $A\left(\mathbf{s}\right)\cup B\left(\mathbf{s}\right)$
+\end_inset
+
+.
+ Regarding the complexity, the operations that we perform here are the union
+ of the states sets and transition functions, with the addition of two new
+ transitions.
+ Let us consider the size of the input as 
+\begin_inset Formula $n=n_{A}+n_{B}=\left|Q^{A}\right|+\left|\delta^{A}\right|+\left|\textrm{SVars}\left(A\right)\right|+\left|Q^{B}\right|+\left|\delta^{B}\right|+\left|\textrm{SVars}\left(B\right)\right|$
+\end_inset
+
+.
+ If we assume the costs of basic operations as adding/deleting a state/transitio
+ns to be constant, then obtaining 
+\begin_inset Formula $Q^{C}$
+\end_inset
+
+ takes 
+\begin_inset Formula $O\left(\left|Q^{B}\right|\right)=O\left(n\right)$
+\end_inset
+
+ time, and constructing 
+\begin_inset Formula $\delta^{C}$
+\end_inset
+
+ takes 
+\begin_inset Formula $O\left(\left|\delta^{B}\right|\right)=O\left(n\right)$
+\end_inset
+
+ time.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Theorem
+\noindent
+Given a well-behaved extended vset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, a set 
+\begin_inset Formula $X=\textrm{SVars}\left(A\right)$
+\end_inset
+
+ and a set 
+\begin_inset Formula $Y\subseteq X$
+\end_inset
+
+, a vset-automaton 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be produced in polynomial time such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\pi_{Y}\left\llbracket A\right\rrbracket $
+\end_inset
+
+, in a well-behavedness preserving manner.
+\end_layout
+
+\begin_layout Proof
+Let us consider 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+.
+ We can take 
+\begin_inset Formula $A'=\left(Q',q_{0}',q_{f}',\delta'\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q'=Q$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{0}'=q_{0}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}'=q_{f}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta'=\delta\setminus\delta^{\textrm{unprojected}}\cup\delta^{\textrm{projected}}$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{unprojected}}=\left\{ \left(q,S,q'\right)\in\delta\mid S\cap\textrm{SVOps}\left(X\setminus Y\right)\neq\textrm{Ø}\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{projected}}=\left\{ \left(q,S',q'\right)\mid\exists\left(q,S,q'\right)\in\delta^{\textrm{unprojected}}:S'=S\setminus\textrm{SVOps}\left(X\setminus Y\right)\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Proof
+This construction removes all the occurencies of variable operations that
+ concern variables excluded from the projection in the transitions of 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ Since 
+\begin_inset Formula $A$
+\end_inset
+
+ is well behaved, we have the guarantee that 
+\begin_inset Formula $A'=A$
+\end_inset
+
+.
+ If this wasn't the case, our construction might result in 
+\begin_inset Formula $A\subseteq A'$
+\end_inset
+
+.
+ 
+\begin_inset Formula $A'$
+\end_inset
+
+ is still well-behaved, since we maintain the occurrencies of operations
+ concerning the variables on which we project, that continue to appear exactly
+ once on each path.
+ With the usual assumptions, this construction can be carried out in 
+\begin_inset Formula $O\left(n\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+An AQL core fragment is an AQL fragment that can be associated with a core
+ spanner.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Theorem
+Given a regex formula 
+\begin_inset Formula $\gamma$
+\end_inset
+
+, 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ can be converted into an equivalent, well-behaved extended vset-automaton
+ 
+\begin_inset Formula $A$
+\end_inset
+
+ in polynomial time.
 \end_layout
 
 \end_body

@@ -5,7 +5,12 @@ import scala.collection.immutable.{HashSet => SVOps}
 import scala.collection.immutable.{HashSet => TransitionFunction}
 import scala.collection.immutable.{HashSet => StateSet}
 import scala.collection.immutable.{HashSet => Predecessors}
+import scala.collection.mutable.{ArrayBuffer => Program, Map}
+import scala.collection.mutable.ArrayBuffer
 import scala.{Int => SVar}
+
+import be.ac.ulb.arc.runtime._
+
 
 /**
   * Represents a variable-set automaton.
@@ -17,6 +22,127 @@ import scala.{Int => SVar}
 class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVars[SVar], val δ:TransitionFunction[Transition[State]]) {
 
   type State2= (State, State)
+
+  /**
+    * Translates the vset-atomaton into a NFA program.
+    * @param program
+    * @param visitedStates
+    * @param q
+    * @param pc
+    * @return
+    */
+  def toNFAProgram(program:Program[Instruction], visitedStates:Map[State, Int], q:State, pc:Int): (Int, Program[JUMP]) = {
+
+    var npc = pc
+    var jumps = new ArrayBuffer[JUMP]()
+
+    visitedStates+= ((q, npc))
+
+    // A final state translates into a match operation, and it
+    // doesn't go through the previous block because it doesn't have
+    // outgoing transitions
+    if(q == qf) {
+
+      program += new MATCH(npc)
+      npc += 1
+    }
+    else {
+
+      var j = 0
+      var oldSplit:SPLIT = null
+
+      val tr = this.δ.filter((t:Transition[State]) => t.q == q)
+
+      for(t <- tr) {
+
+        var instr:Instruction = null
+        var jmp:JUMP = null
+        var split:SPLIT = null
+
+        // If there are >1 outgoing transitions for the current state, we need to put
+        // splits
+        if(tr.size > 1 && j < tr.size - 1) {
+
+          split = new SPLIT(npc, null, null)
+          program += split
+          npc += 1
+
+          // If it is not the first split, connect the previous to this
+          if(oldSplit != null) {
+
+            oldSplit.next2 = split
+          }
+        }
+        else split = null
+
+        // Find out the type of transition and add corresponding instruction to the program
+        t match {
+
+          case OrdinaryTransition(q:State, σ:Char, v:SVars[SVar], q1:State) => {
+
+            instr = new CHAR(σ, npc)
+            program += instr
+            npc +=1
+          }
+          case RangeTransition(q:State, σ:Range, v:SVars[SVar], q1:State) => {
+
+            instr = new RANGE(σ, npc)
+            program += instr
+            npc +=1
+          }
+          case OperationsTransition(q:State, s:SVOps[SVOp], v:SVars[SVar], q1:State) => {
+
+            for(o <- s) {
+
+              val pos = if (o.t == ⊢) 0 else 1
+              program += new SAVE(2*o.x + pos, npc)
+              npc +=1
+
+            }
+
+            if(s.size == 0)
+              instr = program.last
+          }
+
+        }
+
+        // if we placed a split, connect it to the first instruction
+        if(split != null) {
+          split.next1 = instr
+          oldSplit = split
+        }
+        else if(oldSplit != null) {
+
+          oldSplit.next2 = instr
+        }
+
+        if(visitedStates.contains(t.q1)) {
+
+          program += new JUMP(npc, program(visitedStates(t.q1)))
+          npc += 1
+        }
+        else {
+
+          // Recur
+          val (n1pc, lastJumps) = toNFAProgram(program, visitedStates, t.q1, npc)
+          npc = n1pc
+
+          // Jump to the end of the alternatives
+          jumps += new JUMP(npc, null)
+          program += jumps.last
+          npc+=1
+          // Connect the jumps of the inner code to the outer code
+          for(jmp <- lastJumps) {
+            jmp.target = program.last
+          }
+        }
+
+        j += 1
+      }
+    }
+
+    (npc, jumps)
+  }
 
   /**
     * Performs the union of this vset-automaton with another one.
@@ -53,13 +179,13 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
 
       t match {
 
-        case OrdinaryTransition(q, σ, q1) => {
-          if(isQ) newT = new OrdinaryTransition[State](q0, σ, q1)
-          else newT = new OrdinaryTransition[State](q, σ, q0)
+        case OrdinaryTransition(q, σ, v, q1) => {
+          if(isQ) newT = new OrdinaryTransition[State](q0, σ, v, q1)
+          else newT = new OrdinaryTransition[State](q, σ, v, q0)
         }
-        case RangeTransition(q, σ, q1) => {
-          if(isQ) newT = new RangeTransition[State](q0, σ, q1)
-          else newT = new RangeTransition[State](q, σ, q0)
+        case RangeTransition(q, σ, v, q1) => {
+          if(isQ) newT = new RangeTransition[State](q0, σ, v, q1)
+          else newT = new RangeTransition[State](q, σ, v, q0)
         }
         case OperationsTransition(q, s, v, q1) => {
 
@@ -230,7 +356,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
   def ×(other: VSetAutomaton): (TransitionFunction[Transition[State2]], StateSet[State2]) = {
 
     // The transition function resulting from the product
-    var intδ = new TransitionFunction[Transition[State2]]
+    var prodδ = new TransitionFunction[Transition[State2]]
 
     // The state set resulting from the product
     var Q2 = new StateSet[State2]
@@ -243,14 +369,16 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
       // If the intersection succeeded
       if(t12Opt != None) {
         val t12 = t12Opt.get
-        intδ = intδ + t12
+        prodδ = prodδ + t12
+
+
         Q2 = Q2 + t12.q
         Q2 = Q2 + t12.q1
       }
 
     }
 
-    (intδ, Q2)
+    (prodδ, Q2)
   }
 
   /**
@@ -283,7 +411,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
       val qδ = δ.filter((t:Transition[State]) => t.q1 == q)
 
       // Reverse the transitions (for the traversal, we don't care about the original label)
-      val qδ1: TransitionFunction[Transition[State]] = qδ.map((t: Transition[State]) => new OrdinaryTransition[State](t.q1, 'a', t.q))
+      val qδ1: TransitionFunction[Transition[State]] = qδ.map((t: Transition[State]) => new OrdinaryTransition[State](t.q1, 'a', t.V, t.q))
 
       backwardδ = backwardδ + ((q, qδ1))
     }
@@ -381,11 +509,11 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
 
       t match {
 
-        case OrdinaryTransition(q, σ, q1) => {
-          δ = δ + new OrdinaryTransition[State](newQ, σ, newQ1)
+        case OrdinaryTransition(q, σ, v, q1) => {
+          δ = δ + new OrdinaryTransition[State](newQ, σ, v, newQ1)
         }
-        case RangeTransition(q, σ, q1) => {
-          δ = δ + new RangeTransition[State](newQ, σ, newQ1)
+        case RangeTransition(q, σ, v, q1) => {
+          δ = δ + new RangeTransition[State](newQ, σ, v, newQ1)
         }
         case OperationsTransition(q, s, v, q1) => {
           δ = δ + new OperationsTransition[State](newQ, s, v, newQ1)

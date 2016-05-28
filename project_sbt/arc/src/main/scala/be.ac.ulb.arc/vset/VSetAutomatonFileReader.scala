@@ -82,7 +82,7 @@ object VSetAutomatonFileReader {
 
       // Process label and create correspondent transition
       if(label.length == 1) {
-        δ = δ + new OrdinaryTransition[State](q, label.charAt(0), q1)
+        δ = δ + new OrdinaryTransition[State](q, label.charAt(0), V, q1)
       }
       else if(label.matches("\\{.*\\}")) {
 

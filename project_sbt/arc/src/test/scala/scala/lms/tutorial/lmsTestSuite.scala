@@ -4,7 +4,7 @@ import scala.lms.common._
 
 
 class lmsTestSuite extends TutorialFunSuite {
-  val under = "dslapi"
+  val under = "MyDSL"
 
   test("1") {
     val snippet = new DslDriver[Int,Int] {
@@ -37,5 +37,6 @@ class lmsTestSuite extends TutorialFunSuite {
     assert(snippet.eval(2) === 2)
     check("2", snippet.code)
   }
+
 
 }
