@@ -1,11 +1,9 @@
-package be.ac.ulb.amorcian.arc.compiler
+package be.ac.ulb.arc.vsetold
 
-import scala.collection.mutable.Map
-import scala.collection.mutable.ArrayBuffer
-import dk.brics.automaton.Automaton
-import dk.brics.automaton.State
-import dk.brics.automaton.Transition
-import dk.brics.automaton.RegExp
+import dk.brics.automaton.{State, Transition}
+import dk.brics.automaton.{Automaton, RegExp, State, Transition}
+
+import scala.collection.mutable.{ArrayBuffer, Map}
 
 class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[String, String], Int)]], var vars: Array[String]) {
   
@@ -238,12 +236,9 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 	 * Converts an automaton edge into a vset-automaton, using a state counter to number its states.
 	 */
 	def convertEdge(e: Automaton, stateCounter: Int):(VSetAutomaton, Int) = {
-	  
-	  import scala.collection.JavaConversions.asScalaSet
-	  import scala.collection.mutable.SortedSet
-	  
-	  var eStates:scala.collection.mutable.Set[State] = e.getStates
-	  val eAccept:scala.collection.mutable.Set[State]  = e.getAcceptStates
+
+		/*var eStates:java.util.Set[State] = e.getStates
+	  val eAccept:java.util.Set[State]  = e.getAcceptStates
 	  val eInitial = e.getInitialState 
 	  eStates -= eInitial
 	  var sc = stateCounter
@@ -275,23 +270,23 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 	  // Add the transitions to the transition function.
 	  for((s, n) <- stateMap) {
 
-	    val sTransitions:scala.collection.mutable.Set[Transition] = s.getTransitions
-	    
+	    /*val sTransitions:java.util.Set[Transition] = s.getTransitions
+
 	    if(sTransitions.size > 0)
 	      if(!transitionFunction.contains(n))
 	        transitionFunction += ((n, Map[Int, String]()))
-	    
+
 	    for(t <- sTransitions) {
-	      
+
 	      val d = t.getDest
 	      val nd = stateMap(d)
-	        
+
 	      val min = t.getMin
 	      val max = t.getMax
 
 	      // Create a transition for each character in the range (maybe leave it implicit?).
 	      for(c <- Set(min to max)) {
-	        
+
 	        if(!transitionFunction(n).contains(nd))
 	          transitionFunction(n) += ((nd, c.charAt(0).toString()))
 	        else
@@ -299,9 +294,12 @@ class HybridPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(Automaton,  Map[St
 	      }
 	    }
 	  }
-	  
+
 	  // Return the created vset-automaton as well as the current state counter;
-	  (new VSetAutomaton(eStates.size, initial, transitionFunction, new Array[String](0), finalStates.toArray), sc)
+	  (new VSetAutomaton(eStates.size, initial, transitionFunction, new Array[String](0), finalStates.toArray), sc)*/
+	}*/
+
+		(new VSetAutomaton(1,1, null, null, Array[Int]()), 1)
 	}
 	
 }

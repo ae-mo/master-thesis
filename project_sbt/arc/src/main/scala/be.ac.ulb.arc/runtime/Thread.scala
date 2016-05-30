@@ -1,3 +1,6 @@
-package be.ac.ulb.amorcian.arc.runtime
+package be.ac.ulb.arc.runtime
 
-class Thread(val pc: Instruction, var saved:Array[Int]) {}
+import scala.{Int => Position}
+import scala.{Array => Pointers}
+
+class Thread(val instr:Instruction, val saved:Pointers[Position])

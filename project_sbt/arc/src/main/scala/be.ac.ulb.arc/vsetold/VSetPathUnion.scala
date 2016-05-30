@@ -1,9 +1,8 @@
-package be.ac.ulb.amorcian.arc.compiler
+package be.ac.ulb.arc.vsetold
 
-import scala.collection.mutable.Map
-import scala.collection.mutable.ArrayBuffer
-import dk.brics.automaton.Automaton
-import dk.brics.automaton.RegExp
+import dk.brics.automaton.{Automaton, RegExp}
+
+import scala.collection.mutable.{ArrayBuffer, Map}
 
 class VSetPathUnion(var pathUnion: ArrayBuffer[ArrayBuffer[(String,  Map[String, String], Int)]], var vars:Array[String], var finalStates:Array[Int]) {
   
