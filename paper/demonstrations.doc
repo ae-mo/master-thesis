@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="http://www.nongnu.org/elyxer/">
+<meta name="create-date" content="2016-05-17">
+<link rel="stylesheet" href="http://elyxer.nongnu.org/lyx.css" type="text/css" media="all">
+<title>Converted document</title>
+</head>
+<body>
+<div id="globalWrapper">
+<div class="Unindented">
+<span class="formula"><span class="textrm">SVOps</span><sup>⊢</sup> = <span class="symbol">{</span><i>x</i>⊢∣<i>x</i> ∈ <span class="textrm">SVars</span><span class="symbol">}</span></span>
+</div>
+<div class="Indented">
+<span class="formula"><span class="textrm">SVOps</span><sup>⊣</sup> = <span class="symbol">{</span><i>x</i>⊣∣<i>x</i> ∈ <span class="textrm">SVars</span><span class="symbol">}</span></span>
+</div>
+<div class="Indented">
+SVOps<span class="formula"> = <span class="textrm">SVOps</span><sup>⊢</sup>∪<span class="textrm">SVOps</span><sup>⊣</sup></span>
+</div>
+<div class="Definition">
+An extended <i>variable-set automaton</i> (or <i>eVset-automaton</i>) is a tuple <span class="formula"><span class="symbol">(</span><i>Q</i>, <i>q</i><sub>0</sub>, <i>q</i><sub><i>f</i></sub>, <i>δ</i><span class="symbol">)</span></span>, where:
+</div>
+<ul>
+<li class="nested">
+<ul>
+<li>
+<span class="formula"><i>Q</i></span> is a finite set of states;
+</li>
+<li>
+<span class="formula"><i>q</i><sub>0</sub> ∈ <i>Q</i></span> is the initial state;
+</li>
+<li>
+<span class="formula"><i>q</i><sub><i>f</i></sub> ∈ <i>Q</i></span> is an accepting state;
+</li>
+<li>
+<span class="formula"><i>δ</i></span> is a finite transition relation consisting of triples, each having one of these forms:<ul>
+<li>
+<span class="formula"><span class="symbol">(</span><i>q</i>, <i>σ</i>, <i>q</i>’<span class="symbol">)</span></span>, where <span class="formula"><i>σ</i> ∈ <i>Σ</i></span>;
+</li>
+<li>
+<span class="formula"><span class="symbol">(</span><i>q</i>, <i>S</i>, <i>q</i>’<span class="symbol">)</span></span>, where <span class="formula"><i>S</i> ⊆ <span class="symbol">(</span><span class="textrm">SVOps</span><span class="symbol">)</span></span>.
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+<div class="--Separator--">
+
+</div>
+<div class="Definition">
+For a string <span class="formula"><b>s</b> = <i>s</i><sub>1</sub>, …, <i>s</i><sub><i>n</i></sub></span>, a run <span class="formula"><i>ρ</i> = <i>c</i><sub>0</sub>…<i>c</i><sub><i>m</i></sub></span> on <span class="formula"><b>s</b></span> of a (extended) variable-set automaton <span class="formula"><i>A</i></span> is <i>well-behaved</i> if it satisfies the following conditions:
+</div>
+<ul>
+<li class="nested">
+<ul>
+<li>
+<span class="formula"><i>c</i><sub><i>j</i></sub> = <span class="symbol">(</span><i>q</i>, <i>V</i>, <i>Y</i>, <i>i</i><span class="symbol">)</span></span> where <span class="formula"><i>q</i> ≠ <i>q</i><sub><i>f</i></sub></span> for <span class="formula"><i>j</i> = 0, …, <i>m</i> − 1</span>;
+</li>
+<li>
+either:<ul>
+<li>
+<span class="formula"><i>c</i><sub><i>m</i></sub> = <span class="symbol">(</span><i>q</i>, <i>V</i>, <i>Y</i>, <i>i</i><span class="symbol">)</span></span> where <span class="formula"><i>q</i> ≠ <i>q</i><sub><i>f</i></sub></span>;
+</li>
+<li>
+<span class="formula"><i>c</i><sub><i>m</i></sub> = <span class="symbol">(</span><i>q</i><sub><i>f</i></sub>, <span class="textrm">Ø</span>, <span class="textrm">Ø</span>, <i>n</i> + 1<span class="symbol">)</span></span>.
+</li>
+
+</ul>
+
+</li>
+<li>
+for every <span class="formula"><i>c</i><sub><i>j</i></sub>, <i>c</i><sub><i>j</i> + 1</sub></span> and <span class="formula"><i>c</i><sub><i>k</i></sub>, <i>c</i><sub><i>k</i> + 1</sub></span>, <span class="formula"><i>j</i> ≠ <i>k</i></span>, such that <span class="formula"><i>c</i><sub><i>j</i></sub></span> yelds <span class="formula"><i>c</i><sub><i>j</i> + 1</sub></span> by applying transition <span class="formula"><span class="symbol">(</span><i>q</i><sub><i>j</i></sub>, <i>o</i>, <i>q</i><sub><i>j</i> + 1</sub><span class="symbol">)</span> ∈ <i>δ</i></span> and the same holds for <span class="formula"><i>c</i><sub><i>k</i></sub>, <i>c</i><sub><i>k</i> + 1</sub></span> with transition <span class="formula"><span class="symbol">(</span><i>q</i><sub><i>k</i></sub>, <i>o</i>’, <i>q</i><sub><i>k</i> + 1</sub><span class="symbol">)</span> ∈ <i>δ</i></span> (<span class="formula"><i>o</i>, <i>o</i>’ ∈ <span class="textrm">SVops</span></span><span class="formula"><span class="symbol">(</span><i>A</i><span class="symbol">)</span></span>), <span class="formula"><i>o</i> ≠ <i>o</i>’</span>;
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+<div class="--Separator--">
+
+</div>
+<div class="Definition">
+A (extended) variable-set automaton is well-behaved if, for every string <span class="formula"><b>s</b> ∈ <i>Σ</i><sup>∗</sup></span>, <span class="formula"><span class="textrm">ARuns</span><span class="symbol">(</span><i>A</i>, <b>s</b><span class="symbol">)</span></span> contains only well-behaved runs.
+</div>
+<div class="--Separator--">
+
+</div>
+<div class="Lemma">
+Given an extended well-behaved varable-set automaton <span class="formula"><i>A</i></span>, <span class="formula"><i>A</i></span> can be converted into an equivalent well-behaved variable-set automaton <span class="formula"><i>A</i>’</span> in polynomial time.
+</div>
+<div class="Proof">
+Without loss of generality, we consider an ordering of the symbols in <span class="formula"><span class="textrm">SVOps</span><span class="symbol">(</span><i>A</i><span class="symbol">)</span></span> of the following form:<div class="formula">
+<i>x</i>⊢, …, <i>y</i>⊢, <i>x</i>⊣, …, <i>y</i>⊣
+</div>
+ In this ordering, all insertion operations come before the deletion operations. We define <span class="formula"><i>o</i>≺<i>o</i>’</span>, <span class="formula"><i>o</i>, <i>o</i>’ ∈ <span class="textrm">SVOps</span><span class="symbol">(</span><i>A</i><span class="symbol">)</span></span>, if <span class="formula"><i>o</i></span> comes before <span class="formula"><i>o</i>’</span> (<i>not</i> if they are equal) in the chosen ordering. Consider <span class="formula"><i>A</i>’ = </span><span class="formula"><span class="symbol">(</span><i>Q</i>’, <i>q</i><sub>0</sub>’, <i>q</i><sub><i>f</i></sub>’, <i>δ</i>’<span class="symbol">)</span></span>, with <span class="formula"><span class="textrm">SVars</span><span class="symbol">(</span><i>A</i>’<span class="symbol">)</span> = <span class="textrm">SVars</span><span class="symbol">(</span><i>A</i><span class="symbol">)</span></span>, whose components are defined as follows:
+</div>
+<ul>
+<li class="nested">
+<ul>
+<li>
+<span class="formula"><i>Q</i>’ = <i>Q</i>∪<i>Q</i><sup><span class="textrm">ops</span></sup>∪<i>Q</i><sup><span class="textrm">Ø</span></sup></span>, where:<ul>
+<li>
+<span class="formula"><i>Q</i><sup><span class="textrm">ops</span></sup> = <span class="symbol">{</span><i>q</i><sub><i>q</i>’, <i>o</i>, <i>q</i>’’</sub>∣∃<span class="symbol">(</span><i>q</i>’, <i>S</i>, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i>:<i>o</i> ∈ <i>S</i><span class="symbol">}</span></span>;
+</li>
+<li>
+<span class="formula"><i>Q</i><sup><span class="textrm">Ø</span></sup> = <span class="symbol">{</span><i>q</i><sub><span class="textrm">q',Ø,q''</span></sub>∣∃<span class="symbol">(</span><i>q</i>’, <span class="textrm">Ø</span>, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i><span class="symbol">}</span></span>;
+</li>
+
+</ul>
+
+</li>
+<li>
+<span class="formula"><i>q</i><sub>0</sub>’ = <i>q</i><sub>0</sub>;</span>
+</li>
+<li>
+<span class="formula"><i>q</i><sub><i>f</i></sub>’ = <i>q</i><sub><i>f</i></sub></span>;
+</li>
+<li>
+<span class="formula"><i>δ</i>’ = <span class="symbol">(</span><i>δ</i>∖<i>δ</i><sup><i>S</i></sup><span class="symbol">)</span>∪<i>δ</i><sup><span class="textrm">ops</span></sup>∪<i>δ</i><sup><span class="textrm">Ø</span></sup>∪<i>δ</i><sup><i>ε</i></sup></span>, where:<ul>
+<li>
+<span class="formula"><i>δ</i><sup><i>S</i></sup> = <span class="symbol">{</span><span class="symbol">(</span><i>q</i>, <i>S</i>, <i>q</i>’<span class="symbol">)</span> ∈ <i>δ</i><span class="symbol">}</span>;</span>
+</li>
+<li>
+<span class="formula"><i>δ</i><sup><span class="textrm">ops</span></sup> = <span class="symbol">{</span><span class="symbol">(</span><i>q</i><sub><i>q</i>’, <i>o</i>, <i>q</i>’’</sub>, <i>o</i>, <i>q</i><sub><i>q</i>’, <i>o</i>’, <i>q</i>’’</sub><span class="symbol">)</span>∣∃<span class="symbol">(</span><i>q</i>’, <i>S</i>, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i>:<span class="symbol">(</span><i>o</i>, <i>o</i>’<i>ϵ</i><i>S</i>∧<i>o</i>≺<i>o</i>’∧∀<i>o</i>’’ ∈ <i>S</i>:<i>o</i>⊀<i>o</i>’’⊀<i>o</i>’<span class="symbol">)</span><span class="symbol">}</span>∪<span class="symbol">{</span><span class="symbol">(</span><i>q</i><sub><i>q</i>’, <i>o</i>, <i>q</i>’’</sub>, <i>o</i>, <i>q</i>’’<span class="symbol">)</span>∣∃<span class="symbol">(</span><i>q</i>’, <i>S</i>, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i>:<span class="symbol">(</span><i>o</i><i>ϵ</i><i>S</i>∧∀<i>o</i>’ ∈ <i>S</i>:<i>o</i>⊀<i>o</i>’<span class="symbol">)</span><span class="symbol">}</span></span>;
+</li>
+<li>
+<span class="formula"><i>δ</i><sup><span class="textrm">Ø</span></sup> = <span class="symbol">{</span><span class="symbol">(</span><i>q</i><sub><span class="textrm">q',Ø,q''</span></sub>, <i>ε</i>, <i>q</i>’’<span class="symbol">)</span>∣∃<span class="symbol">(</span><i>q</i>’, <span class="textrm">Ø</span>, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i><span class="symbol">}</span>;</span>
+</li>
+<li>
+<span class="formula"><i>δ</i><sup><i>ε</i></sup> = <span class="symbol">{</span><span class="symbol">(</span><i>q</i>, <i>ε</i>, <i>q</i>’<span class="symbol">)</span>∣<span class="symbol">(</span>∃<span class="symbol">(</span><i>q</i>’, <i>o</i>, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i><sup><span class="textrm">ops</span></sup>:∀<span class="symbol">(</span><i>q</i>’, <i>o</i>’, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i><sup><span class="textrm">ops</span></sup>:<i>o</i>’⊀<i>o</i><span class="symbol">)</span>∨<span class="symbol">(</span>∃<span class="symbol">(</span><i>q</i>’, <i>ε</i>, <i>q</i>’’<span class="symbol">)</span> ∈ <i>δ</i><sup><span class="textrm">Ø</span></sup><span class="symbol">)</span><span class="symbol">}</span></span>.
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+<div class="Proof">
+This construction expands the transitions of <span class="formula"><i>A</i></span> that are labeled with a set of variable operations into a sequence of transitions performing one operation at a time, taking care of putting the insertion operations before the deletion ones, thus preserving well-behavedness. It also substitutes transitions labeled with the empty set with ordinary <span class="formula"><i>ε</i> − </span>transitions. To prove equivalence between <span class="formula"><i>A</i></span> and <span class="formula"><i>A</i>’</span> it is sufficient to notice that for every string <span class="formula"><b>s</b></span>, every run <span class="formula"><i>ρ</i> = <i>c</i><sub>0</sub>, …, <i>c</i><sub><i>m</i></sub></span><span class="formula"> ∈ <span class="textrm">ARuns</span><span class="symbol">(</span><i>A</i>, <b>s</b><span class="symbol">)</span></span> can be put in correspondence with a run <span class="formula"><i>ρ</i>’ ∈ <span class="textrm">ARuns</span><span class="symbol">(</span><i>A</i>’, <b>s</b><span class="symbol">)</span></span>. Indeed, for every pair of consecutive configurations <span class="formula"><i>c</i><sub><i>j</i></sub> = <span class="symbol">(</span><i>q</i><sub><i>j</i></sub>, <i>V</i><sub><i>j</i></sub>, <i>Y</i><sub><i>j</i></sub>, <i>i</i><sub><i>j</i></sub><span class="symbol">)</span></span>, <span class="formula"><i>c</i><sub><i>j</i> + 1</sub> = <span class="symbol">(</span><i>q</i><sub><i>j</i> + 1</sub>, <i>V</i><sub><i>j</i> + 1</sub>, <i>Y</i><sub><i>j</i> + 1</sub>, <i>i</i><sub><i>j</i> + 1</sub><span class="symbol">)</span></span>:
+</div>
+<ul>
+<li class="nested">
+<ul>
+<li>
+if <span class="formula"><i>i</i><sub><i>j</i></sub> = <i>i</i><sub><i>j</i> + 1</sub></span> and <span class="formula"><span class="symbol">(</span><i>q</i>, <i>S</i>, <i>q</i>’<span class="symbol">)</span></span><span class="formula"> ∈ <i>δ</i></span>:<ul>
+<li>
+if <span class="formula"><i>V</i><sub><i>j</i></sub> ≠ <i>V</i><sub><i>j</i> + 1</sub></span>, replace <span class="formula"><i>c</i><sub><i>j</i></sub></span>, <span class="formula"><i>c</i><sub><i>j</i> + 1</sub></span> with a sequence <span class="formula"><i>c</i><sub><i>j</i>, 1</sub>, …, <i>c</i><sub><i>j</i>, <i>k</i></sub></span> of configurations, where:<ul>
+<li>
+<span class="formula"><i>c</i><sub><i>j</i>, 1</sub> = <i>c</i><sub><i>j</i></sub></span>;
+</li>
+<li>
+<span class="formula"><i>c</i><sub><i>j</i>, <i>k</i></sub> = <i>c</i><sub><i>j</i> + 1</sub></span>; 
+</li>
+<li>
+<span class="formula"><i>c</i><sub><i>j</i>, 2</sub> = <span class="symbol">(</span><i>q</i><sub><i>j</i>, 2</sub>, <i>V</i><sub><i>j</i>, 1</sub>, <i>Y</i><sub><i>j</i>, 1</sub>, <i>i</i><sub><i>j</i></sub><span class="symbol">)</span></span> (<span class="formula"><span class="symbol">(</span><i>q</i><sub><i>j</i>, 1</sub>, <i>ε</i>, <i>q</i><sub><i>j</i>, 2</sub><span class="symbol">)</span> ∈ <i>δ</i><sup><i>ε</i></sup>)</span>;
+</li>
+<li>
+for every pair <span class="formula"><i>c</i><sub><i>j</i>, <i>l</i></sub> = <span class="symbol">(</span><i>q</i><sub><i>j</i>, <i>l</i></sub>, <i>V</i><sub><i>j</i>, <i>l</i></sub>, <i>Y</i><sub><i>j</i>, <i>l</i></sub>, <i>i</i><sub><i>j</i></sub><span class="symbol">)</span>, <i>c</i><sub><i>j</i>, <i>l</i> + 1</sub> = <span class="symbol">(</span><i>q</i><sub><i>j</i>, <i>l</i> + 1</sub>, <i>V</i><sub><i>j</i>, <i>l</i> + 1</sub>, <i>Y</i><sub><i>j</i>, <i>l</i> + 1</sub>, <i>i</i><sub><i>j</i></sub><span class="symbol">)</span></span>, different from <span class="formula"><i>c</i><sub><i>j</i>, 1</sub>, <i>c</i><sub><i>j</i>, 2</sub></span>, there exists a transition <span class="formula"><span class="symbol">(</span><i>q</i><sub><i>j</i>, <i>l</i></sub>, <i>o</i>, <i>q</i><sub><i>j</i>, <i>l</i> + 1</sub><span class="symbol">)</span> ∈ <i>δ</i><sup><span class="textrm">ops</span></sup></span> such that <span class="formula"><i>o</i> ∈ <i>S</i></span> and <span class="formula"><i>V</i><sub><i>j</i>, <i>l</i> + 1</sub>, <i>Y</i><sub><i>j</i>, <i>l</i> + 1</sub></span> are obtained from <span class="formula"><i>V</i><sub><i>j</i>, <i>l</i></sub>, <i>Y</i><sub><i>j</i>, <i>l</i></sub></span> according to <span class="formula"><i>o</i></span>;
+</li>
+
+</ul>
+
+</li>
+<li>
+if <span class="formula"><i>V</i><sub><i>j</i></sub> = <i>V</i><sub><i>j</i> + 1</sub></span>, replace <span class="formula"><i>c</i><sub><i>j</i></sub></span>, <span class="formula"><i>c</i><sub><i>j</i> + 1</sub></span>with <span class="formula"><i>c</i><sub><i>j</i>, 1</sub>, <i>c</i><sub><i>j</i>, 2</sub>, <i>c</i><sub><i>j</i>, 3</sub></span>, where:<ul>
+<li>
+<span class="formula"><i>c</i><sub><i>j</i>, 1</sub></span> and <span class="formula"><i>c</i><sub><i>j</i>, 2</sub></span> are as in the previous case;
+</li>
+<li>
+<span class="formula"><i>c</i><sub><i>j</i>, 3</sub> = <i>c</i><sub><i>j</i> + 1</sub></span>;
+</li>
+<li>
+there exists a transition <span class="formula"><span class="symbol">(</span><i>q</i><sub><i>j</i>, 2</sub>, <span class="textrm"> Ø</span>, <i>q</i><sub><i>j</i>, 3</sub><span class="symbol">)</span> ∈ <i>δ</i><sup><span class="textrm">Ø</span></sup></span> and <span class="formula"><i>V</i><sub><i>j</i>, 3</sub> = <i>V</i><sub><i>j</i>, <i>l</i></sub></span>, <span class="formula"><i>Y</i><sub><i>j</i>, 3</sub> = <i>Y</i><sub><i>j</i>, 2</sub></span>;
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+
+</li>
+<li>
+if <span class="formula"><i>i</i><sub><i>j</i> + 1</sub> = <i>i</i><sub><i>j</i></sub> + 1</span>, do nothing.
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+<div class="Proof">
+After having applied this modifications to <span class="formula"><i>ρ</i></span>, the obtained run <span class="formula"><i>ρ</i>’</span> will be a valid run of <span class="formula"><i>A</i>’</span> on <span class="formula"><b>s</b></span> and it will be accepting if and only if <span class="formula"><i>ρ</i></span> was accepting, in which case it will return the same <span class="formula"><b>s</b> − </span>tuple returned by <span class="formula"><i>ρ</i></span>. This is because the only occasions where we actually modify <span class="formula"><i>ρ</i></span> is when we are performing variable operations between a configuration and the next one. In this case, we are not advancing the string pointer. The new series of configurations we put in place of the original pair doesn’t advance the pointer either, and it performs the exact variable operations that were performed before the substitution, insertions first, thanks to the way we constructed <span class="formula"><i>A</i>’</span>. Thus, for every pair of configurations <span class="formula"><i>c</i><sub><i>j</i></sub>, <i>c</i><sub><i>j</i> + 1</sub> ∈ <i>ρ</i></span> that we replace, <span class="formula"><i>c</i><sub><i>j</i> + 2</sub></span> won’t see any difference. Also notice how the replaced sequence <span class="formula"><i>c</i><sub><i>j</i>, 1</sub>, …, <i>c</i><sub><i>j</i>, <i>k</i></sub></span> is unique, and the sequence of operations from <span class="formula"><i>c</i><sub><i>j</i>, 1</sub></span> to <span class="formula"><i>c</i><sub><i>j</i>, <i>k</i></sub></span> respect the operation ordering that we chose.
+</div>
+
+</div>
+</body>
+</html>
