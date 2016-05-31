@@ -3,6 +3,13 @@
 \begin_document
 \begin_header
 \textclass ulb_thesis
+\begin_preamble
+\usepackage{tikz, pgf, pgfplots}
+\usetikzlibrary{automata,graphs,positioning}
+\usetikzlibrary{arrows,backgrounds,plotmarks}
+\pgfplotsset{width=7cm,compat=newest}
+\pgfplotsset{plot coordinates/math parser=false}
+\end_preamble
 \options draftfoot
 \use_default_options false
 \maintain_unincluded_children false
@@ -259,7 +266,7 @@ status open
 
 \begin_layout Plain Layout
 
-https://scholar.google.com/
+https://scholar.google.it/
 \end_layout
 
 \end_inset
@@ -4897,6 +4904,96 @@ reference ".setdiff=set"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Chapter
+A Runtime System for AQL's Core
+\end_layout
+
+\begin_layout Standard
+In this chapter I describe a new runtime system for AQL's core fragments,
+ that I developed during my work.
+ It is based on a modified version of vset-automata, the 
+\emph on
+extended vset-automata.
+
+\emph default
+ I start by describing some interesting ways of running usual nondeterministic
+ automata on a string, then I present extended vset-automata and I show
+ their relevant properties, and finally I explain how the runtime works.
+\end_layout
+
+\begin_layout Section
+Methods for NFA execution
+\end_layout
+
+\begin_layout Subsection
+The Thompson Approach
+\end_layout
+
+\begin_layout Standard
+Given a NFA 
+\begin_inset Formula $A$
+\end_inset
+
+ and a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, the Thompson algorithm will try all the feasible runs of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ at the same time.
+ More precisely, when the string pointer is on a given character, there
+ is a set of current states, each representing the advancement in a feasible
+ run.
+ The set of outgoing transitions for each state is examined.
+ All 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+-transitions are fired iteratively, and any transition labeled with the
+ character corresponding to the one pointed by the string pointer is fired
+ too.
+ This produces a new set of states and the execution continues as descibed.
+ 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is matched by 
+\begin_inset Formula $A$
+\end_inset
+
+ if, at the end of the execution, at least one state in the current state
+ set is an accepting state.
+ In its common versions, the algorithm implements a policy to discriminate
+ among ambiguous matches (e.g.
+ greedy leftmost).
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "C:/Users/Andrea/Desktop/try.txt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "C:/Users/Andrea/Desktop/try2.txt"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard

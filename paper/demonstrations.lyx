@@ -142,14 +142,14 @@ eVset-automaton
 \begin_inset Formula $\delta^{char}=\left\{ \left(q,\sigma,q'\right)\mid q,q'\in Q,\sigma\in\varSigma\right\} $
 \end_inset
 
-;
+, whose elments are called character transitions;
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $\delta^{op}=\left\{ \left(q,S,q'\right)\mid q,q'\in Q,S\subseteq\left(\textrm{SVOps}\right)\right\} $
 \end_inset
 
- .
+, whose elements are called operation transitions .
 \end_layout
 
 \end_deeper
