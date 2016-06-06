@@ -159,8 +159,225 @@ eVset-automaton
 \end_layout
 
 \begin_layout Definition
+Given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, 
+\begin_inset Formula $\left|\mathbf{s}\right|=n$
+\end_inset
+
+, and an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a configuration of A is a tuple 
+\begin_inset Formula $c=\left(q,V,Y,i\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $q\in Q$
+\end_inset
+
+ is the current state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $V\subseteq\textrm{SVars}\left(A\right)$
+\end_inset
+
+ is the active variable set;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Y\subseteq\textrm{SVars}\left(A\right)$
+\end_inset
+
+ is the set of available variables;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $i$
+\end_inset
+
+ is an index belonging to 
+\begin_inset Formula $\left\{ 1,\ldots,n+1\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $\mathbf{s}=s_{1},\ldots,s_{n}$
+\end_inset
+
+ and an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is a sequence 
+\begin_inset Formula $c_{0},\ldots,c_{m}$
+\end_inset
+
+ of configurations, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $c_{0}=\left(q_{0},\textrm{Ø},\textrm{SVars}\left(A\right),1\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+for 
+\begin_inset Formula $j=0,\ldots,m-1$
+\end_inset
+
+ one of the following holds for 
+\begin_inset Formula $c_{j}=\left(q_{j},V_{j},Y_{j},i_{j}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{j+1}=\left(q_{j+1},V_{j+1},Y_{j+1},i_{j+1}\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $V_{j+1}=V_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $i_{j+1}=i_{j}+1$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(q_{j},s_{j}q_{j+1}\right)\in\delta^{char}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}$
+\end_inset
+
+, and for some 
+\begin_inset Formula $S\subseteq\textrm{SVOps}\left(A\right)$
+\end_inset
+
+ we have :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+for each 
+\begin_inset Formula $x\in\textrm{SVars}\left(A\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\left\{ x\vdash,\dashv x\right\} \cap S=\left\{ x\vdash\right\} $
+\end_inset
+
+ or 
+\begin_inset Formula $\left\{ x\vdash,\dashv x\right\} \cap S=\left\{ x\vdash,\dashv x\right\} $
+\end_inset
+
+ if and only if 
+\begin_inset Formula $x\in Y_{j}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\left\{ x\vdash,\dashv x\right\} \cap S=\left\{ \dashv x\right\} $
+\end_inset
+
+ if and only if 
+\begin_inset Formula $x\in V_{j}$
+\end_inset
+
+;
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $V_{j+1}=V_{j}\cup\left\{ x\mid x\vdash\in S\right\} \setminus\left\{ x\mid\dashv x\in S\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Y_{j+1}=Y_{j}\setminus\left\{ x\mid x\vdash\in S\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\left(q_{j},S,q_{j+1}\right)\in\delta^{op}$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Definition
+\begin_inset Formula $\rho$
+\end_inset
+
+ is accepting if 
+\begin_inset Formula $c_{m}=\left(q_{f},\textrm{Ø,}\textrm{Ø},n+1\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
 Given a transition 
-\begin_inset Formula $t=\left(q,S,q'\right)\in\delta^{op}$
+\begin_inset Formula $t\in\delta$
 \end_inset
 
  in an eVset-automaton 
@@ -175,15 +392,53 @@ Given a transition
 \begin_inset Formula $\textrm{SVOps}\left(A\right)$
 \end_inset
 
-, we define:
+, we define
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+\begin_inset Formula $\textrm{Ops}\left(t\right)$
+\end_inset
+
+as either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $t=\left(q,S,q'\right)\in\delta^{op}$
+\end_inset
+
+, the set 
+\begin_inset Formula $S$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+if 
+\begin_inset Formula $t\in\delta^{char}$
+\end_inset
+
+, the empty set.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
 \begin_inset Formula $\textrm{LOps}_{\varphi}\left(t\right)$
 \end_inset
 
- as the list 
+ as either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $t=\left(q,S,q'\right)\in\delta^{op}$
+\end_inset
+
+, the list 
 \begin_inset Formula $o_{1},\ldots,o_{\left|S\right|}$
 \end_inset
 
@@ -199,12 +454,14 @@ Given a transition
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Formula $\textrm{Ops}\left(t\right)=S$
+if 
+\begin_inset Formula $t\in\delta^{char}$
 \end_inset
 
-.
+, the empty list.
 \end_layout
 
+\end_deeper
 \end_deeper
 \begin_layout --Separator--
 
@@ -291,7 +548,12 @@ for every pair
 
 \end_deeper
 \begin_layout Definition
-We refer to the set of paths in 
+We also write 
+\begin_inset Formula $p_{q}^{q'}$
+\end_inset
+
+.
+ We refer to the set of paths in 
 \begin_inset Formula $A$
 \end_inset
 
@@ -307,12 +569,158 @@ We refer to the set of paths in
 \end_layout
 
 \begin_layout Definition
+Given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho=c_{0},$
+\end_inset
+
+
+\begin_inset Formula $\ldots,c_{m}$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ and a path 
+\begin_inset Formula $p=t_{0},\ldots,t_{m-1}$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+, we say that 
+\begin_inset Formula $p$
+\end_inset
+
+ supports 
+\begin_inset Formula $\rho$
+\end_inset
+
+ if, for every pair 
+\begin_inset Formula $c_{i}$
+\end_inset
+
+, 
+\begin_inset Formula $c_{i+1}$
+\end_inset
+
+ of configurations, 
+\begin_inset Formula $c_{i+1}$
+\end_inset
+
+is obtained from 
+\begin_inset Formula $c_{i}$
+\end_inset
+
+ by applying 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a path 
+\begin_inset Formula $p=t_{1},\ldots,t_{n}$
+\end_inset
+
+ in an eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, and considering an ordering 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ on the elements of 
+\begin_inset Formula $\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, we define
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+the set 
+\begin_inset Formula $\textrm{Ops}\left(p\right)$
+\end_inset
+
+ as
+\begin_inset Formula 
+\[
+\bigcup_{i=1}^{n}\textrm{Ops}\left(t_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+the list 
+\begin_inset Formula $\textrm{LOps}_{\varphi}\left(p\right)$
+\end_inset
+
+ as
+\begin_inset Formula 
+\[
+\bigoplus_{i=1}^{n}\textrm{LOps}_{\varphi}\left(t_{i}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\bigoplus$
+\end_inset
+
+ is the usual list concatenation operator;
+\end_layout
+
+\end_deeper
+\begin_layout Definition
+If every transition in 
+\begin_inset Formula $p$
+\end_inset
+
+ belongs to 
+\begin_inset Formula $\delta^{op}$
+\end_inset
+
+, we say that 
+\begin_inset Formula $p$
+\end_inset
+
+ is an operation-only path.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
 \noindent
 Given an eVset-automaton 
 \begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
 \end_inset
 
- a path 
+, a path 
 \begin_inset Formula $p=t_{1},\ldots,t_{n}$
 \end_inset
 
@@ -336,104 +744,6 @@ Given an eVset-automaton
 \end_layout
 
 \begin_layout Definition
-Given a path 
-\begin_inset Formula $p=t_{1},\ldots,t_{n}$
-\end_inset
-
- in an eVset-automaton 
-\begin_inset Formula $A$
-\end_inset
-
-, and considering the sublist 
-\begin_inset Formula $p^{op}=t_{j},\ldots t_{k}$
-\end_inset
-
-, where 
-\begin_inset Formula $\forall t_{j}$
-\end_inset
-
-, 
-\begin_inset Formula $t_{j}\in\delta^{op}$
-\end_inset
-
- and an ordering 
-\begin_inset Formula $\varphi$
-\end_inset
-
- on the elements of 
-\begin_inset Formula $\textrm{SVOps}\left(A\right)$
-\end_inset
-
-, we define
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-the list 
-\begin_inset Formula $\textrm{LOps}_{\varphi}\left(p\right)$
-\end_inset
-
- as:
-\begin_inset Formula 
-\[
-o_{j,1},\ldots,o_{j,l_{j}},\ldots,o_{k,1},\ldots,o_{k,l_{k}}
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $\forall j,m$
-\end_inset
-
-, 
-\begin_inset Formula $o_{j,m}$
-\end_inset
-
-
-\begin_inset Formula $\in S_{j}$
-\end_inset
-
-, and the order of the operations belonging to the same 
-\begin_inset Formula $S_{j}$
-\end_inset
-
- is fixed according to 
-\begin_inset Formula $\varphi$
-\end_inset
-
-;
-\end_layout
-
-\begin_layout Itemize
-the set 
-\begin_inset Formula $\textrm{Ops}\left(p\right)$
-\end_inset
-
- as the set of operations appearing in 
-\begin_inset Formula $\textrm{LOps}_{\varphi}\left(p\right)$
-\end_inset
-
-.
-\end_layout
-
-\end_deeper
-\begin_layout Definition
-If 
-\begin_inset Formula $p^{op}=p$
-\end_inset
-
-, we say that 
-\begin_inset Formula $p$
-\end_inset
-
- is an operation-only path.
-\end_layout
-
-\begin_layout --Separator--
-
-\end_layout
-
-\begin_layout Definition
 \noindent
 \begin_inset CommandInset label
 LatexCommand label
@@ -441,7 +751,7 @@ name "well-behaved"
 
 \end_inset
 
-A (extended) variable-set automaton 
+An eVset-automaton 
 \begin_inset Formula $A$
 \end_inset
 
@@ -568,11 +878,16 @@ Given a well-behaved eVset-automaton
 \begin_inset Formula $A'$
 \end_inset
 
- which is equivalent to 
-\begin_inset Formula $A$
+ such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\left\llbracket A\right\rrbracket $
 \end_inset
 
 .
+ Moreover, 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be produced in polynomial time.
 \end_layout
 
 \begin_layout Proof
@@ -584,85 +899,141 @@ To obtain
 \begin_inset Formula $A$
 \end_inset
 
- those states that don't participate in any complete path in 
-\begin_inset Formula $A$
+ those states from which we can't reach the final state, those states that
+ are unreachable from the initial state, and all the transitions involving
+ them.
+ This can be done by using Dijkstra's shortest path algorithm, for instance,
+ which ensures 
+\begin_inset Formula $A'$
 \end_inset
 
-, and all the transitions involving them.
+ can be found in polynomial time.
  Because of our construction, 
 \begin_inset Formula $A'$
 \end_inset
 
- is well-behaved, as it now contains only the complete paths in 
+ is well-behaved, as all its complete paths are also in 
 \begin_inset Formula $A$
 \end_inset
 
 .
+ We now show that, for every string 
+\begin_inset Formula $\mathbf{s},$
+\end_inset
+
+ we have 
+\begin_inset Formula $A'\left(\mathbf{s}\right)=A\left(\mathbf{s}\right)$
+\end_inset
+
+.
  To see that 
+\begin_inset Formula $A'\left(\mathbf{s}\right)\subseteq A\left(\mathbf{s}\right)$
+\end_inset
+
+, we can notice that each run 
+\begin_inset Formula $\rho'$
+\end_inset
+
+ of 
 \begin_inset Formula $A'$
 \end_inset
 
- is equivalent to 
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ that is accepting can be supported only by a complete path 
+\begin_inset Formula $p'$
+\end_inset
+
+, which is also in 
 \begin_inset Formula $A$
 \end_inset
 
-, consider a state 
-\begin_inset Formula $q$
+ by construction.
+ 
+\begin_inset Formula $A\left(\mathbf{s}\right)\subseteq A'\left(\mathbf{s}\right)$
+\end_inset
+
+ is true as well because we include in 
+\begin_inset Formula $A'$
+\end_inset
+
+ all the complete paths existing in 
+\begin_inset Formula $A$
+\end_inset
+
+ so every run 
+\begin_inset Formula $p$
 \end_inset
 
  of 
 \begin_inset Formula $A$
 \end_inset
 
- that is not present in 
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is also a run of 
 \begin_inset Formula $A'$
 \end_inset
 
 .
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Corollary
+Given a pruned well-behaved eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, for every path
+\begin_inset Formula $p$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
  
-\begin_inset Formula $q$
+\begin_inset Formula $\textrm{LOps}\left(p\right)$
 \end_inset
 
- could never occur in a configuration of an accepting run of 
+ contains no duplicates.
+\end_layout
+
+\begin_layout Proof
+Since 
 \begin_inset Formula $A$
 \end_inset
 
-, because either it is unreachable from the initial state of 
-\begin_inset Formula $A$
+ is pruned, 
+\begin_inset Formula $p$
 \end_inset
 
-, either it couldn't reach the final state of 
-\begin_inset Formula $A$
+ is part of a complete path 
+\begin_inset Formula $p'$
 \end_inset
 
 .
- Thus, given an accepting run of 
+ But 
 \begin_inset Formula $A$
 \end_inset
 
-, there will be a corresponding accepting run of 
-\begin_inset Formula $A'$
+ is also well-behaved, so 
+\begin_inset Formula $\textrm{LOps}\left(p'\right)$
 \end_inset
 
-.
- 
-\begin_inset Formula $A'$
+ contains no duplicates, which implies that 
+\begin_inset Formula $\textrm{LOps}\left(p\right)$
 \end_inset
 
- cannot have an accepting run that can't be put in correspondence with an
- accepting run of 
-\begin_inset Formula $A$
-\end_inset
-
- because we do not add any transitions to 
-\begin_inset Formula $A'$
-\end_inset
-
- that aren't present in 
-\begin_inset Formula $A$
-\end_inset
-
-.
+ has no duplicates either.
 \end_layout
 
 \begin_layout --Separator--
@@ -768,7 +1139,11 @@ Since
 \end_inset
 
 .
- If the statement was false, then one of 
+ If 
+\begin_inset Formula $\textrm{Ops}\left(p\right)\neq\textrm{Ops}\left(p'\right)$
+\end_inset
+
+, then one of 
 \begin_inset Formula $p^{0}pp^{f}$
 \end_inset
 
@@ -840,7 +1215,7 @@ Given a eVset-automaton
 \end_inset
 
  of the form 
-\begin_inset Formula $\left(q,\bigcup_{1\leq i\leq n}\textrm{Ops}\left(t_{i}\right),q'\right)$
+\begin_inset Formula $\left(q,\bigcup_{i=1}^{n}\textrm{Ops}\left(t_{i}\right),q'\right)$
 \end_inset
 
 .
@@ -860,7 +1235,16 @@ Given a well-behaved eVset-automaton
 \begin_inset Formula $A'$
 \end_inset
 
- that is equivalent to 
+ such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\left\llbracket A\right\rrbracket $
+\end_inset
+
+.
+ Moreover, the size of 
+\begin_inset Formula $A'$
+\end_inset
+
+ is polynomial in the size of 
 \begin_inset Formula $A$
 \end_inset
 
@@ -912,7 +1296,7 @@ Let us consider
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Formula $\delta'=\delta\cup\left\{ \left(q,\bigcup_{1\leq i\leq n}\textrm{Ops}\left(t_{i}\right),q'\right)\mid\exists p=t_{1},\ldots,t_{n}\in\textrm{Paths}\left(A\right):p\textrm{ is between \ensuremath{q} and \ensuremath{q'}, \ensuremath{p} is operation-only}\right\} $
+\begin_inset Formula $\delta'=\delta\cup\left\{ \left(q,\bigcup_{i=1}^{n}\textrm{Ops}\left(t_{i}\right),q'\right)\mid\exists p=t_{1},\ldots,t_{n}\in\textrm{Paths}\left(A\right):p=p_{q}^{q'}\textrm{, \ensuremath{p} is operation-only}\right\} $
 \end_inset
 
 .
@@ -921,38 +1305,21 @@ Let us consider
 \end_deeper
 \begin_layout Proof
 This construction does nothing but including the transitions that are missing
- from 
+ in 
 \begin_inset Formula $A$
 \end_inset
 
- to be operation-closed to 
+ to be operation-closed in 
 \begin_inset Formula $A'$
 \end_inset
 
 .
- We now show that 
-\begin_inset Formula $A'$
-\end_inset
-
- is equivalent to 
-\begin_inset Formula $A$
-\end_inset
-
-.
- It is easy to see that, for every string 
+ We now show that for every string 
 \begin_inset Formula $\mathbf{s}\in\varSigma^{\ast}$
 \end_inset
 
 , 
-\begin_inset Formula $A\left(\mathbf{s}\right)\subseteq A'\left(\mathbf{s}\right)$
-\end_inset
-
-, as we include all transitions of 
-\begin_inset Formula $A$
-\end_inset
-
- in 
-\begin_inset Formula $A'$
+\begin_inset Formula $A'\left(\mathbf{s}\right)=A\left(\mathbf{s}\right)$
 \end_inset
 
 .
@@ -960,74 +1327,158 @@ This construction does nothing but including the transitions that are missing
 \begin_inset Formula $A'\left(\mathbf{s}\right)\subseteq A\left(\mathbf{s}\right)$
 \end_inset
 
-, consider a pair of states 
-\begin_inset Formula $q,q'\in Q$
+, consider an accepting run 
+\begin_inset Formula $\rho'$
 \end_inset
 
- and let us assume there exists an operation-only path 
-\begin_inset Formula $p'=t$
+ of 
+\begin_inset Formula $A'$
 \end_inset
 
- between 
-\begin_inset Formula $q$
+ on 
+\begin_inset Formula $\mathbf{s}$
 \end_inset
 
- and 
-\begin_inset Formula $q'$
+, that returns an 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ This run is supported by a complete path 
+\begin_inset Formula $p'$
+\end_inset
+
+ in 
+\begin_inset Formula $A'$
+\end_inset
+
+.
+ We can always find a complete path 
+\begin_inset Formula $p$
 \end_inset
 
  in 
 \begin_inset Formula $A$
 \end_inset
 
-', where 
+ that supports a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, which returns 
+\begin_inset Formula $\mu$
+\end_inset
+
+ as well.
+ To obtain 
+\begin_inset Formula $p$
+\end_inset
+
+, we substitute every operations transition 
 \begin_inset Formula $t$
 \end_inset
 
- is a transition that is not in 
-\begin_inset Formula $A$
-\end_inset
-
-.
- By construction of 
-\begin_inset Formula $A'$
-\end_inset
-
-, there exists in 
-\begin_inset Formula $A$
-\end_inset
-
- an operation-only path 
-\begin_inset Formula $p$
-\end_inset
-
- between 
-\begin_inset Formula $q$
-\end_inset
-
- and 
-\begin_inset Formula $q'$
-\end_inset
-
-, and
-\begin_inset Formula $\textrm{LOps}\left(p'\right)=\textrm{LOps}\left(p\right)$
-\end_inset
-
-.
- Thus, 
+ in 
 \begin_inset Formula $p'$
 \end_inset
 
- is equivalent to 
-\begin_inset Formula $p$
+ that doesn't belong to 
+\begin_inset Formula $\delta$
+\end_inset
+
+ with a operation-only path 
+\begin_inset Formula $p''$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ such that 
+\begin_inset Formula $\textrm{LOps}\left(p''\right)=\textrm{LOps}\left(t\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p''$
+\end_inset
+
+ is between the source and destination states of 
+\begin_inset Formula $t$
 \end_inset
 
 .
- This also shows that 
+ This is always possible by construction of 
 \begin_inset Formula $A'$
 \end_inset
 
- is well-behaved.
+.
+ It is easy to verify that the run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, supported by 
+\begin_inset Formula $p$
+\end_inset
+
+, returns indeed 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ 
+\begin_inset Formula $A\left(\mathbf{s}\right)\subseteq A\left('\mathbf{s}\right)$
+\end_inset
+
+ is also true, because we include all the transitions belonging to 
+\begin_inset Formula $\delta$
+\end_inset
+
+ in 
+\begin_inset Formula $\delta'$
+\end_inset
+
+.
+ The fact that the size of 
+\begin_inset Formula $A'$
+\end_inset
+
+ is polynomial in the size of 
+\begin_inset Formula $A$
+\end_inset
+
+ follows from the fact that we add 
+\begin_inset Formula $O\left(\left|Q^{2}\right|\right)$
+\end_inset
+
+ new transitions to 
+\begin_inset Formula $\delta$
+\end_inset
+
+ to form 
+\begin_inset Formula $\delta'$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout --Separator--

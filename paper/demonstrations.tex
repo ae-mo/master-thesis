@@ -5,6 +5,7 @@
 \usepackage[latin9]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{stmaryrd}
 
 \makeatletter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
@@ -26,48 +27,247 @@ is a tuple $\left(Q,q_{0},q_{f},\delta\right)$, where:
 \item $Q$ is a finite set of states;
 \item $q_{0}\in Q$ is the initial state;
 \item $q_{f}\in Q$ is an accepting state;
-\item $\delta$ is a finite transition relation consisting of triples, each
-having one of these forms:
+\item $\delta=\delta^{char}\cup\delta^{op}$ is a finite transition relation
+consisting of triples, where:
 
 \begin{itemize}
-\item $\left(q,\sigma,q'\right)$, where $\sigma\in\varSigma$;
-\item $\left(q,S,q'\right)$, where $S\subseteq\left(\textrm{SVOps}\right)$.
+\item $\delta^{char}=\left\{ \left(q,\sigma,q'\right)\mid q,q'\in Q,\sigma\in\varSigma\right\} $,
+whose elments are called character transitions;
+\item $\delta^{op}=\left\{ \left(q,S,q'\right)\mid q,q'\in Q,S\subseteq\left(\textrm{SVOps}\right)\right\} $,
+whose elements are called operation transitions .
 \end{itemize}
 \end{itemize}
+\end{definition}
+
+
+\begin{definition}
+Given a transition $t=\left(q,S,q'\right)\in\delta^{op}$ in an eVset-automaton
+$A$, and an ordering $\varphi$ on the elements of $\textrm{SVOps}\left(A\right)$,
+we define:
+\begin{itemize}
+\item $\textrm{LOps}_{\varphi}\left(t\right)$ as the list $o_{1},\ldots,o_{\left|S\right|}$
+of operations belonging to $S$, ordered according to $\varphi$;
+\item $\textrm{Ops}\left(t\right)=S$.
+\end{itemize}
+\end{definition}
+
+
+\begin{definition}
+\noindent Given an extended vset-automaton $A=\left(Q,q_{0},q_{f},\delta\right)$
+and a pair of states $q,q'\in Q$, a path $p$ between $q$ and $q'$
+in $A$ is a sequence of transitions $t_{1},$$\ldots,t_{n}\in\delta$,
+such that:
+\begin{itemize}
+\item the source state of $t_{1}$ is $q$;
+\item the destination state of $t_{n}$ is $q'$;
+\item \noindent for every pair $t_{i},t_{i+1}$, the destination state of
+$t_{i}$ equals the source state of $t_{i+1}$.
+\end{itemize}
+We refer to the set of paths in $A$ as $\textrm{Paths}\left(A\right)$.
+\end{definition}
+
+
+\begin{definition}
+\noindent Given an eVset-automaton $A=\left(Q,q_{0},q_{f},\delta\right)$
+a path $p=t_{1},\ldots,t_{n}$ in $A$ is complete if it is between
+$q_{0}$ and $q_{f}$.
+\end{definition}
+
+
+\begin{definition}
+Given a path $p=t_{1},\ldots,t_{n}$ in an eVset-automaton $A$, and
+considering the sublist $p^{op}=t_{j},\ldots t_{k}$, where $\forall t_{j}$,
+$t_{j}\in\delta^{op}$ and an ordering $\varphi$ on the elements
+of $\textrm{SVOps}\left(A\right)$, we define
+\begin{itemize}
+\item the list $\textrm{LOps}_{\varphi}\left(p\right)$ as:
+\[
+o_{j,1},\ldots,o_{j,l_{j}},\ldots,o_{k,1},\ldots,o_{k,l_{k}}
+\]
+where $\forall j,m$, $o_{j,m}$$\in S_{j}$, and the order of the
+operations belonging to the same $S_{j}$ is fixed according to $\varphi$;
+\item the set $\textrm{Ops}\left(p\right)$ as the set of operations appearing
+in $\textrm{LOps}_{\varphi}\left(p\right)$.
+\end{itemize}
+If $p^{op}=p$, we say that $p$ is an operation-only path.
+\end{definition}
+
+
+\begin{definition}
+\noindent \label{well-behaved}A (extended) variable-set automaton
+$A$ is well-behaved if, for every complete path $p$ in $A$ we have:
+\begin{enumerate}
+\item for every $o\in\textrm{SVOps}\left(A\right)$, $o$ appears exactly
+once in $\textrm{LOps}\left(p\right)$;\label{enu:well-behaved-1,}
+\item for every pair of operations $x\vdash$,$\dashv x$$\in\textrm{SVOps}\left(A\right)$,
+$x\vdash$ appears before $\dashv x$ in $\textrm{LOps}\left(p\right)$.
+\end{enumerate}
 \end{definition}
 
 \noindent 
 \begin{definition}
-\noindent For a string $\mathbf{s}=s_{1},\ldots,s_{n}$, a run $\rho=c_{0}\ldots c_{m}$
-on $\mathbf{s}$ of a (extended) variable-set automaton $A$ is \emph{well-behaved}
-if it satisfies the following conditions:
-\begin{itemize}
-\item $c_{j}=\left(q,V,Y,i\right)$ where $q\neq q_{f}$ for $j=0,\ldots,m-1$;
-\item either:
-
-\begin{itemize}
-\item $c_{m}=\left(q,V,Y,i\right)$ where $q\neq q_{f}$;
-\item $c_{m}=\left(q_{f},\textrm{Ø},\textrm{Ø},n+1\right)$.
-\end{itemize}
-\item for every $c_{j},c_{j+1}$ and $c_{k},c_{k+1}$, $j\neq k$, such
-that $c_{j}$ yelds $c_{j+1}$ by applying transition $\left(q_{j},o,q_{j+1}\right)\in\delta$
-and the same holds for $c_{k},c_{k+1}$ with transition $\left(q_{k},o',q_{k+1}\right)\in\delta$
-($o,o'\in\textrm{SVops}$$\left(A\right)$), $o\neq o'$;
-\end{itemize}
+Given an eVset-automaton $A$, $A$ is pruned if for every state $q$
+in $A$, there is a path from $q_{0}$ to $q$, and a path from $q$
+to $q_{f}$ in $A$.
 \end{definition}
 
+\noindent 
+\begin{proposition}
+Given a well-behaved eVset-automaton $A$, there exists a pruned well-behaved
+eVset automaton $A'$ which is equivalent to $A$.\end{proposition}
 
+\begin{proof}
+To obtain $A'$, it is sufficient to remove from $A$ those states
+that don't participate in any complete path in $A$, and all the transitions
+involving them. Because of our construction, $A'$ is well-behaved,
+as it now contains only the complete paths in $A$. To see that $A'$
+is equivalent to $A$, consider a state $q$ of $A$ that is not present
+in $A'$. $q$ could never occur in a configuration of an accepting
+run of $A$, because either it is unreachable from the initial state
+of $A$, either it couldn't reach the final state of $A$. Thus, given
+an accepting run of $A$, there will be a corresponding accepting
+run of $A'$. $A'$ cannot have an accepting run that can't be put
+in correspondence with an accepting run of $A$ because we do not
+add any transitions to $A'$ that aren't present in $A$.
+\end{proof}
+
+\noindent 
+\begin{corollary}
+\label{same-ops}Given a pruned well-behaved eVset-automaton $A$,
+and two states $q,q'$ in $A$, for every pair of paths $p,p'$ between
+$q$ and $q'$ in $A$, $\textrm{Ops}\left(p\right)=\textrm{Ops}\left(p'\right)$.\end{corollary}
+
+\begin{proof}
+Since $A$ is pruned, there surely exists a path $p^{0}$ between
+$q_{0}$ and $q$. For the same reason, there exists a path $p^{f}$
+between $q'$ and $q_{f}$. So $q$ and $q'$ appear in two complete
+paths, which we may call $p^{0}pp^{f}$ and $p^{0}p'p^{f}$, that
+differ only in the subpaths between $q$ and $q'$. If the statement
+was false, then one of $p^{0}pp^{f}$ and $p^{0}p'p^{f}$ wouldn't
+satisfy the requirement \ref{enu:well-behaved-1,} of \ref{well-behaved},
+making $A$ not well-behaved, a contraddiction.
+\end{proof}
+
+\noindent 
 \begin{definition}
-\noindent A (extended) variable-set automaton is well-behaved if,
-for every string $\mathbf{s}\in\varSigma^{\ast}$, $\textrm{ARuns}\left(A,\mathbf{s}\right)$
-contains only well-behaved runs.
+Given a eVset-automaton $A$, $A$ is operation-closed if, for every
+pair of states $q,q'$ in $A$, whenever there exists an operation-only
+path $p$=$t_{1},\ldots,t_{n}$ between $q$ and $q'$, then there
+exists a transition in $A$ of the form $\left(q,\bigcup_{1\leq i\leq n}\textrm{Ops}\left(t_{i}\right),q'\right)$.
 \end{definition}
+
+\noindent 
+\begin{proposition}
+Given a well-behaved eVset-automaton $A$, there exists an operation-closed
+well-behaved eVset-automaton $A'$ that is equivalent to $A$.\end{proposition}
+
+\begin{proof}
+Let us consider $A$ to be of the form $\left(Q,q_{0},q_{f},\delta\right)$.
+Without loss of generality, we can assume that $A$ is pruned. Then
+we can take $A'=\left(Q',q_{0}',q_{f}',\delta'\right)$, where:
+\begin{itemize}
+\item $Q'=Q$;
+\item $q_{0}'=q_{0}$;
+\item $q_{f}'=q_{f}$;
+\item $\delta'=\delta\cup\left\{ \left(q,\bigcup_{1\leq i\leq n}\textrm{Ops}\left(t_{i}\right),q'\right)\mid\exists p=t_{1},\ldots,t_{n}\in\textrm{Paths}\left(A\right):p\textrm{ is between \ensuremath{q} and \ensuremath{q'}, \ensuremath{p} is operation-only}\right\} $.
+\end{itemize}
+This construction does nothing but including the transitions that
+are missing from $A$ to be operation-closed to $A'$. We now show
+that $A'$ is equivalent to $A$. It is easy to see that, for every
+string $\mathbf{s}\in\varSigma^{\ast}$, $A\left(\mathbf{s}\right)\subseteq A'\left(\mathbf{s}\right)$,
+as we include all transitions of $A$ in $A'$. To see that $A'\left(\mathbf{s}\right)\subseteq A\left(\mathbf{s}\right)$,
+consider a pair of states $q,q'\in Q$ and let us assume there exists
+an operation-only path $p'=t$ between $q$ and $q'$ in $A$', where
+$t$ is a transition that is not in $A$. By construction of $A'$,
+there exists in $A$ an operation-only path $p$ between $q$ and
+$q'$, and$\textrm{LOps}\left(p'\right)=\textrm{LOps}\left(p\right)$.
+Thus, $p'$ is equivalent to $p$. This also shows that $A'$ is well-behaved.
+\end{proof}
+
+\noindent 
+\begin{definition}
+Given two well-behaved operation-closed eVset-automata $A=\left(Q_{A},q_{A}^{0},q_{A}^{f},\delta_{A}\right)$
+and $B=\left(Q_{B},q_{B}^{0},q_{B}^{f},\delta_{B}\right)$, their
+product is a eVset-automaton $C=\left(Q,q^{0},q^{f},\delta\right)$,
+where:
+\begin{itemize}
+\item $Q=Q_{A}\times Q_{B}$;
+\item $q^{0}=\left\langle q_{A}^{0},q_{B}^{0}\right\rangle $;
+\item $q^{f}=\left\langle q_{A}^{f},q_{B}^{f}\right\rangle $;
+\item $\delta$ has the following transitions:
+
+\begin{itemize}
+\item $\left(\left\langle q_{A},q_{B}\right\rangle ,\sigma,\left\langle q'_{A},q'_{B}\right\rangle \right)$
+whenever $\sigma\in\varSigma$, $\left(q_{A},\sigma,q'_{A}\right)\in\delta_{A}$
+and $\left(q_{B},\sigma,q'_{B}\right)\in\delta_{B}$;
+\item $\left(\left\langle q_{A},q_{B}\right\rangle ,S_{A}\cup S_{B},\left\langle q'_{A},q'_{B}\right\rangle \right)$
+whenever $\left(q_{A},S_{A},q'_{A}\right)\in\delta_{A}$, $\left(q_{B},S_{B},q'_{B}\right)\in\delta_{B}$
+and $\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{A}=\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{B}$;
+\item $\left(\left\langle q_{A},q_{B}\right\rangle ,S_{A},\left\langle q'_{A},q{}_{B}\right\rangle \right)$
+whenever $\left(q_{A},S_{A},q'_{A}\right)\in\delta_{A}$ and $\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{A}=\textrm{Ø}$;
+\item $\left(\left\langle q_{A},q_{B}\right\rangle ,S_{B},\left\langle q{}_{A},q'_{B}\right\rangle \right)$
+whenever $\left(q_{B},S_{B},q'_{B}\right)\in\delta_{B}$ and $\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{B}=\textrm{Ø}$.
+\end{itemize}
+\end{itemize}
+We may write $C=A\times B$.
+\end{definition}
+
+\noindent 
+\begin{definition}
+Given two well-behaved operation-closed eVset-automata $A$ and $B$,
+and given an eVset-automaton $C$ such that $C=A\times B$, the projection
+of a transition $t$ in $C$ over $A$ is a transition $t'$ in $A$
+defined as:
+\begin{itemize}
+\item $\left(q_{A},\sigma,q'_{A}\right)$ if $t=\left(\left\langle q_{A},q_{B}\right\rangle ,\sigma,\left\langle q'_{A},q'_{B}\right\rangle \right)$;
+\item $\left(q_{A},S_{A},q'_{A}\right)$ if $t=\left(\left\langle q_{A},q_{B}\right\rangle ,S_{A}\cup S_{B},\left\langle q'_{A},q'_{B}\right\rangle \right)$
+or $t=\left(\left\langle q_{A},q_{B}\right\rangle ,S_{A},\left\langle q'_{A},q{}_{B}\right\rangle \right)$.
+\end{itemize}
+We may write $t'=\pi_{A}\left(t\right)$. The definition is symmetric
+for the projection over $B$.
+\end{definition}
+
+\noindent 
+\begin{definition}
+Given two well-behaved operation-closed eVset-automata $A$ and $B$,
+and given an eVset-automaton $C$ such that $C=A\times B$, the projection
+of a path $p=t_{1},\ldots,t_{n}$ in $C$ over $A$ is a path $p'$
+in $A$ defined as:
+\[
+t'_{1},\ldots t'
+\]
+
+\end{definition}
+
+\noindent 
+\begin{theorem}
+Given two well-behaved operation-closed eVset-automata $A$ and $B$,
+and given an eVset-automaton $C$ such that $C=A\times B$, then $\left\llbracket C\right\rrbracket =\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket $.\end{theorem}
+
+\begin{proof}
+To show that $\left\llbracket C\right\rrbracket \subseteq\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket $,
+we can easily decompose a run of $C$ on a string $\mathbf{s}$ into
+two consistent runs of $A$ and $B$. To show that $\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket \subseteq\left\llbracket C\right\rrbracket $,
+consider a string $\mathbf{s}$, a $\mathbf{s}$-tuple $\mu_{A}\in A\left(\mathbf{s}\right)$
+and a $\mathbf{s}$-tuple $\mu_{B}\in B\left(\mathbf{s}\right)$ that
+agrees with $\mu_{A}$ on common variables. Given the $\mathbf{s}$-tuple
+$\mu$ that yelds all the variable assignments of $\mu_{A}$ and $\mu_{B}$.
+We need to find a run $\rho$ of $C$ on $\mathbf{s}$ that returns
+$\mu$. Let us call $\rho_{A}\in\textrm{ARuns}\left(A,\mathbf{s}\right)$
+and $\rho_{B}\in\textrm{ARuns}\left(B,\mathbf{s}\right)$ the runs
+that return $\mu_{A}$ and $\mu_{B}$, respectively. We can obtain
+$\rho$ by combining $\rho_{A}$ and $\rho_{B}$. To do that, we first
+need to ensure that $\rho_{A}$ and $\rho_{B}$ are consistent on
+the order of the variable operations they perform. Since $A$ and
+$B$ are well-behaved and operation-closed, $\rho_{A}$ and $\rho_{B}$
+can always be selected so that they are consistent.
+\end{proof}
 
 \noindent 
 \begin{lemma}
-\noindent Given an extended well-behaved varable-set automaton $A$,
-$A$ can be converted into an equivalent well-behaved variable-set
-automaton $A'$ in polynomial time.\end{lemma}
+\noindent Given an extended varable-set automaton $A=\left(Q,q_{0},q_{f},\delta\right)$,
+$A$ can be converted into an equivalent variable-set automaton $A'$
+in polynomial time in a well-behavedness preserving manner.\end{lemma}
 
 \begin{proof}
 Without loss of generality, we consider an ordering of the symbols
@@ -152,7 +352,112 @@ first, thanks to the way we constructed $A'$. Thus, for every pair
 of configurations $c_{j},c_{j+1}\in\rho$ that we replace, $c_{j+2}$
 won't see any difference. Also notice how the replaced sequence $c_{j,1},\ldots,c_{j,k}$
 is unique, and the sequence of operations from $c_{j,1}$ to $c_{j,k}$
-respect the operation ordering that we chose.\end{proof}
+respect the operation ordering that we chose. It can also easily be
+verified that well-behavedness is preserved.
+
+\noindent It remains to show that the construction of $A'$ can be
+carried in polynomial time. Let us refer to the size of $A$ as $n$.
+We consider $n=\left|Q\right|+\left|\delta\right|+\left|\textrm{SVars}\left(A\right)\right|$.
+We can reasonably assume that the operations of adding a new state,
+adding a new transition, removing a state and removing a transition
+take constant time. Thus, expanding a single transition of $A$ takes
+$O\left(\left|\textrm{SVars}\left(A\right)\right|\right)=O\left(n\right)$
+time. Expanding every transition that is needed will then take $O\left(\left|\textrm{SVars}\left(A\right)\right|\cdot\left|\delta\right|\right)=O\left(n^{2}\right)$
+time.
+
+\medskip{}
+\end{proof}
+
+\begin{definition}
+\noindent Given an extended vset-automaton $A$, the epsilon-closure
+of $A$ is an extended vset-automaton $A'=\left(Q',q_{0}',q_{f}',\delta'\right)$
+, where:
+\begin{itemize}
+\item $Q'=Q$;
+\item $q_{0}'=q_{0}$;
+\item $q_{f}'=q_{f}$;
+\item $\delta\subseteq\delta'$;
+\item for every sequence of triples $\left(q_{1},S_{1},q'_{1}\right),\ldots,\left(q_{n},S_{n},q'_{n}\right)\in\delta$
+such that $\forall i$,$1\leq i<n$ we have $q'_{i}=q_{i+1}$, $\delta'$
+contains a triple $\left(q_{1},\bigcup_{i}S_{i},q_{n}\right)$ and
+no additional triples that don't belong to $\delta$.
+\end{itemize}
+\end{definition}
+
+
+\begin{theorem}
+\noindent Given two extended vset-automata $A$ and $B$ that are
+union-compatible, a third vset-automaton $C$ can be produced in polynomial
+time such that $\left\llbracket C\right\rrbracket =\left\llbracket A\right\rrbracket \cup\left\llbracket B\right\rrbracket $,
+in a well-behavedness preserving manner.\end{theorem}
+
+\begin{proof}
+Let us consider $A$ to be of the form $\left(Q^{A},q_{0}^{A},q_{f}^{A},\delta^{A}\right)$
+and $B$ of the form $\left(Q^{B},q_{0}^{B},q_{f}^{B},\delta^{B}\right)$.
+We can take $C=\left(Q^{C},q_{0}^{C},q_{f}^{C},\delta^{C}\right)$,
+where:
+\begin{itemize}
+\item $Q^{C}=Q^{A}\cup Q^{B}$;
+\item $q_{0}^{C}=q_{0}^{A}$;
+\item $q_{f}^{C}=q_{f}^{A}$;
+\item $\delta^{C}=\delta^{A}\cup\delta^{B}\cup\left\{ \left(q_{0}^{C},\textrm{Ø},q_{0}^{B}\right),\left(q_{f}^{B},\textrm{Ø},q_{f}^{C}\right)\right\} $.
+\end{itemize}
+In this construction, we allow to go from the initial state of $A$
+to the one of $B$, and to go from the final state of $B$ to the
+one of $A$. Thus, given a string $\mathbf{s}$, $C$ can span exactly
+the $\left(V,\mathbf{s}\right)-$tuples contained in $A\left(\mathbf{s}\right)\cup B\left(\mathbf{s}\right)$.
+Regarding the complexity, the operations that we perform here are
+the union of the states sets and transition functions, with the addition
+of two new transitions. Let us consider the size of the input as $n=n_{A}+n_{B}=\left|Q^{A}\right|+\left|\delta^{A}\right|+\left|\textrm{SVars}\left(A\right)\right|+\left|Q^{B}\right|+\left|\delta^{B}\right|+\left|\textrm{SVars}\left(B\right)\right|$.
+If we assume the costs of basic operations as adding/deleting a state/transitions
+to be constant, then obtaining $Q^{C}$ takes $O\left(\left|Q^{B}\right|\right)=O\left(n\right)$
+time, and constructing $\delta^{C}$ takes $O\left(\left|\delta^{B}\right|\right)=O\left(n\right)$
+time.
+\end{proof}
+
+
+\begin{theorem}
+\noindent Given a well-behaved extended vset-automaton $A$, a set
+$X=\textrm{SVars}\left(A\right)$ and a set $Y\subseteq X$, a vset-automaton
+$A'$ can be produced in polynomial time such that $\left\llbracket A'\right\rrbracket =\pi_{Y}\left\llbracket A\right\rrbracket $,
+in a well-behavedness preserving manner.\end{theorem}
+
+\begin{proof}
+Let us consider $A=\left(Q,q_{0},q_{f},\delta\right)$. We can take
+$A'=\left(Q',q_{0}',q_{f}',\delta'\right)$, where:
+\begin{itemize}
+\item $Q'=Q$;
+\item $q_{0}'=q_{0}$;
+\item $q_{f}'=q_{f}$;
+\item $\delta'=\delta\setminus\delta^{\textrm{unprojected}}\cup\delta^{\textrm{projected}}$,
+where:
+
+\begin{itemize}
+\item $\delta^{\textrm{unprojected}}=\left\{ \left(q,S,q'\right)\in\delta\mid S\cap\textrm{SVOps}\left(X\setminus Y\right)\neq\textrm{Ø}\right\} $;
+\item $\delta^{\textrm{projected}}=\left\{ \left(q,S',q'\right)\mid\exists\left(q,S,q'\right)\in\delta^{\textrm{unprojected}}:S'=S\setminus\textrm{SVOps}\left(X\setminus Y\right)\right\} $.
+\end{itemize}
+\end{itemize}
+This construction removes all the occurencies of variable operations
+that concern variables excluded from the projection in the transitions
+of $A$. Since $A$ is well behaved, we have the guarantee that $A'=A$.
+If this wasn't the case, our construction might result in $A\subseteq A'$.
+$A'$ is still well-behaved, since we maintain the occurrencies of
+operations concerning the variables on which we project, that continue
+to appear exactly once on each path. With the usual assumptions, this
+construction can be carried out in $O\left(n\right)$.
+\end{proof}
+
+
+\begin{definition}
+An AQL core fragment is an AQL fragment that can be associated with
+a core spanner.
+\end{definition}
+
+
+\begin{theorem}
+Given a regex formula $\gamma$, $\gamma$ can be converted into an
+equivalent, well-behaved extended vset-automaton $A$ in polynomial
+time.\end{theorem}
 
 
 \end{document}

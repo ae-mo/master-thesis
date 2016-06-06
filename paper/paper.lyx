@@ -4918,9 +4918,2788 @@ In this chapter I describe a new runtime system for AQL's core fragments,
 extended vset-automata.
 
 \emph default
- I start by describing some interesting ways of running usual nondeterministic
- automata on a string, then I present extended vset-automata and I show
- their relevant properties, and finally I explain how the runtime works.
+ I start by presenting this new model and its relevant properties, then
+ I describe some interesting ways of running usual nondeterministic automata
+ on a string, and finally I explain how the runtime system works.
+\end_layout
+
+\begin_layout Section
+Extended Vset-automata
+\end_layout
+
+\begin_layout Standard
+Before I define extended vset-automata formally, I introduce some basic
+ concepts.
+\end_layout
+
+\begin_layout Definition
+Given a set 
+\begin_inset Formula $X\subseteq\textrm{SVars}$
+\end_inset
+
+, we define:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\textrm{SVOps}^{\vdash}\left(X\right)=\left\{ x\vdash\mid x\in X\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\textrm{SVOps}^{\dashv}\left(X\right)=\left\{ \dashv x\mid x\in X\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\textrm{SVOps}\left(X\right)=\textrm{SVOps}^{\vdash}\left(X\right)\cup\textrm{SVOps}^{\dashv}\left(X\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+I now define an extended vset-automaton.
+\end_layout
+
+\begin_layout Definition
+An extended 
+\emph on
+variable-set automaton
+\emph default
+ (or 
+\emph on
+eVset-automaton
+\emph default
+) is a tuple 
+\begin_inset Formula $\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q$
+\end_inset
+
+ is a finite set of states;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{0}\in Q$
+\end_inset
+
+ is the initial state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}\in Q$
+\end_inset
+
+ is an accepting state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta=\delta^{char}\cup\delta^{op}$
+\end_inset
+
+ is a finite transition relation consisting of triples, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\delta^{char}=\left\{ \left(q,\sigma,q'\right)\mid q,q'\in Q,\sigma\in\varSigma\right\} $
+\end_inset
+
+, whose elments are called character transitions;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{op}=\left\{ \left(q,S,q'\right)\mid q,q'\in Q,S\subseteq\textrm{SVOps\left(SVars\right)}\right\} $
+\end_inset
+
+, whose elements are called operation transitions .
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+By a slight abuse of notation, I denote by 
+\begin_inset Formula $\textrm{SVOps}\left(A\right)$
+\end_inset
+
+ the set of variable operations appearing in the transitions of an eVset-automat
+on 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\textrm{SVars}\left(A\right)$
+\end_inset
+
+ is defined as for a regular vset-automaton.
+ I now define a configuration and, consequently, a run of an eVset-automaton.
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, 
+\begin_inset Formula $\left|\mathbf{s}\right|=n$
+\end_inset
+
+, and an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a configuration of A is a tuple 
+\begin_inset Formula $c=\left(q,V,Y,i\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $q\in Q$
+\end_inset
+
+ is the current state;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $V\subseteq\textrm{SVars}\left(A\right)$
+\end_inset
+
+ is the active variable set;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Y\subseteq\textrm{SVars}\left(A\right)$
+\end_inset
+
+ is the set of available variables;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $i$
+\end_inset
+
+ is an index belonging to 
+\begin_inset Formula $\left\{ 1,\ldots,n+1\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $\mathbf{s}=s_{1},\ldots,s_{n}$
+\end_inset
+
+ and an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is a sequence 
+\begin_inset Formula $c_{0},\ldots,c_{m}$
+\end_inset
+
+ of configurations, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $c_{0}=\left(q_{0},\textrm{Ø},\textrm{SVars}\left(A\right),1\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+for 
+\begin_inset Formula $j=0,\ldots,m-1$
+\end_inset
+
+ one of the following holds for 
+\begin_inset Formula $c_{j}=\left(q_{j},V_{j},Y_{j},i_{j}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{j+1}=\left(q_{j+1},V_{j+1},Y_{j+1},i_{j+1}\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $V_{j+1}=V_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $Y_{j+1}=Y_{j}$
+\end_inset
+
+, 
+\begin_inset Formula $i_{j+1}=i_{j}+1$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(q_{j},s_{j}q_{j+1}\right)\in\delta^{char}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $i_{j+1}=i_{j}$
+\end_inset
+
+, and for some 
+\begin_inset Formula $S\subseteq\textrm{SVOps}\left(A\right)$
+\end_inset
+
+ we have :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+for each 
+\begin_inset Formula $x\in\textrm{SVars}\left(A\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\left\{ x\vdash,\dashv x\right\} \cap S=\left\{ x\vdash\right\} $
+\end_inset
+
+ or 
+\begin_inset Formula $\left\{ x\vdash,\dashv x\right\} \cap S=\left\{ x\vdash,\dashv x\right\} $
+\end_inset
+
+ if and only if 
+\begin_inset Formula $x\in Y_{j}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\left\{ x\vdash,\dashv x\right\} \cap S=\left\{ \dashv x\right\} $
+\end_inset
+
+ if and only if 
+\begin_inset Formula $x\in V_{j}$
+\end_inset
+
+;
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $V_{j+1}=V_{j}\cup\left\{ x\mid x\vdash\in S\right\} \setminus\left\{ x\mid\dashv x\in S\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Y_{j+1}=Y_{j}\setminus\left\{ x\mid x\vdash\in S\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\left(q_{j},S,q_{j+1}\right)\in\delta^{op}$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Definition
+\begin_inset Formula $\rho$
+\end_inset
+
+ is accepting if 
+\begin_inset Formula $c_{m}=\left(q_{f},\textrm{Ø,}\textrm{Ø},n+1\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\textrm{ARuns}\left(A,\mathbf{s}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\left\llbracket A\right\rrbracket $
+\end_inset
+
+, for an eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ and a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, are defined in a similar ways to those of usual vset-automata.
+ The reason why I call this new kind of vset-automata extended is that they
+ allow to perform an arbitrary number of variable operations in one transition.
+ The operations in a transition are to be performed in a given order.
+ The exact order isn't very important, except for the fact that, in a valid
+ run, the insertion and removal of a variable from the active variable set
+ need to happen in the correct order.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+\backslash
+node[state,initial]  (q_0)                      {$q_0$}; 
+\backslash
+node[state]          (q_1) [right=of q_0] {$q_1$}; 
+\backslash
+node[state]          (q_2) [right=of q_1] {$q_2$}; 
+\backslash
+node[state,accepting](q_3) [right=of q_2] {$q_3$}; 
+\backslash
+path[->] (q_0) edge              node        {$
+\backslash
+left
+\backslash
+{ x
+\backslash
+vdash
+\backslash
+right
+\backslash
+} $} (q_1) 		edge [loop above] node        {.} () 	  (q_1) edge 	       
+   node        {$
+\backslash
+left
+\backslash
+{ y
+\backslash
+vdash
+\backslash
+right
+\backslash
+} $} (q_2) 		edge [loop above] node        {a} (q_2) 	  (q_2) edge     
+         node        {$
+\backslash
+left
+\backslash
+{ 
+\backslash
+dashv x,
+\backslash
+dashv y
+\backslash
+right
+\backslash
+} $} (q_3) 		edge [loop above] node        {b} () 	  (q_3) edge [loop above]
+ node        {.} (); 
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+An eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The main reason for using eVset-automata instead of plain vset-automata
+ is that the former can represent document spanners in a more compact way.
+ I now introduce some additional useful concepts, the most important of
+ which being that of a 
+\emph on
+path
+\emph default
+ in an eVset-automaton.
+\end_layout
+
+\begin_layout Definition
+Given a transition 
+\begin_inset Formula $t\in\delta$
+\end_inset
+
+ in an eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, and an ordering 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ on the elements of 
+\begin_inset Formula $\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, we define
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\textrm{Ops}\left(t\right)$
+\end_inset
+
+as either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $t=\left(q,S,q'\right)\in\delta^{op}$
+\end_inset
+
+, the set 
+\begin_inset Formula $S$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+if 
+\begin_inset Formula $t\in\delta^{char}$
+\end_inset
+
+, the empty set.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $\textrm{LOps}_{\varphi}\left(t\right)$
+\end_inset
+
+ as either:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if 
+\begin_inset Formula $t=\left(q,S,q'\right)\in\delta^{op}$
+\end_inset
+
+, the list 
+\begin_inset Formula $o_{1},\ldots,o_{\left|S\right|}$
+\end_inset
+
+ of operations belonging to 
+\begin_inset Formula $S$
+\end_inset
+
+, ordered according to 
+\begin_inset Formula $\varphi$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+if 
+\begin_inset Formula $t\in\delta^{char}$
+\end_inset
+
+, the empty list.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+\noindent
+Given an extended vset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+ and a pair of states 
+\begin_inset Formula $q,q'\in Q$
+\end_inset
+
+, a path 
+\begin_inset Formula $p$
+\end_inset
+
+ between 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $q'$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ is a sequence of transitions 
+\begin_inset Formula $t_{1},$
+\end_inset
+
+
+\begin_inset Formula $\ldots,t_{n}\in\delta$
+\end_inset
+
+, such that:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+the source state of 
+\begin_inset Formula $t_{1}$
+\end_inset
+
+ is 
+\begin_inset Formula $q$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+the destination state of 
+\begin_inset Formula $t_{n}$
+\end_inset
+
+ is 
+\begin_inset Formula $q'$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\noindent
+for every pair 
+\begin_inset Formula $t_{i},t_{i+1}$
+\end_inset
+
+, the destination state of 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+ equals the source state of 
+\begin_inset Formula $t_{i+1}$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Definition
+We also write 
+\begin_inset Formula $p_{q}^{q'}$
+\end_inset
+
+.
+ We refer to the set of paths in 
+\begin_inset Formula $A$
+\end_inset
+
+ as 
+\begin_inset Formula $\textrm{Paths}\left(A\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+A path in an eVset-automaton is closely related to a run, as formalized
+ by the next definition.
+\end_layout
+
+\begin_layout Definition
+Given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a run 
+\begin_inset Formula $\rho=c_{0},$
+\end_inset
+
+
+\begin_inset Formula $\ldots,c_{m}$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ and a path 
+\begin_inset Formula $p=t_{0},\ldots,t_{m-1}$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+, we say that 
+\begin_inset Formula $p$
+\end_inset
+
+ supports 
+\begin_inset Formula $\rho$
+\end_inset
+
+ if, for every pair 
+\begin_inset Formula $c_{i}$
+\end_inset
+
+, 
+\begin_inset Formula $c_{i+1}$
+\end_inset
+
+ of configurations, 
+\begin_inset Formula $c_{i+1}$
+\end_inset
+
+is obtained from 
+\begin_inset Formula $c_{i}$
+\end_inset
+
+ by applying 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Definition
+Given a path 
+\begin_inset Formula $p=t_{1},\ldots,t_{n}$
+\end_inset
+
+ in an eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, and considering an ordering 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ on the elements of 
+\begin_inset Formula $\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, we define
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+the set 
+\begin_inset Formula $\textrm{Ops}\left(p\right)$
+\end_inset
+
+ as
+\begin_inset Formula 
+\[
+\bigcup_{i=1}^{n}\textrm{Ops}\left(t_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+the list 
+\begin_inset Formula $\textrm{LOps}_{\varphi}\left(p\right)$
+\end_inset
+
+ as
+\begin_inset Formula 
+\[
+\bigoplus_{i=1}^{n}\textrm{LOps}_{\varphi}\left(t_{i}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\bigoplus$
+\end_inset
+
+ is the usual list concatenation operator;
+\end_layout
+
+\end_deeper
+\begin_layout Definition
+If every transition in 
+\begin_inset Formula $p$
+\end_inset
+
+ belongs to 
+\begin_inset Formula $\delta^{op}$
+\end_inset
+
+, we say that 
+\begin_inset Formula $p$
+\end_inset
+
+ is an operation-only path.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+From now on, without loss of generality, I consider a fixed order 
+\begin_inset Formula $\varphi$
+\end_inset
+
+, in which insertions come before deletions.
+\end_layout
+
+\begin_layout Standard
+In order to have a runtime system for core spanners, we need to support
+ the operations in the spanner algebra presented in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Algebra-of-Operators"
+
+\end_inset
+
+.
+ The construction methods that I present in this thesis focus on a particular
+ subclass of eVset-automata: 
+\emph on
+well-behaved eVset-automata
+\emph default
+.
+ Later on I will show that an AQL core fragment, as defined in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+, can be converted into a well-behaved eVset-automaton.
+ Well-behaved eVset-automata respect some constraints on paths that are
+ between their initial and final state, which I call 
+\emph on
+complete paths.
+\end_layout
+
+\begin_layout Definition
+\noindent
+Given an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, a path 
+\begin_inset Formula $p=t_{1},\ldots,t_{n}$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ is complete if it is between 
+\begin_inset Formula $q_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $q_{f}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+I now formally define a well-behaved eVset-automaton.
+\end_layout
+
+\begin_layout Definition
+\noindent
+\begin_inset CommandInset label
+LatexCommand label
+name "well-behaved"
+
+\end_inset
+
+An eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ is well-behaved if, for every complete path 
+\begin_inset Formula $p=$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ we have:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+for every 
+\begin_inset Formula $o\in\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, 
+\begin_inset Formula $o$
+\end_inset
+
+ appears exactly once in 
+\begin_inset Formula $\textrm{LOps}\left(p\right)$
+\end_inset
+
+;
+\begin_inset CommandInset label
+LatexCommand label
+name "enu:well-behaved-1,"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+for every pair of operations 
+\begin_inset Formula $x\vdash$
+\end_inset
+
+,
+\begin_inset Formula $\dashv x$
+\end_inset
+
+
+\begin_inset Formula $\in\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, 
+\begin_inset Formula $x\vdash$
+\end_inset
+
+ appears before 
+\begin_inset Formula $\dashv x$
+\end_inset
+
+ in 
+\begin_inset Formula $\textrm{LOps}\left(p\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Standard
+According to the definition, well-behaved eVset-automata guarantee that
+ any of their complete paths will support a valid accepting run.
+ Since states that cannot reach the final state, or that cannot be reached
+ from the initial state, are not used in complete paths, we might want to
+ consider only well-behaved eVset-automata where these states don't exist.
+\end_layout
+
+\begin_layout Definition
+Given an eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, 
+\begin_inset Formula $A$
+\end_inset
+
+ is pruned if for every state 
+\begin_inset Formula $q$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+, there is a path from 
+\begin_inset Formula $q_{0}$
+\end_inset
+
+ to 
+\begin_inset Formula $q$
+\end_inset
+
+, and a path from 
+\begin_inset Formula $q$
+\end_inset
+
+ to 
+\begin_inset Formula $q_{f}$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Standard
+The next proposition tells us that tha class of pruned well-behaved eVset-automa
+ta is equivalent to that of well-behaved eVset-automata.
+\end_layout
+
+\begin_layout Proposition
+Given a well-behaved eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, there exists a pruned well-behaved eVset automaton 
+\begin_inset Formula $A'$
+\end_inset
+
+ such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\left\llbracket A\right\rrbracket $
+\end_inset
+
+.
+ Moreover, 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be produced in polynomial time.
+\end_layout
+
+\begin_layout Proof
+To obtain 
+\begin_inset Formula $A'$
+\end_inset
+
+, it is sufficient to remove from 
+\begin_inset Formula $A$
+\end_inset
+
+ those states from which we can't reach the final state, those states that
+ are unreachable from the initial state, and all the transitions involving
+ them.
+ This can be done by using Dijkstra's shortest path algorithm, for instance,
+ which ensures 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be found in polynomial time.
+ Because of our construction, 
+\begin_inset Formula $A'$
+\end_inset
+
+ is well-behaved, as all its complete paths are also in 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ We now show that, for every string 
+\begin_inset Formula $\mathbf{s},$
+\end_inset
+
+ we have 
+\begin_inset Formula $A'\left(\mathbf{s}\right)=A\left(\mathbf{s}\right)$
+\end_inset
+
+.
+ To see that 
+\begin_inset Formula $A'\left(\mathbf{s}\right)\subseteq A\left(\mathbf{s}\right)$
+\end_inset
+
+, we can notice that each run 
+\begin_inset Formula $\rho'$
+\end_inset
+
+ of 
+\begin_inset Formula $A'$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ that is accepting can be supported only by a complete path 
+\begin_inset Formula $p'$
+\end_inset
+
+, which is also in 
+\begin_inset Formula $A$
+\end_inset
+
+ by construction.
+ 
+\begin_inset Formula $A\left(\mathbf{s}\right)\subseteq A'\left(\mathbf{s}\right)$
+\end_inset
+
+ is true as well because we include in 
+\begin_inset Formula $A'$
+\end_inset
+
+ all the complete paths existing in 
+\begin_inset Formula $A$
+\end_inset
+
+ so every run 
+\begin_inset Formula $p$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ is also a run of 
+\begin_inset Formula $A'$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Standard
+If a well-behaved eVset-automaton is pruned, it automatically gets two other
+ properties.
+\end_layout
+
+\begin_layout Corollary
+Given a pruned well-behaved eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, for every path
+\begin_inset Formula $p$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ 
+\begin_inset Formula $\textrm{LOps}\left(p\right)$
+\end_inset
+
+ contains no duplicates.
+\end_layout
+
+\begin_layout Proof
+Since 
+\begin_inset Formula $A$
+\end_inset
+
+ is pruned, 
+\begin_inset Formula $p$
+\end_inset
+
+ is part of a complete path 
+\begin_inset Formula $p'$
+\end_inset
+
+.
+ But 
+\begin_inset Formula $A$
+\end_inset
+
+ is also well-behaved, so 
+\begin_inset Formula $\textrm{LOps}\left(p'\right)$
+\end_inset
+
+ contains no duplicates, which implies that 
+\begin_inset Formula $\textrm{LOps}\left(p\right)$
+\end_inset
+
+ has no duplicates either.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Corollary
+\begin_inset CommandInset label
+LatexCommand label
+name "same-ops"
+
+\end_inset
+
+Given a pruned well-behaved eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, and two states 
+\begin_inset Formula $q,q'$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+, for every pair of paths 
+\begin_inset Formula $p,p'$
+\end_inset
+
+ between 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $q'$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+, 
+\begin_inset Formula $\textrm{Ops}\left(p\right)=\textrm{Ops}\left(p'\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Proof
+Since 
+\begin_inset Formula $A$
+\end_inset
+
+ is pruned, there surely exists a path 
+\begin_inset Formula $p^{0}$
+\end_inset
+
+ between 
+\begin_inset Formula $q_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $q$
+\end_inset
+
+.
+ For the same reason, there exists a path 
+\begin_inset Formula $p^{f}$
+\end_inset
+
+ between 
+\begin_inset Formula $q'$
+\end_inset
+
+ and 
+\begin_inset Formula $q_{f}$
+\end_inset
+
+.
+ So 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $q'$
+\end_inset
+
+ appear in two complete paths, which we may call 
+\begin_inset Formula $p^{0}pp^{f}$
+\end_inset
+
+ and 
+\begin_inset Formula $p^{0}p'p^{f}$
+\end_inset
+
+, that differ only in the subpaths between 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $q'$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $\textrm{Ops}\left(p\right)\neq\textrm{Ops}\left(p'\right)$
+\end_inset
+
+, then one of 
+\begin_inset Formula $p^{0}pp^{f}$
+\end_inset
+
+ and 
+\begin_inset Formula $p^{0}p'p^{f}$
+\end_inset
+
+ wouldn't satisfy the requirement 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:well-behaved-1,"
+
+\end_inset
+
+ of 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "well-behaved"
+
+\end_inset
+
+, making 
+\begin_inset Formula $A$
+\end_inset
+
+ not well-behaved, a contraddiction.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Standard
+I now describe how to support algebraic operations with well-behaved eVset-autom
+ata.
+ The main advantage of the constructions that I present is that they produce
+ a well-behaved eVset-automaton whose size is 
+\emph on
+polynomial
+\emph default
+ in the size of the input automaton/a.
+ Let us start by projection.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Theorem
+\noindent
+\begin_inset CommandInset label
+LatexCommand label
+name "ext-proj"
+
+\end_inset
+
+Given a well-behaved eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, a set 
+\begin_inset Formula $X=\textrm{SVars}\left(A\right)$
+\end_inset
+
+ and a set 
+\begin_inset Formula $Y\subseteq X$
+\end_inset
+
+, a well behaved eVset-automaton 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be produced in linear time such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\pi_{Y}\left\llbracket A\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Proof
+Let us consider 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+.
+ We can take 
+\begin_inset Formula $A'=\left(Q',q_{0}',q_{f}',\delta'\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q'=Q$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{0}'=q_{0}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}'=q_{f}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta'=\left(\delta\setminus\delta^{\textrm{unprojected}}\right)\cup\delta^{\textrm{projected}}$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{unprojected}}=\left\{ \left(q,S,q'\right)\in\delta\mid S\cap\textrm{SVOps}\left(X\setminus Y\right)\neq\textrm{Ø}\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{projected}}=\left\{ \left(q,S',q'\right)\mid\exists\left(q,S,q'\right)\in\delta^{\textrm{unprojected}}:S'=S\setminus\textrm{SVOps}\left(X\setminus Y\right)\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Proof
+This construction removes all the occurencies of variable operations that
+ concern variables excluded from the projection in the transitions of 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ 
+\begin_inset Formula $A'$
+\end_inset
+
+ is still well-behaved, since we maintain the occurrencies of operations
+ concerning the variables on which we project, that continue to appear exactly
+ once on each path.
+ Assuming the size of 
+\begin_inset Formula $A$
+\end_inset
+
+ as the sum of the sizes of 
+\begin_inset Formula $Q$
+\end_inset
+
+, 
+\begin_inset Formula $\delta$
+\end_inset
+
+ and 
+\begin_inset Formula $\textrm{SVars}\left(A\right)$
+\end_inset
+
+, this construction can be carried out in 
+\begin_inset Formula $O\left(n\right)$
+\end_inset
+
+.
+ To see that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\pi_{Y}\left\llbracket A\right\rrbracket $
+\end_inset
+
+, we can notice that given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, for each accepting run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, producing an 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu$
+\end_inset
+
+, there is an accepting run 
+\begin_inset Formula $\rho'$
+\end_inset
+
+ of 
+\begin_inset Formula $A'$
+\end_inset
+
+ that produces an 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu'$
+\end_inset
+
+ that assigns the same spans as 
+\begin_inset Formula $\mu$
+\end_inset
+
+ to the variables in common with 
+\begin_inset Formula $\mu'$
+\end_inset
+
+, which by construction belong to 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ The path 
+\begin_inset Formula $p'$
+\end_inset
+
+ supporting 
+\begin_inset Formula $\rho'$
+\end_inset
+
+ is exactly the path obtained by modifying the path 
+\begin_inset Formula $p$
+\end_inset
+
+ supporting 
+\begin_inset Formula $\rho$
+\end_inset
+
+ , by eliminitaning the operations on unprojected variables.
+ Moreover, since 
+\begin_inset Formula $A$
+\end_inset
+
+ is well-behaved, it can't happen that we accidentally increase the set
+ of strings accepted by 
+\begin_inset Formula $A'$
+\end_inset
+
+ with respect to 
+\begin_inset Formula $A$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+A similar result is valid for the union operation.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Theorem
+\noindent
+\begin_inset CommandInset label
+LatexCommand label
+name "ext-union"
+
+\end_inset
+
+Given two well-behaved eVset-automata 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ that are union-compatible, a third well-behaved eVset-automaton 
+\begin_inset Formula $C$
+\end_inset
+
+ can be produced in linear time such that 
+\begin_inset Formula $\left\llbracket C\right\rrbracket =\left\llbracket A\right\rrbracket \cup\left\llbracket B\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Proof
+Let us consider 
+\begin_inset Formula $A$
+\end_inset
+
+ to be of the form 
+\begin_inset Formula $\left(Q^{A},q_{0}^{A},q_{f}^{A},\delta^{A}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ of the form 
+\begin_inset Formula $\left(Q^{B},q_{0}^{B},q_{f}^{B},\delta^{B}\right)$
+\end_inset
+
+.
+ We can take 
+\begin_inset Formula $C=\left(Q^{C},q_{0}^{C},q_{f}^{C},\delta^{C}\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q^{C}=Q^{A}\cup Q^{B}\cup\left\{ q_{0}^{C},q_{f}^{C}\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{C}=\delta^{A}\cup\delta^{B}\cup\left\{ \left(q_{0}^{C},\textrm{Ø},q_{0}^{B}\right),\left(q_{f}^{B},\textrm{Ø},q_{f}^{C}\right),\left(q_{0}^{C},\textrm{Ø},q_{0}^{A}\right),\left(q_{f}^{A},\textrm{Ø},q_{f}^{C}\right)\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Proof
+In this construction, we allow to go from the initial state of 
+\begin_inset Formula $C$
+\end_inset
+
+ to either the one of
+\begin_inset Formula $A$
+\end_inset
+
+ or 
+\begin_inset Formula $B$
+\end_inset
+
+, and to go from the final state of 
+\begin_inset Formula $A$
+\end_inset
+
+ or that of 
+\begin_inset Formula $B$
+\end_inset
+
+ to the one of 
+\begin_inset Formula $C$
+\end_inset
+
+, without any new variable operations.
+ Thus, given a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, 
+\begin_inset Formula $C$
+\end_inset
+
+ can span exactly the 
+\begin_inset Formula $\mathbf{s}-$
+\end_inset
+
+tuples contained in 
+\begin_inset Formula $A\left(\mathbf{s}\right)\cup B\left(\mathbf{s}\right)$
+\end_inset
+
+.
+ Regarding the complexity, the operations that we perform here are the union
+ of the states sets and transition functions, with the addition of a fixed
+ number of new transitions and states.
+ Let us consider the size of the input as 
+\begin_inset Formula $n=n_{A}+n_{B}=\left|Q^{A}\right|+\left|\delta^{A}\right|+\left|\textrm{SVars}\left(A\right)\right|+\left|Q^{B}\right|+\left|\delta^{B}\right|+\left|\textrm{SVars}\left(B\right)\right|$
+\end_inset
+
+.
+ If we assume the costs of basic operations as adding/deleting a state/transitio
+ns to be constant, then obtaining 
+\begin_inset Formula $Q^{C}$
+\end_inset
+
+ takes 
+\begin_inset Formula $O\left(\left|Q^{B}\right|\right)=O\left(n\right)$
+\end_inset
+
+ time, and constructing 
+\begin_inset Formula $\delta^{C}$
+\end_inset
+
+ takes 
+\begin_inset Formula $O\left(\left|\delta^{B}\right|\right)=O\left(n\right)$
+\end_inset
+
+ time.
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+In order to show that we can obtain the join of two spanners, represented
+ by well-behaved eVset-automata, so that the size of the correspondent resulting
+ eVset-automaton is polynomial in the size of the input automata, we need
+ a few more steps with respect to the previous cases.
+ The construction that I present is conceptually very similar to that described
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+.
+ The construction described there requires that the input automata are in
+ a particular form, which prevents the size of the result from being polynomial
+ in the size of the input.
+ Here, a particular form of eVset-automata is required too, but it allows
+ to keep the size of the result polynomial in the input.
+ The kind of eVset-automata that we need are called 
+\emph on
+operation-closed
+\emph default
+.
+\end_layout
+
+\begin_layout Definition
+Given a eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, 
+\begin_inset Formula $A$
+\end_inset
+
+ is operation-closed if, for every pair of states 
+\begin_inset Formula $q,q'$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+, whenever there exists an operation-only path 
+\begin_inset Formula $p$
+\end_inset
+
+=
+\begin_inset Formula $t_{1},\ldots,t_{n}$
+\end_inset
+
+ between 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $q'$
+\end_inset
+
+, then there exists a transition in 
+\begin_inset Formula $A$
+\end_inset
+
+ of the form 
+\begin_inset Formula $\left(q,\bigcup_{i=1}^{n}\textrm{Ops}\left(t_{i}\right),q'\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Proposition
+Given a well-behaved eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+, there exists an operation-closed well-behaved eVset-automaton 
+\begin_inset Formula $A'$
+\end_inset
+
+ such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\left\llbracket A\right\rrbracket $
+\end_inset
+
+.
+ Moreover, the size of 
+\begin_inset Formula $A'$
+\end_inset
+
+ is polynomial in the size of 
+\begin_inset Formula $A$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Proof
+Let us consider 
+\begin_inset Formula $A$
+\end_inset
+
+ to be of the form 
+\begin_inset Formula $\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+.
+ Without loss of generality, we can assume that 
+\begin_inset Formula $A$
+\end_inset
+
+ is pruned.
+ Then we can take 
+\begin_inset Formula $A'=\left(Q',q_{0}',q_{f}',\delta'\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q'=Q$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{0}'=q_{0}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}'=q_{f}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta'=\delta\cup\left\{ \left(q,\bigcup_{i=1}^{n}\textrm{Ops}\left(t_{i}\right),q'\right)\mid\exists p=t_{1},\ldots,t_{n}\in\textrm{Paths}\left(A\right):p=p_{q}^{q'}\textrm{, \ensuremath{p} is operation-only}\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Proof
+This construction does nothing but including the transitions that are missing
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ to be operation-closed in 
+\begin_inset Formula $A'$
+\end_inset
+
+.
+ We now show that for every string 
+\begin_inset Formula $\mathbf{s}\in\varSigma^{\ast}$
+\end_inset
+
+, 
+\begin_inset Formula $A'\left(\mathbf{s}\right)=A\left(\mathbf{s}\right)$
+\end_inset
+
+.
+ To see that 
+\begin_inset Formula $A'\left(\mathbf{s}\right)\subseteq A\left(\mathbf{s}\right)$
+\end_inset
+
+, consider an accepting run 
+\begin_inset Formula $\rho'$
+\end_inset
+
+ of 
+\begin_inset Formula $A'$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, that returns an 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ This run is supported by a complete path 
+\begin_inset Formula $p'$
+\end_inset
+
+ in 
+\begin_inset Formula $A'$
+\end_inset
+
+.
+ We can always find a complete path 
+\begin_inset Formula $p$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ that supports a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, which returns 
+\begin_inset Formula $\mu$
+\end_inset
+
+ as well.
+ To obtain 
+\begin_inset Formula $p$
+\end_inset
+
+, we substitute every operations transition 
+\begin_inset Formula $t$
+\end_inset
+
+ in 
+\begin_inset Formula $p'$
+\end_inset
+
+ that doesn't belong to 
+\begin_inset Formula $\delta$
+\end_inset
+
+ with a operation-only path 
+\begin_inset Formula $p''$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ such that 
+\begin_inset Formula $\textrm{LOps}\left(p''\right)=\textrm{LOps}\left(t\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p''$
+\end_inset
+
+ is between the source and destination states of 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ This is always possible by construction of 
+\begin_inset Formula $A'$
+\end_inset
+
+.
+ It is easy to verify that the run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, supported by 
+\begin_inset Formula $p$
+\end_inset
+
+, returns indeed 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ 
+\begin_inset Formula $A\left(\mathbf{s}\right)\subseteq A\left('\mathbf{s}\right)$
+\end_inset
+
+ is also true, because we include all the transitions belonging to 
+\begin_inset Formula $\delta$
+\end_inset
+
+ in 
+\begin_inset Formula $\delta'$
+\end_inset
+
+.
+ The fact that the size of 
+\begin_inset Formula $A'$
+\end_inset
+
+ is polynomial in the size of 
+\begin_inset Formula $A$
+\end_inset
+
+ follows from the fact that we add 
+\begin_inset Formula $O\left(\left|Q^{2}\right|\right)$
+\end_inset
+
+ new transitions to 
+\begin_inset Formula $\delta$
+\end_inset
+
+ to form 
+\begin_inset Formula $\delta'$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Standard
+I now present a product construction that simulates running two operation-closed
+ well-behaved eVset-automata in parallel.
+ Notice that we need the input automata to be operation-closed, in order
+ for the construction to be correct.
+\end_layout
+
+\begin_layout Definition
+Given two well-behaved operation-closed eVset-automata 
+\begin_inset Formula $A=\left(Q_{A},q_{A}^{0},q_{A}^{f},\delta_{A}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $B=\left(Q_{B},q_{B}^{0},q_{B}^{f},\delta_{B}\right)$
+\end_inset
+
+, their product is a eVset-automaton 
+\begin_inset Formula $C=\left(Q,q^{0},q^{f},\delta\right)$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q=Q_{A}\times Q_{B}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q^{0}=\left\langle q_{A}^{0},q_{B}^{0}\right\rangle $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q^{f}=\left\langle q_{A}^{f},q_{B}^{f}\right\rangle $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta$
+\end_inset
+
+ has the following transitions:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\left(\left\langle q_{A},q_{B}\right\rangle ,\sigma,\left\langle q'_{A},q'_{B}\right\rangle \right)$
+\end_inset
+
+ whenever 
+\begin_inset Formula $\sigma\in\varSigma$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{A},\sigma,q'_{A}\right)\in\delta_{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(q_{B},\sigma,q'_{B}\right)\in\delta_{B}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\left(\left\langle q_{A},q_{B}\right\rangle ,S_{A}\cup S_{B},\left\langle q'_{A},q'_{B}\right\rangle \right)$
+\end_inset
+
+ whenever 
+\begin_inset Formula $\left(q_{A},S_{A},q'_{A}\right)\in\delta_{A}$
+\end_inset
+
+, 
+\begin_inset Formula $\left(q_{B},S_{B},q'_{B}\right)\in\delta_{B}$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{A}=\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{B}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\left(\left\langle q_{A},q_{B}\right\rangle ,S_{A},\left\langle q'_{A},q{}_{B}\right\rangle \right)$
+\end_inset
+
+ whenever 
+\begin_inset Formula $\left(q_{A},S_{A},q'_{A}\right)\in\delta_{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{A}=\textrm{Ø}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\left(\left\langle q_{A},q_{B}\right\rangle ,S_{B},\left\langle q{}_{A},q'_{B}\right\rangle \right)$
+\end_inset
+
+ whenever 
+\begin_inset Formula $\left(q_{B},S_{B},q'_{B}\right)\in\delta_{B}$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(\textrm{SVOps}\left(A\right)\cap\textrm{SVOps}\left(B\right)\right)\cap S_{B}=\textrm{Ø}$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Definition
+We may write 
+\begin_inset Formula $C=A\times B$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Standard
+We can now state the following theorem.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset CommandInset label
+LatexCommand label
+name "ext-join"
+
+\end_inset
+
+Given two well-behaved operation-closed eVset-automata 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+, and given an eVset-automaton 
+\begin_inset Formula $C$
+\end_inset
+
+ such that 
+\begin_inset Formula $C=A\times B$
+\end_inset
+
+, then 
+\begin_inset Formula $\left\llbracket C\right\rrbracket =\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket $
+\end_inset
+
+.
+ Moreover, the size of 
+\begin_inset Formula $C$
+\end_inset
+
+ is polynomial in the size of 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Proof
+To show that 
+\begin_inset Formula $\left\llbracket C\right\rrbracket \subseteq\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket $
+\end_inset
+
+, we can easily decompose a run of 
+\begin_inset Formula $C$
+\end_inset
+
+ on a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ into two consistent runs of 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ To show that 
+\begin_inset Formula $\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket \subseteq\left\llbracket C\right\rrbracket $
+\end_inset
+
+, consider a string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, a 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu_{A}\in A\left(\mathbf{s}\right)$
+\end_inset
+
+ and a 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu_{B}\in B\left(\mathbf{s}\right)$
+\end_inset
+
+ that agrees with 
+\begin_inset Formula $\mu_{A}$
+\end_inset
+
+ on common variables.
+ Given the 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu$
+\end_inset
+
+ that yelds all the variable assignments of 
+\begin_inset Formula $\mu_{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mu_{B}$
+\end_inset
+
+.
+ We need to find a run 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of 
+\begin_inset Formula $C$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ that returns 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ Let us call 
+\begin_inset Formula $\rho_{A}\in\textrm{ARuns}\left(A,\mathbf{s}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\rho_{B}\in\textrm{ARuns}\left(B,\mathbf{s}\right)$
+\end_inset
+
+ the runs that return 
+\begin_inset Formula $\mu_{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mu_{B}$
+\end_inset
+
+, respectively.
+ We can obtain 
+\begin_inset Formula $\rho$
+\end_inset
+
+ by combining 
+\begin_inset Formula $\rho_{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\rho_{B}$
+\end_inset
+
+.
+ To do that, we first need to ensure that 
+\begin_inset Formula $\rho_{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\rho_{B}$
+\end_inset
+
+ are consistent on the order of the variable operations they perform.
+ Since 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ are well-behaved and operation-closed, 
+\begin_inset Formula $\rho_{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\rho_{B}$
+\end_inset
+
+ can always be selected so that they are consistent.
+\end_layout
+
+\begin_layout --Separator--
+\noindent
+
+\end_layout
+
+\begin_layout Standard
+Let us denote the class of eVset-automata by 
+\begin_inset Formula $\textrm{VA}_{\textrm{eSet}}$
+\end_inset
+
+.
+ We can now state the following theorem.
+\end_layout
+
+\begin_layout Standard
+Now, let us reason on the relative expressive power of eVset-automata with
+ respect to plain vset-automata.
+ Actually, they are equivalent, as the following lemmas show.
+\end_layout
+
+\begin_layout Lemma
+\noindent
+Given an eVset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, 
+\begin_inset Formula $A$
+\end_inset
+
+ can be converted into a vset-automaton 
+\begin_inset Formula $A'$
+\end_inset
+
+, such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\left\llbracket A\right\rrbracket $
+\end_inset
+
+, in polynomial time, and in a well-behavedness preserving manner
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Note that I didn't define well-behavedness in the case of a plain vset-automaton
+, but the concept is the same and the definition isn't difficult to figure
+ out.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Proof
+Without loss of generality, we consider an ordering of the symbols in 
+\begin_inset Formula $\textrm{SVOps}\left(A\right)$
+\end_inset
+
+ of the following form:
+\begin_inset Formula 
+\[
+x\vdash,\ldots,y\vdash,x\dashv,\ldots,y\dashv
+\]
+
+\end_inset
+
+ In this ordering, all insertion operations come before the deletion operations.
+ We define 
+\begin_inset Formula $o\prec o'$
+\end_inset
+
+, 
+\begin_inset Formula $o,o'\in\textrm{SVOps}\left(A\right)$
+\end_inset
+
+, if 
+\begin_inset Formula $o$
+\end_inset
+
+ comes before 
+\begin_inset Formula $o'$
+\end_inset
+
+ (
+\emph on
+not
+\emph default
+ if they are equal) in the chosen ordering.
+ Consider 
+\begin_inset Formula $A'=$
+\end_inset
+
+
+\begin_inset Formula $\left(Q',q_{0}',q_{f}',\delta'\right)$
+\end_inset
+
+, with 
+\begin_inset Formula $\textrm{SVars}\left(A'\right)=\textrm{SVars}\left(A\right)$
+\end_inset
+
+, whose components are defined as follows:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q'=Q\cup Q^{\textrm{ops}}\cup Q^{\textrm{Ø}}$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $Q^{\textrm{ops}}=\left\{ q_{q',o,q''}\mid\exists\left(q',S,q''\right)\in\delta:o\in S\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Q^{\textrm{Ø}}=\left\{ q_{\textrm{q',Ø,q''}}\mid\exists\left(q',\textrm{Ø},q''\right)\in\delta\right\} $
+\end_inset
+
+;
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $q_{0}'=q_{0};$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q_{f}'=q_{f}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta'=\left(\delta\setminus\delta^{S}\right)\cup\delta^{\textrm{ops}}\cup\delta^{\textrm{Ø}}\cup\delta^{\varepsilon}$
+\end_inset
+
+, where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\delta^{S}=\left\{ \left(q,S,q'\right)\in\delta\right\} ;$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{ops}}=\left\{ \left(q_{q',o,q''},o,q_{q',o',q''}\right)\mid\exists\left(q',S,q''\right)\in\delta:\left(o,o'\epsilon S\land o\prec o'\land\forall o''\in S:o\nprec o''\nprec o'\right)\right\} \cup\left\{ \left(q_{q',o,q''},o,q''\right)\mid\exists\left(q',S,q''\right)\in\delta:\left(o\epsilon S\land\forall o'\in S:o\nprec o'\right)\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\textrm{Ø}}=\left\{ \left(q_{\textrm{q',Ø,q''}},\varepsilon,q''\right)\mid\exists\left(q',\textrm{Ø},q''\right)\in\delta\right\} ;$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\delta^{\varepsilon}=\left\{ \left(q,\varepsilon,q'\right)\mid\left(\exists\left(q',o,q''\right)\in\delta^{\textrm{ops}}:\forall\left(q',o',q''\right)\in\delta^{\textrm{ops}}:o'\nprec o\right)\lor\left(\exists\left(q',\varepsilon,q''\right)\in\delta^{\textrm{Ø}}\right)\right\} $
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Proof
+This construction expands the transitions of 
+\begin_inset Formula $A$
+\end_inset
+
+ that are labeled with a set of variable operations into a sequence of transitio
+ns performing one operation at a time, taking care of putting the insertion
+ operations before the deletion ones, thus preserving well-behavedness.
+ It also substitutes transitions labeled with the empty set with ordinary
+ 
+\begin_inset Formula $\varepsilon-$
+\end_inset
+
+transitions.
+ To prove equivalence between 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $A'$
+\end_inset
+
+ it is sufficient to notice that for every string 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, every run belonging to
+\begin_inset Formula $\textrm{ARuns}\left(A,\mathbf{s}\right)$
+\end_inset
+
+ can be put in correspondence with a run belonging to 
+\begin_inset Formula $\textrm{ARuns}\left(A',\mathbf{s}\right)$
+\end_inset
+
+.
+ Indeed, if we start from 
+\begin_inset Formula $\rho\in\textrm{ARuns}\left(A,\mathbf{s}\right)$
+\end_inset
+
+ we can obtain a run 
+\begin_inset Formula $\textrm{\rho'\in ARuns}\left(A',\mathbf{s}\right)$
+\end_inset
+
+ that spans the same 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ It is sufficient to expand configuration pairs in 
+\begin_inset Formula $\rho$
+\end_inset
+
+ whose current states are linked in 
+\begin_inset Formula $A$
+\end_inset
+
+ by a transition 
+\begin_inset Formula $t$
+\end_inset
+
+, which we expand in 
+\begin_inset Formula $A'$
+\end_inset
+
+, with a series of configurations that let us perform the set of variable
+ operations in 
+\begin_inset Formula $t$
+\end_inset
+
+ one at a time.
+ This is always possible by construction of 
+\begin_inset Formula $A'$
+\end_inset
+
+.
+ If we start from 
+\begin_inset Formula $\textrm{\rho'\in ARuns}\left(A',\mathbf{s}\right)$
+\end_inset
+
+, we can obtain an equivalent run 
+\begin_inset Formula $\rho\in\textrm{ARuns}\left(A,\mathbf{s}\right)$
+\end_inset
+
+ in the opposite way, by compressing consecutive configurations.
+ The details are omitted.
+\end_layout
+
+\begin_layout Proof
+\noindent
+It remains to show that the construction of 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be carried in polynomial time.
+ Let us refer to the size of 
+\begin_inset Formula $A$
+\end_inset
+
+ as 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ We consider 
+\begin_inset Formula $n=\left|Q\right|+\left|\delta\right|+\left|\textrm{SVars}\left(A\right)\right|$
+\end_inset
+
+.
+ With the usual assumptions, adding a new transition, removing a state and
+ removing a transition take constant time.
+ Thus, expanding a single transition of 
+\begin_inset Formula $A$
+\end_inset
+
+ takes 
+\begin_inset Formula $O\left(\left|\textrm{SVars}\left(A\right)\right|\right)=O\left(n\right)$
+\end_inset
+
+ time.
+ Expanding every transition that is needed will then take 
+\begin_inset Formula $O\left(\left|\textrm{SVars}\left(A\right)\right|\cdot\left|\delta\right|\right)=O\left(n^{2}\right)$
+\end_inset
+
+ time.
+\end_layout
+
+\begin_layout Standard
+The opposite direction is also true.
+\end_layout
+
+\begin_layout Lemma
+\noindent
+Given a vset-automaton 
+\begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
+\end_inset
+
+, an eVset-automaton 
+\begin_inset Formula $A'$
+\end_inset
+
+ can be found such that 
+\begin_inset Formula $\left\llbracket A'\right\rrbracket =\left\llbracket A\right\rrbracket $
+\end_inset
+
+, in polynomial time, and in a well-behavedness preserving manner.
+\end_layout
+
+\begin_layout Proof
+In this case it is sufficient to replace every transition 
+\begin_inset Formula $t$
+\end_inset
+
+ performing a variable operation 
+\begin_inset Formula $o$
+\end_inset
+
+ in 
+\begin_inset Formula $A$
+\end_inset
+
+ with an operations transition 
+\begin_inset Formula $t'$
+\end_inset
+
+ in 
+\begin_inset Formula $A'$
+\end_inset
+
+ such that 
+\begin_inset Formula $\textrm{Ops}\left(t'\right)=\left\{ o\right\} $
+\end_inset
+
+ and 
+\begin_inset Formula $\textrm{LOps}\left(t'\right)=o$
+\end_inset
+
+ .
+ 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+-transitions can be replaced by operations transitions with an empty set.
+ With the usual assumptions, this construction can be obtained in linear
+ time.
+ It is easy to verify equivalence, and that well-behavedness is preserved.
+\end_layout
+
+\begin_layout Theorem
+Given a regex formula 
+\begin_inset Formula $\gamma$
+\end_inset
+
+, 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ can be converted into an equivalent, well-behaved eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ in polynomial time.
 \end_layout
 
 \begin_layout Section
@@ -4977,22 +7756,6 @@ Given a NFA
 \end_layout
 
 \begin_layout Standard
-\begin_inset CommandInset include
-LatexCommand include
-filename "C:/Users/Andrea/Desktop/try.txt"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset include
-LatexCommand include
-filename "C:/Users/Andrea/Desktop/try2.txt"
-
-\end_inset
-
 
 \end_layout
 
@@ -5011,7 +7774,7 @@ filename "conclusion.lyx"
 \lang english
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "xampl"
+bibfiles "spanners"
 options "apalike"
 
 \end_inset
