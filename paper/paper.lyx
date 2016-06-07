@@ -4680,10 +4680,17 @@ Another lemma, known as the
 \emph on
 core simplification lemma
 \emph default
-, gives a even more simple way of representing core spanners.
+, gives an even more simple way of representing core spanners.
 \end_layout
 
 \begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "Core-simplif"
+
+\end_inset
+
+
 \begin_inset Formula $\mathbf{(Core\,Simplification\,Lemma)}$
 \end_inset
 
@@ -4740,7 +4747,7 @@ where:
 \begin_layout Standard
 \noindent
 Now I look at which string relations can be simulated by core spanners.
- In the next definition, I define three string relations of relevance.
+ In the next definition, I present three string relations of relevance.
 \end_layout
 
 \begin_layout Definition
@@ -7338,6 +7345,12 @@ Now, let us reason on the relative expressive power of eVset-automata with
 
 \begin_layout Lemma
 \noindent
+\begin_inset CommandInset label
+LatexCommand label
+name "eVset-to-plain"
+
+\end_inset
+
 Given an eVset-automaton 
 \begin_inset Formula $A=\left(Q,q_{0},q_{f},\delta\right)$
 \end_inset
@@ -7686,22 +7699,165 @@ In this case it is sufficient to replace every transition
  It is easy to verify equivalence, and that well-behavedness is preserved.
 \end_layout
 
+\begin_layout Standard
+This result is interesting, as it ensures that any well-behaved eVset-automaton,
+ equipped with the string equality selection operator in some way, does
+ indeed represent an AQL core fragment.
+ What about the inverse? In order for the runtime system to work, we would
+ like to prove that an AQL core fragment can be represented by a well-behaved
+ eVset automaton, extended with string equality selection.
+ An AQL core fragment is basically a set of regex formulas combined by using
+ the algebraic operators described in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Algebras-of-Spanners"
+
+\end_inset
+
+.
+ We already know that well-behaved eVset-automata are closed under projection,
+ union and join, so it remains to prove that a regex formula can always
+ be converted into a well-behaved eVset-automaton.
+\end_layout
+
 \begin_layout Theorem
+\begin_inset CommandInset label
+LatexCommand label
+name "regex-to-well"
+
+\end_inset
+
 Given a regex formula 
 \begin_inset Formula $\gamma$
 \end_inset
 
-, 
-\begin_inset Formula $\gamma$
-\end_inset
-
- can be converted into an equivalent, well-behaved eVset-automaton 
+, a well-behaved eVset-automaton 
 \begin_inset Formula $A$
 \end_inset
 
- in polynomial time.
+ can be found, in polynomial time, such that 
+\begin_inset Formula $\left\llbracket A\right\rrbracket =\left\llbracket \gamma\right\rrbracket $
+\end_inset
+
+.
 \end_layout
 
+\begin_layout Standard
+Let us call the class of well-behaved eVset-automata 
+\begin_inset Formula $\textrm{VA}_{\textrm{eSet}}$
+\end_inset
+
+.
+ By combining Theorems 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "regex-to-well"
+
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "ext-union"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "ext-join"
+
+\end_inset
+
+ and Lemma 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eVset-to-plain"
+
+\end_inset
+
+, we can state the following theorem.
+\end_layout
+
+\begin_layout Theorem
+\begin_inset Formula $\left\llbracket \textrm{RGX}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{VA}_{\textrm{eSet}}^{\left\{ \cup,\pi,\bowtie,\varsigma^{=}\right\} }\right\rrbracket =\left\llbracket \textrm{VA}_{\textrm{eSet}}^{\left\{ \pi,\varsigma^{=}\right\} }\right\rrbracket $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Finally, we can also formulate a modified version of the Core Simplification
+ Lemma (Lemma 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Core-simplif"
+
+\end_inset
+
+).
+ The proof is the same as the proof of the original lemma, which can be
+ found in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+, and is omitted here.
+\end_layout
+
+\begin_layout Lemma
+Every core spanner can be defined by an expression of the form
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Formula 
+\begin{equation}
+\pi_{V}SA
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+\noindent
+where:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $A$
+\end_inset
+
+ is a well-behaved eVset-automaton;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $V\subseteq\textrm{SVars}\left(A\right)$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $S$
+\end_inset
+
+ is a sequence of string selections 
+\begin_inset Formula $\varsigma_{x,y}^{=}$
+\end_inset
+
+, for 
+\begin_inset Formula $x,y\in\textrm{SVars}\left(A\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
 \begin_layout Section
 Methods for NFA execution
 \end_layout
@@ -7711,7 +7867,11 @@ The Thompson Approach
 \end_layout
 
 \begin_layout Standard
-Given a NFA 
+Given a regular expression 
+\begin_inset Formula $r$
+\end_inset
+
+, its corresponding NFA 
 \begin_inset Formula $A$
 \end_inset
 
@@ -7748,14 +7908,771 @@ Given a NFA
 \begin_inset Formula $A$
 \end_inset
 
- if, at the end of the execution, at least one state in the current state
- set is an accepting state.
- In its common versions, the algorithm implements a policy to discriminate
- among ambiguous matches (e.g.
- greedy leftmost).
+ if, at the end of the execution, all the symbols of 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ have been consumed and at least one state in the current state set is an
+ accepting state.
+ It can be shown that the time complexity of this approach is 
+\begin_inset Formula $O\left(mn\right)$
+\end_inset
+
+, where 
+\begin_inset Formula $m$
+\end_inset
+
+ is the size of 
+\begin_inset Formula $r$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
+Usually, we accept 
+\emph on
+partial matchings,
+\emph default
+ meaning that we don't require to reach the end of a string to produce a
+ matching, instead we only require that one current state set contains the
+ final state.
+ This is useful for implementing 
+\emph on
+unanchored matchings.
+ 
+\emph default
+Partial matchings pose the problem of ambiguous matches, and this is why
+ concrete algorithms implement a policy to discriminate among multiple possible
+ matchings (e.g.
+ greedy leftmost).
+ For more information on the Thompson approach, see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "cox_regular_2007"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering 
+\backslash
+begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+\backslash
+node[state,initial]  (q_0)                      {$q_0$}; 
+\backslash
+node[state]          (q_1) [above right=of q_0] {$q_1$}; 
+\backslash
+node[state]          (q_2) [below right=of q_0] {$q_2$}; 
+\backslash
+node[state,accepting](q_3) [below right=of q_1] {$q_3$}; 
+\backslash
+path[->] (q_0) edge              node        {a} (q_1) 		edge          
+    node [swap] {$
+\backslash
+varepsilon$} (q_2) 	  (q_1) edge [bend left]  node        {a} (q_3) 		edge
+ [bend right] node        {b} (q_3) 		edge [loop above] node        {a}
+ () 	  (q_2) edge              node [swap] {c} (q_3) 		edge [loop below]
+ node        {a} () 	  (q_3) edge [loop right] node        {a} (); 
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\begin_inset CommandInset label
+LatexCommand label
+name "thompson-aut"
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+An 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+-NFA 
+\begin_inset Formula $A$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering 
+\backslash
+begin{tikzpicture}[node distance=2.5cm,auto]     
+\backslash
+node (one) [align=left] {$
+\backslash
+underline{a}aab$
+\backslash
+
+\backslash
+$
+\backslash
+left
+\backslash
+{ q_{0}
+\backslash
+right
+\backslash
+} $};     
+\backslash
+node (two) [right of=one,align=left] {$a
+\backslash
+underline{a}ab$
+\backslash
+
+\backslash
+$
+\backslash
+left
+\backslash
+{ q_{1}, q_{2} 
+\backslash
+right
+\backslash
+} $};     
+\backslash
+node (three) [right of=two,align=left] {$aa
+\backslash
+underline{a}b$
+\backslash
+
+\backslash
+$
+\backslash
+left
+\backslash
+{ q_{1}, q_{2}, q_{3} 
+\backslash
+right
+\backslash
+} $};     
+\backslash
+node (four) [right of=three,align=left] {$aaa
+\backslash
+underline{b}$
+\backslash
+
+\backslash
+$
+\backslash
+left
+\backslash
+{ q_{1}, q_{2}, q_{3} 
+\backslash
+right
+\backslash
+} $};     
+\backslash
+node (five) [right of=four,align=left] {aaab
+\backslash
+underline{ }
+\backslash
+
+\backslash
+$
+\backslash
+left
+\backslash
+{q_{3} 
+\backslash
+right
+\backslash
+} $};     
+\backslash
+path[->] (one) edge node {} (two);     
+\backslash
+path[->] (two) edge node {} (three);     
+\backslash
+path[->] (three) edge node {} (four);     
+\backslash
+path[->] (four) edge node {} (five); 
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\begin_inset CommandInset label
+LatexCommand label
+name "thompson-exec"
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The execution of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 'aaab' according to the Thompson approach.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\lang american
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Example of the Thompson algorithm.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Example
+The automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ of Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "thompson-aut"
+
+\end_inset
+
+ matches the string 
+\begin_inset Formula $\mathbf{s}=$
+\end_inset
+
+'aaab'.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "thompson-exec"
+
+\end_inset
+
+ illustrates the execution of 
+\begin_inset Formula $A$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+.
+ Notice how runs that end up in the same state are naturally merged.
+ For instance, if we are in 
+\begin_inset Formula $q_{1}$
+\end_inset
+
+ and we read an 
+\begin_inset Formula $a$
+\end_inset
+
+ we can go to 
+\begin_inset Formula $q_{3}$
+\end_inset
+
+, but we can also read an 
+\begin_inset Formula $a$
+\end_inset
+
+ while in 
+\begin_inset Formula $q_{3}$
+\end_inset
+
+, remaining in that state.
+ Nonetheless, in the cases where both 
+\begin_inset Formula $q_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $q_{3}$
+\end_inset
+
+ are in the current state set, 
+\begin_inset Formula $q_{3}$
+\end_inset
+
+ appears only once in the next.
+ This is because the two originally distinct runs are now equivalent.
+ This lets the algorithm keep a reduced list of current states, and justifies
+ the runtime complexity presented.
+\end_layout
+
+\begin_layout Standard
+One interesting implementation of the Thompson algorithm views an NFA as
+ a program that can be executed by a virtual machine on a string.
+ This method is described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "cox_regular_2009"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+The Virtual Machine Implementation
+\end_layout
+
+\begin_layout Standard
+In this implementation, a NFA is converted into a program, written in a
+ simple assembly language with few instructions.
+ The basic instructions are character match (CHAR), string match (MATCH),
+ and control flow instructions (SPLIT and JUMP).
+ A virtual machine is provided, which treats each concurrent run on a string
+ 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+ as a conceptual thread.
+ The virtual machine advances all the threads in lockstep, in the spirit
+ of the Thompson approach.
+ The actual implementation can enforce a policy for ambiguous matches.
+ Different threads that reach the same instruction in a program are merged.
+ 
+\end_layout
+
+\begin_layout Standard
+The main advantage of this method is that it is easy to enrich the assembly
+ language with new instructions, in order to support new features.
+ To execute new instructions, modyifing the virtual machine is required.
+ For instance, capturing groups can be implemented by equipping each thread
+ with an array of saved pointers that are grouped by two: each first element
+ would point to the beginning of a group and each second one would point
+ to its end.
+ Then, a SAVE instruction could be added, that would make the virtual machine
+ record the current position in the input into the pointer specified by
+ the instruction.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tikzpicture} 
+\backslash
+matrix [ampersand replacement=
+\backslash
+&]{ 	
+\backslash
+node {0}; 
+\backslash
+& 
+\backslash
+node {CHAR a};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node {1}; 
+\backslash
+& 
+\backslash
+node {SPLIT 0, 2};
+\backslash
+
+\backslash
+ 	
+\backslash
+node {2}; 
+\backslash
+& 
+\backslash
+node {SPLIT 3, 5};
+\backslash
+
+\backslash
+ 	
+\backslash
+node {3}; 
+\backslash
+& 
+\backslash
+node {CHAR b};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node {4}; 
+\backslash
+& 
+\backslash
+node {JUMP 2};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node {5}; 
+\backslash
+& 
+\backslash
+node {MATCH};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node {}; 
+\backslash
+& 
+\backslash
+node {};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node {}; 
+\backslash
+& 
+\backslash
+node {};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node {}; 
+\backslash
+& 
+\backslash
+node {};     
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+}; 
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tikzpicture} 
+\backslash
+matrix [ampersand replacement=
+\backslash
+&]{ 
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+node{0}; 
+\backslash
+& 
+\backslash
+node {SAVE 0};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{1}; 
+\backslash
+& 
+\backslash
+node {CHAR a};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{2}; 
+\backslash
+& 
+\backslash
+node {SPLIT 1, 3};
+\backslash
+
+\backslash
+ 	
+\backslash
+node{3}; 
+\backslash
+& 
+\backslash
+node {SAVE 1};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{4}; 
+\backslash
+& 
+\backslash
+node {SAVE 2};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{5}; 
+\backslash
+& 
+\backslash
+node {SPLIT 6, 8};
+\backslash
+
+\backslash
+ 	
+\backslash
+node{6}; 
+\backslash
+& 
+\backslash
+node {CHAR b};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{7}; 
+\backslash
+& 
+\backslash
+node {JUMP 5};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{8}; 
+\backslash
+& 
+\backslash
+node {SAVE 3};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{9}; 
+\backslash
+& 
+\backslash
+node {MATCH};     
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+}; 
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
@@ -7774,7 +8691,7 @@ filename "conclusion.lyx"
 \lang english
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "spanners"
+bibfiles "spanners,thompson,vm"
 options "apalike"
 
 \end_inset
