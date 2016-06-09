@@ -5299,8 +5299,8 @@ for each
 \end_inset
 
 , are defined in a similar ways to those of usual vset-automata.
- The reason why I call this new kind of vset-automata extended is that they
- allow to perform an arbitrary number of variable operations in one transition.
+ This new kind vset-automata allow to perform an arbitrary number of variable
+ operations in one transition.
  The operations in a transition are to be performed in a given order.
  The exact order isn't very important, except for the fact that, in a valid
  run, the insertion and removal of a variable from the active variable set
@@ -5322,6 +5322,8 @@ status open
 
 
 \backslash
+centering
+\backslash
 begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
 \backslash
 node[state,initial]  (q_0)                      {$q_0$}; 
@@ -5342,8 +5344,9 @@ vdash
 \backslash
 right
 \backslash
-} $} (q_1) 		edge [loop above] node        {.} () 	  (q_1) edge 	       
-   node        {$
+} $} (q_1) 		edge [loop above] node        {$
+\backslash
+varSigma$} () 	  (q_1) edge 	          node        {$
 \backslash
 left
 \backslash
@@ -5367,7 +5370,9 @@ dashv y
 right
 \backslash
 } $} (q_3) 		edge [loop above] node        {b} () 	  (q_3) edge [loop above]
- node        {.} (); 
+ node        {$
+\backslash
+varSigma$} (); 
 \backslash
 end{tikzpicture}
 \end_layout
@@ -5378,6 +5383,13 @@ end{tikzpicture}
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "evset"
+
+\end_inset
+
+
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
@@ -5399,6 +5411,9 @@ An eVset-automaton
 \end_layout
 
 \begin_layout Standard
+\begin_inset Formula $\varSigma$
+\end_inset
+
 The main reason for using eVset-automata instead of plain vset-automata
  is that the former can represent document spanners in a more compact way.
  I now introduce some additional useful concepts, the most important of
@@ -5956,6 +5971,32 @@ Given an eVset-automaton
 \begin_layout --Separator--
 \noindent
 
+\end_layout
+
+\begin_layout Example
+The eVset automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ from Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "evset"
+
+\end_inset
+
+ and the eVset-automaton 
+\begin_inset Formula $B$
+\end_inset
+
+ from Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "evset-2"
+
+\end_inset
+
+ are well-behaved and pruned.
 \end_layout
 
 \begin_layout Standard
@@ -6676,11 +6717,208 @@ key "Fagin:2015:DSF:2772377.2699442"
 \end_inset
 
 .
- The construction described there requires that the input automata are in
- a particular form, which prevents the size of the result from being polynomial
- in the size of the input.
- Here, a particular form of eVset-automata is required too, but it allows
- to keep the size of the result polynomial in the input.
+ That construction simulates running the input automata in parallel, making
+ sure that operations on common variables are performed simultaneously.
+ Unfortunately this doesn't work in general, as the next example shows.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\backslash
+begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+\backslash
+node[state,initial]  (q_0)                      {$q_0$}; 
+\backslash
+node[state]          (q_1) [right=of q_0] {$q_1$}; 
+\backslash
+node[state]          (q_2) [right=of q_1] {$q_2$}; 
+\backslash
+node[state,accepting](q_3) [right=of q_2] {$q_3$}; 
+\backslash
+path[->] (q_0) edge              node        {$
+\backslash
+left
+\backslash
+{ y
+\backslash
+vdash
+\backslash
+right
+\backslash
+} $} (q_1) 		edge [loop above] node        {$
+\backslash
+varSigma$} () 	  (q_1) edge 	          node        {$
+\backslash
+left
+\backslash
+{ x
+\backslash
+vdash
+\backslash
+right
+\backslash
+} $} (q_2) 		edge [loop above] node        {a} (q_2) 	  (q_2) edge     
+         node        {$
+\backslash
+left
+\backslash
+{ 
+\backslash
+dashv x,
+\backslash
+dashv y
+\backslash
+right
+\backslash
+} $} (q_3) 		edge [loop above] node        {b} () 	  (q_3) edge [loop above]
+ node        {$
+\backslash
+varSigma$} (); 
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "evset-2"
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+An eVset-automaton 
+\begin_inset Formula $B$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Example
+Consider the eVset-automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ from Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "evset"
+
+\end_inset
+
+, the eVset-automaton 
+\begin_inset Formula $B$
+\end_inset
+
+ from Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "evset-2"
+
+\end_inset
+
+ and the string 
+\begin_inset Formula $\mathbf{s}=$
+\end_inset
+
+'b'.
+ 
+\begin_inset Formula $\left\llbracket A\right\rrbracket \left(\mathbf{s}\right)$
+\end_inset
+
+ contains the 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+-tuple 
+\begin_inset Formula $\mu$
+\end_inset
+
+ such that 
+\begin_inset Formula $\mu\left(x\right)=\left[0,0\right\rangle $
+\end_inset
+
+ and 
+\begin_inset Formula $\mu\left(y\right)=\left[0,1\right\rangle $
+\end_inset
+
+.
+ We also have that 
+\begin_inset Formula $\mu\in\left\llbracket B\right\rrbracket \left(\mathbf{s}\right)$
+\end_inset
+
+.
+ If we attempt to run 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ in parallel on 
+\begin_inset Formula $\mathbf{s}$
+\end_inset
+
+, we won't be able to span 
+\begin_inset Formula $\mu$
+\end_inset
+
+ because the two automata disagree on the order of the operations 
+\begin_inset Formula $x\vdash$
+\end_inset
+
+ and 
+\begin_inset Formula $y\vdash$
+\end_inset
+
+.
+ Thus, we don't get 
+\begin_inset Formula $\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket \left(\mathbf{s}\right)$
+\end_inset
+
+ as a result of the execution.
+\end_layout
+
+\begin_layout Standard
+For the construction to work, the input automata must be modified in some
+ way.
+ Here, I use a particular form of eVset-automata, but it allows to keep
+ the size of the result polynomial in the input.
  The kind of eVset-automata that we need are called 
 \emph on
 operation-closed
@@ -6738,6 +6976,12 @@ Given a eVset-automaton
 \end_layout
 
 \begin_layout Proposition
+\begin_inset CommandInset label
+LatexCommand label
+name "well-b-to-op-clos"
+
+\end_inset
+
 Given a well-behaved eVset-automaton 
 \begin_inset Formula $A$
 \end_inset
@@ -7144,7 +7388,7 @@ name "ext-join"
 
 \end_inset
 
-Given two well-behaved operation-closed eVset-automata 
+Given two well-behaved eVset-automata 
 \begin_inset Formula $A$
 \end_inset
 
@@ -7181,7 +7425,25 @@ Given two well-behaved operation-closed eVset-automata
 \end_layout
 
 \begin_layout Proof
-To show that 
+Without loss of generality, we can assume that 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ are operation closed.
+ If this was not the case, we could always obtain equivalent automata that
+ are operation closed, in polynomial time, because of Proposition 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "well-b-to-op-clos"
+
+\end_inset
+
+.
+ To show that 
 \begin_inset Formula $\left\llbracket C\right\rrbracket \subseteq\left\llbracket A\right\rrbracket \bowtie\left\llbracket B\right\rrbracket $
 \end_inset
 
@@ -7326,15 +7588,6 @@ To show that
 \begin_layout --Separator--
 \noindent
 
-\end_layout
-
-\begin_layout Standard
-Let us denote the class of eVset-automata by 
-\begin_inset Formula $\textrm{VA}_{\textrm{eSet}}$
-\end_inset
-
-.
- We can now state the following theorem.
 \end_layout
 
 \begin_layout Standard
@@ -7700,9 +7953,17 @@ In this case it is sufficient to replace every transition
 \end_layout
 
 \begin_layout Standard
-This result is interesting, as it ensures that any well-behaved eVset-automaton,
- equipped with the string equality selection operator in some way, does
- indeed represent an AQL core fragment.
+These results are interesting.
+ In particular, Lemma 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eVset-to-plain"
+
+\end_inset
+
+ ensures that any well-behaved eVset-automaton, equipped with the string
+ equality selection operator in some way, can indeed represent an AQL core
+ fragment.
  What about the inverse? In order for the runtime system to work, we would
  like to prove that an AQL core fragment can be represented by a well-behaved
  eVset automaton, extended with string equality selection.
@@ -7715,9 +7976,8 @@ reference "sub:Algebras-of-Spanners"
 \end_inset
 
 .
- We already know that well-behaved eVset-automata are closed under projection,
- union and join, so it remains to prove that a regex formula can always
- be converted into a well-behaved eVset-automaton.
+ Thus we need to prove that a regex formula can always be converted into
+ a well-behaved eVset-automaton.
 \end_layout
 
 \begin_layout Theorem
@@ -7961,7 +8221,7 @@ key "cox_regular_2007"
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -7980,7 +8240,6 @@ centering
 \end_layout
 
 \begin_layout Plain Layout
-
 \begin_inset Float figure
 wide false
 sideways false
@@ -8023,7 +8282,6 @@ end{tikzpicture}
 \end_layout
 
 \begin_layout Plain Layout
-
 \begin_inset CommandInset label
 LatexCommand label
 name "thompson-aut"
@@ -8063,7 +8321,6 @@ An
 \end_layout
 
 \begin_layout Plain Layout
-
 \begin_inset Float figure
 wide false
 sideways false
@@ -8178,7 +8435,6 @@ end{tikzpicture}
 \end_layout
 
 \begin_layout Plain Layout
-
 \begin_inset CommandInset label
 LatexCommand label
 name "thompson-exec"
@@ -8203,8 +8459,6 @@ The execution of
 
 \end_inset
 
-
-\lang american
 
 \begin_inset Caption Standard
 
@@ -8314,8 +8568,8 @@ The Virtual Machine Implementation
 \end_layout
 
 \begin_layout Standard
-In this implementation, a NFA is converted into a program, written in a
- simple assembly language with few instructions.
+In this implementation, a NFA (or a regex) is converted into a program,
+ written in a simple assembly language with few instructions.
  The basic instructions are character match (CHAR), string match (MATCH),
  and control flow instructions (SPLIT and JUMP).
  A virtual machine is provided, which treats each concurrent run on a string
@@ -8336,8 +8590,8 @@ The main advantage of this method is that it is easy to enrich the assembly
  language with new instructions, in order to support new features.
  To execute new instructions, modyifing the virtual machine is required.
  For instance, capturing groups can be implemented by equipping each thread
- with an array of saved pointers that are grouped by two: each first element
- would point to the beginning of a group and each second one would point
+ with an array of saved pointers that are grouped by two: the first element
+ would point to the beginning of a group and the second one would point
  to its end.
  Then, a SAVE instruction could be added, that would make the virtual machine
  record the current position in the input into the pointer specified by
@@ -8370,7 +8624,7 @@ centering
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -8490,10 +8744,21 @@ end{tikzpicture}
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "prog"
+
+\end_inset
+
+
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+A program for the regex 
+\begin_inset Formula $a^{+}b^{\ast}$
+\end_inset
 
+.
 \end_layout
 
 \end_inset
@@ -8642,16 +8907,9 @@ end{tikzpicture}
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
+\begin_inset CommandInset label
+LatexCommand label
+name "prog-capt"
 
 \end_inset
 
@@ -8659,7 +8917,25 @@ end{tikzpicture}
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+A program for the regex 
+\begin_inset Formula $\left(a^{+}\right)\left(b^{\ast}\right)$
+\end_inset
 
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Example programs.
 \end_layout
 
 \end_inset
@@ -8674,6 +8950,425 @@ end{tikzpicture}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Example
+The program shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "prog"
+
+\end_inset
+
+ can be used to match the regular expression 
+\begin_inset Formula $a^{+}b^{*}$
+\end_inset
+
+.
+ SPLIT instructions explictly divide a thread into two, telling each of
+ the generated threads which position in the program to reach.
+ The program in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "prog-capt"
+
+\end_inset
+
+ matches the same expression as the one in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "prog"
+
+\end_inset
+
+, but it retains the substrings matching the subexpressions between parentheses
+ too.
+\end_layout
+
+\begin_layout Example
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\backslash
+begin{tikzpicture} 
+\backslash
+matrix [ampersand replacement=
+\backslash
+&]{ 
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+node{0}; 
+\backslash
+& 
+\backslash
+node {SPLIT 1, 8};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{1}; 
+\backslash
+& 
+\backslash
+node {CHAR a};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{2}; 
+\backslash
+& 
+\backslash
+node {SPLIT 1, 3};
+\backslash
+
+\backslash
+ 	
+\backslash
+node{3}; 
+\backslash
+& 
+\backslash
+node {SPLIT 4, 6};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{4}; 
+\backslash
+& 
+\backslash
+node {CHAR a};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{5}; 
+\backslash
+& 
+\backslash
+node {JUMP 7};
+\backslash
+
+\backslash
+ 	
+\backslash
+node{6}; 
+\backslash
+& 
+\backslash
+node {CHAR b};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{7}; 
+\backslash
+& 
+\backslash
+node {JUMP 12};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{8}; 
+\backslash
+& 
+\backslash
+node {SPLIT 9, 11};    
+\backslash
+
+\backslash
+ 	
+\backslash
+node{9}; 
+\backslash
+& 
+\backslash
+node {CHAR a};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node{10}; 
+\backslash
+& 
+\backslash
+node {JUMP 8};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node{11}; 
+\backslash
+& 
+\backslash
+node {CHAR c};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node{12}; 
+\backslash
+& 
+\backslash
+node {SPLIT 13, 15};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node{13}; 
+\backslash
+& 
+\backslash
+node {CHAR a};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node{14}; 
+\backslash
+& 
+\backslash
+node {JUMP 12};     
+\backslash
+
+\backslash
+ 	
+\backslash
+node{15}; 
+\backslash
+& 
+\backslash
+node {MATCHS};     
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+}; 
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "prog-aut"
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The program for the automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ of Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "thompson-aut"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Example
+The program shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "prog-aut"
+
+\end_inset
+
+ corresponds to the automaton 
+\begin_inset Formula $A$
+\end_inset
+
+ of Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "thompson-aut"
+
+\end_inset
+
+.
+ Notice how the 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+-transition between 
+\begin_inset Formula $q_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $q_{2}$
+\end_inset
+
+ is automatically omitted from the program.
+ SPLIT instructions correspond to multiple outgoing transitions from a state.
+ JUMP instructions are used to merge execution branches.
+ 
+\end_layout
+
+\begin_layout Subsection
+Ordered Binary Decision Diagrams
+\end_layout
+
+\begin_layout Standard
+Ordered Binary Decision Diagrams (OBDDs) are tree-like structures, that
+ can be used to efficiently represent, manipulate and evaluate boolean formulas.
+ One of their advantages is that first order logic quantifiers can be easily
+ supported by performing a series of operations that change the structure
+ of an OBDD opportunely.
+ In 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yang:2012:FSE:2396556.2396594"
+
+\end_inset
+
+, it is shown how to encode NFAs as OBDDs, with support for submatch extraction.
+ Then, a procedure for evaluating a string by using an OBDD representation
+ of a NFA is described.
+\end_layout
+
+\begin_layout Standard
+Given a regular expression 
+\begin_inset Formula $r$
+\end_inset
+
+ of size 
+\begin_inset Formula $m$
+\end_inset
+
+ and a string of size 
+\begin_inset Formula $n$
+\end_inset
+
+, the runtime cost of this approach is shown to be between 
+\begin_inset Formula $O\left(m\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $O\left(mn\right)$
+\end_inset
+
+.
+ The authors of 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yang:2012:FSE:2396556.2396594"
+
+\end_inset
+
+ suggest that this approach performs best when matching patterns are combined
+ togheter.
+\end_layout
+
+\begin_layout Subsection
+Kleenex
+\end_layout
+
+\begin_layout Standard
+A 
+\emph on
+transducer
+\emph default
+ is a kind of finite state machine whose main difference with an NFA is
+ that it has an 
+\emph on
+output tape
+\emph default
+.
+ Thus, the transition function of a transducer is enriched with 
+\emph on
+output actions.
+
+\emph default
+ Output actions can be used to write to the output tape, thus providing
+ a way to support submatch extraction.
+\end_layout
+
+\begin_layout Standard
+In 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Grathwohl:2016:KCN:2914770.2837647"
+
+\end_inset
+
+, the Kleenex language is presented.
+ It can be used to specify context free grammars, representing regular expressio
+ns with capturing groups.
+ A Kleenex program is converted to a transducer, which is in turn decomposed
+ into an 
+\emph on
+oracle machine
+\emph default
+ and an 
+\emph on
+action machine
+\emph default
+.
+ The oracle machine traverses an input string trying to match it (according
+ to a disambiguation policy), while the action machine performs the ouput
+ actions.
+\end_layout
+
+\begin_layout Section
+Implementation
 \end_layout
 
 \begin_layout Standard
@@ -8691,7 +9386,7 @@ filename "conclusion.lyx"
 \lang english
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "spanners,thompson,vm"
+bibfiles "spanners,thompson,vm,obdd,kleenex"
 options "apalike"
 
 \end_inset
