@@ -4,6 +4,7 @@ import scala.collection.immutable.{HashSet => SVars}
 import scala.collection.immutable.{HashSet => SVOps}
 import scala.collection.immutable.{HashSet => TransitionFunction}
 import scala.collection.immutable.{HashSet => StateSet}
+import scala.collection.mutable.ArrayBuffer
 import scala.{Int => SVar}
 
 /**
@@ -16,7 +17,7 @@ object VSetAutomatonFileReader {
     *
     * @param file the file name
     */
-  def getVSetAutomaton(file: String): Option[VSetAutomaton] = {
+  def getVSetAutomaton(file: String): (Option[VSetAutomaton], Option[Array[(SVar, SVar)]]) = {
 
     import scala.io.Source
 
@@ -49,6 +50,25 @@ object VSetAutomatonFileReader {
     val VStr = lineIterator.next()
     val VTok = VStr.split("\\s+").map(_.toInt)
     V = V ++ VTok
+
+    // String equalities
+    val eqPattern = "\\((.),(.)\\)".r
+    var eqsBuf = new ArrayBuffer[(SVar, SVar)]()
+    val eqStr = lineIterator.next()
+    if(!eqStr.matches("-")) {
+
+      val eqs = VStr.split("\\s+")
+      for(eq <- eqs) {
+
+        val eqPattern(x, y) = eq
+        eqsBuf += ((x.toInt, y.toInt))
+      }
+    }
+    var eqsArray:Option[Array[(SVar, SVar)]] = None
+
+    if(eqsBuf.size > 0)
+      eqsArray = Some(eqsBuf.toArray)
+
 
     // Transition function and other states
     val transitionPattern = "(\\d+)\\s(.+)\\s(\\d+)".r
@@ -101,6 +121,6 @@ object VSetAutomatonFileReader {
       }
     }
 
-    Some(new VSetAutomaton(Q, q0, qf, V, δ))
+    (Some(new VSetAutomaton(Q, q0, qf, V, δ)), eqsArray)
   }
 }

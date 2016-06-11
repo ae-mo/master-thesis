@@ -185,5 +185,35 @@ class basicsTestSuite extends FunSuite {
     assert(t17 != t18)
 
   }
-   
+
+
+  test("Arrays should be passed to functions by reference") {
+
+    def mod(a:Array[Int]) = {
+      a(0) = a(0) + 1
+    }
+
+    val a = Array[Int](1)
+    a(0) = 0
+
+    mod(a)
+
+    assert(a(0) == 1)
+  }
+
+  test("Arrays clones should be indipendent from the originals") {
+
+    def mod(a:Array[Int]) = {
+      a(0) = a(0) + 1
+    }
+
+    val a = Array[Int](1)
+    a(0) = 0
+
+    mod(a.clone())
+
+    assert(a(0) == 0)
+  }
+
+
 }

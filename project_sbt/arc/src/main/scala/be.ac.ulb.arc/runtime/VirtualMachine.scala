@@ -18,10 +18,16 @@ object VirtualMachine {
     * Executes a NFA program on the provided strings and outputs the spanned tuples.
     * @param prog
     * @param V
+    * @param equalities
     * @param input
+    * @param mode
+    * @param processSAVE
     * @return
     */
-  def execute(prog:Program[Instruction], V:SVars[SVar], input:String):Option[VSRelation[VSTuple[Position]]] = {
+  def execute(prog:Program[Instruction], V:SVars[SVar], equalities:Array[(SVar, SVar)], input:String, mode:Int,
+              processSAVE:(Program[Instruction], ThreadList[Thread], Array[(SVar, SVar)], String, Position, Thread, Int, Int) => Unit)
+  :Option[VSRelation[VSTuple[Position]]] = {
+
 
     // The set of output tuples
     var tuples = new VSRelation[VSTuple[Position]]
@@ -34,8 +40,9 @@ object VirtualMachine {
 
     var matched = false
 
+
     // Add the first thread to the current list
-    addThread(cList, prog(0), new Pointers[Position](V.size * 2))
+    addThread(cList, prog(0), if(mode == 0) new StringPointerArray(V.size*2) else new StringPointerTree(V.size*2))
 
     var sp = 0
 
@@ -64,7 +71,7 @@ object VirtualMachine {
           case MATCH(pos) => {
 
             // Add the tuple spanned by this thread to the output
-            tuples = tuples + t.saved
+            tuples = tuples + t.saved.toArray
             matched = true
           }
           case JUMP(pos, target) => {
@@ -79,8 +86,7 @@ object VirtualMachine {
           }
           case SAVE(ptr, pos) => {
 
-            t.saved(ptr) = sp
-            addThread(cList, prog(pos + 1), t.saved)
+            processSAVE(prog, cList, equalities, input, pos, t, ptr, sp)
           }
 
         }
@@ -103,9 +109,49 @@ object VirtualMachine {
     * @param instr
     * @param saved
     */
-  def addThread(l:ThreadList[Thread], instr:Instruction, saved:Pointers[Position]):Unit = {
+  def addThread(l:ThreadList[Thread], instr:Instruction, saved:StringPointerCollection):Unit = {
 
-      l += new Thread(instr, saved.clone())
+      l += new Thread(instr, saved.copy)
 
+  }
+
+  def processSAVEwithEq (prog:Program[Instruction], l:ThreadList[Thread], eqs:Array[(SVar, SVar)], in:String, p:Position, t:Thread, ptr:Int, sp:Int):Unit = {
+
+    // If a span is being closed
+    if(ptr % 2 != 0) {
+
+      // corresponding span variable
+      val v1 = (ptr-1)/2
+
+      // check it satisfies all string equality selections,
+      // when the other variables involved have already been assigned a span
+      for(eq <- eqs) {
+
+        // get the other variable
+        val v2:SVar = if(v1 == eq._1) eq._1 else if(v1 == eq._2) eq._1 else -1
+
+        if(v2 != -1 && t.saved(v2*2 + 1) != -1) {
+
+          // get corresponding span
+          val sp2 = (t.saved(v2*2), t.saved(v2*2 + 1))
+
+          val str1 = in.substring(t.saved(ptr-1), sp)
+          val str2 = in.substring(sp2._1, sp2._2)
+
+          // If an equality is not satisfied, the thread dies
+          if(str1 != str2) return
+        }
+
+      }
+    }
+
+    t.saved(ptr) = sp
+    addThread(l, prog(p + 1), t.saved)
+  }
+
+  def processSAVE(prog:Program[Instruction], l:ThreadList[Thread], eqs:Array[(SVar, SVar)], in:String, p:Position, t:Thread, ptr:Int, sp:Int): Unit = {
+
+    t.saved(ptr) = sp
+    addThread(l, prog(p + 1), t.saved)
   }
 }

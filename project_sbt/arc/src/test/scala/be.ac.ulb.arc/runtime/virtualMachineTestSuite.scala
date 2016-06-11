@@ -5,11 +5,8 @@ import org.scalatest.FunSuite
 import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
 import scala.{Int => Position}
-import scala.{Array => Pointers}
 import scala.{Array => Program}
-import scala.collection.immutable.{HashSet => VSRelation}
 import scala.{Array => VSTuple}
-import scala.collection.mutable.{MutableList => ThreadList}
 
 /**
   * Created by andrea on 19/05/16.
@@ -45,7 +42,7 @@ class virtualMachineTestSuite extends FunSuite{
     prog2(8) = new JUMP(8, prog2(6))
     prog2(10) = new MATCH(10)
 
-    val str2 = "aaaab" + '\0'
+    val str2 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + '\0'
 
   }
 
@@ -53,7 +50,7 @@ class virtualMachineTestSuite extends FunSuite{
 
     val vars = new SVars[SVar] + 1 + 2
 
-    val tuplesOpt = VirtualMachine.execute(data.prog1, vars, data.str1)
+    val tuplesOpt = VirtualMachine.execute(data.prog1, vars, Array[(SVar, SVar)](), data.str1, 0, VirtualMachine.processSAVE)
 
     assert(tuplesOpt != None)
 
@@ -69,7 +66,41 @@ class virtualMachineTestSuite extends FunSuite{
 
     val vars = new SVars[SVar] + 1 + 2
 
-    val tuplesOpt = VirtualMachine.execute(data.prog2, vars, data.str2)
+    val tuplesOpt = VirtualMachine.execute(data.prog2, vars, Array[(SVar, SVar)](), data.str2, 0, VirtualMachine.processSAVE)
+
+    assert(tuplesOpt != None)
+
+    val tuples = tuplesOpt.get
+
+    OutputWriter.printOutput(data.str2, tuples)
+
+  }
+
+  test("VM should match prog2 on str2 with var 1 equal to var 2") {
+
+    val vars = new SVars[SVar] + 0 + 1
+    val eqs = new Array[(SVar, SVar)](1)
+
+    eqs(0) = ((0, 1))
+
+    val tuplesOpt = VirtualMachine.execute(data.prog2, vars, eqs, data.str2, 0, VirtualMachine.processSAVEwithEq)
+
+    assert(tuplesOpt != None)
+
+    val tuples = tuplesOpt.get
+
+    OutputWriter.printOutput(data.str2, tuples)
+
+  }
+
+  test("VM should match prog2 on str2 with var 1 equal to var 2, with tuples backed by a shared representation") {
+
+    val vars = new SVars[SVar] + 0 + 1
+    val eqs = new Array[(SVar, SVar)](1)
+
+    eqs(0) = ((0, 1))
+
+    val tuplesOpt = VirtualMachine.execute(data.prog2, vars, eqs, data.str2, 1, VirtualMachine.processSAVEwithEq)
 
     assert(tuplesOpt != None)
 
