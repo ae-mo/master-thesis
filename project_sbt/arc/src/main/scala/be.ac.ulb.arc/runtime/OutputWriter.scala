@@ -2,7 +2,7 @@ package be.ac.ulb.arc.runtime
 
 import scala.{Int => Position}
 import scala.collection.immutable.{HashSet => VSRelation}
-import scala.{Array => VSTuple}
+import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -15,11 +15,11 @@ object OutputWriter {
     * @param input
     * @param output
     */
-  def printOutput(input:String, output:VSRelation[VSTuple[Position]]):Unit = {
+  def printOutput(input:String, output:VSRelation[VSTuple]):Unit = {
 
     for(t <- output) {
 
-      var spans = new ArrayBuffer[Position]() ++ t
+      var spans = new ArrayBuffer[Position]() ++ t.toArray
 
       while(!spans.isEmpty) {
 
@@ -29,7 +29,7 @@ object OutputWriter {
         print("(" + span(0) + "," + span(1) + ") ")
       }
 
-      spans = new ArrayBuffer[Position]() ++ t
+      spans = new ArrayBuffer[Position]() ++ t.toArray
 
       while(!spans.isEmpty) {
 

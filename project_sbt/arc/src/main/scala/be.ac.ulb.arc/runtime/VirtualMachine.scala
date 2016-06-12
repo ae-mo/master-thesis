@@ -3,10 +3,9 @@ package be.ac.ulb.arc.runtime
 import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
 import scala.{Int => Position}
-import scala.{Array => Pointers}
 import scala.{Array => Program}
 import scala.collection.immutable.{HashSet => VSRelation}
-import scala.{Array => VSTuple}
+import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import scala.collection.mutable.{MutableList => ThreadList}
 
 /**
@@ -26,11 +25,11 @@ object VirtualMachine {
     */
   def execute(prog:Program[Instruction], V:SVars[SVar], equalities:Array[(SVar, SVar)], input:String, mode:Int,
               processSAVE:(Program[Instruction], ThreadList[Thread], Array[(SVar, SVar)], String, Position, Thread, Int, Int) => Unit)
-  :Option[VSRelation[VSTuple[Position]]] = {
+  :Option[VSRelation[VSTuple]] = {
 
 
     // The set of output tuples
-    var tuples = new VSRelation[VSTuple[Position]]
+    var tuples = new VSRelation[VSTuple]
 
     val len = prog.length
 
@@ -42,7 +41,7 @@ object VirtualMachine {
 
 
     // Add the first thread to the current list
-    addThread(cList, prog(0), if(mode == 0) new StringPointerArray(V.size*2) else new StringPointerTree(V.size*2))
+    addThread(cList, prog(0), new StringPointerArray(V))
 
     var sp = 0
 
@@ -71,7 +70,7 @@ object VirtualMachine {
           case MATCH(pos) => {
 
             // Add the tuple spanned by this thread to the output
-            tuples = tuples + t.saved.toArray
+            tuples = tuples + t.saved
             matched = true
           }
           case JUMP(pos, target) => {

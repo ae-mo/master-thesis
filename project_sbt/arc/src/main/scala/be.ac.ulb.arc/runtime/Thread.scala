@@ -2,12 +2,14 @@ package be.ac.ulb.arc.runtime
 
 import scala.collection.mutable
 import scala.{Int => Position}
+import scala.collection.immutable.{HashSet => SVars}
+import scala.{Int => SVar}
 
 /**
   * Represents collection of string pointers.
-  * @param size
+  * @param vars
   */
-abstract class StringPointerCollection(val size:Int) {
+abstract class StringPointerCollection(val vars:SVars[SVar]) {
 
   def apply(i: Int):Position
   def update(i:Int, p:Position)
@@ -17,34 +19,48 @@ abstract class StringPointerCollection(val size:Int) {
 
 /**
   * Represents an array of string pointers.
-  * @param size
+  * @param vars
   */
-class StringPointerArray(override val size:Int) extends StringPointerCollection(size) { self =>
+class StringPointerArray(override val vars:SVars[SVar]) extends StringPointerCollection(vars) { self =>
 
-  val ptrs = Array.fill[Position](size)(-1)
+  val sortedVars = vars.toArray.sortWith(_<_)
+  val ptrs = Array.fill[Position](vars.size*2)(-1)
 
-  def apply(i: Int):Position = ptrs(i)
-  def update(i:Int, p:Position) = ptrs(i) = p
+  def apply(i: Int):Position = {
+
+    ptrs(getIndex(i))
+  }
+  def update(i:Int, p:Position) = {
+
+    ptrs(getIndex(i)) = p
+  }
 
   def copy:StringPointerCollection = new {
 
     override val ptrs = self.ptrs.clone
-  } with StringPointerArray(size)
+  } with StringPointerArray(vars)
 
   def toArray:Array[Position] = ptrs
+
+  def getIndex(i:Int):Int = {
+
+    val i2:Int = i/2
+    val rem = if (i % 2 == 0) 0 else 1
+    sortedVars.indexOf(i2)*2+rem
+  }
  }
 
 /**
   * Represents a tree of string pointers.
   * @param size
   */
-class StringPointerTree(override val size:Int) extends StringPointerCollection(size) { self =>
+/*
+class StringPointerTree(override val vars:SVars[SVar]) extends StringPointerCollection(vars) { self =>
 
   val ptrs = mutable.Map[Int, PointerNode]()
 
   def apply(i: Int):Position = {
 
-    checkBounds(i)
     if(ptrs.contains(i))
       ptrs(i).p
     else
@@ -53,7 +69,6 @@ class StringPointerTree(override val size:Int) extends StringPointerCollection(s
 
   def update(i:Int, p:Position) = {
 
-    checkBounds(i)
     if(!ptrs.contains(i))
       ptrs += ((i, new PointerNode(p)))
     else ptrs(i).p = p
@@ -71,13 +86,13 @@ class StringPointerTree(override val size:Int) extends StringPointerCollection(s
       newPtrs
     }
 
-  } with StringPointerTree(size)
+  } with StringPointerTree(vars)
 
   def toArray:Array[Position] = {
 
-    val res = new Array[Position](size)
+    val res = new Array[Position](vars.size*2)
 
-    for(i <- 0 until size) {
+    for(i <- 0 until vars.size) {
 
       if(ptrs.contains(i))
         res(i) = ptrs(i).p
@@ -88,10 +103,6 @@ class StringPointerTree(override val size:Int) extends StringPointerCollection(s
     res
   }
 
-  def checkBounds(i:Int): Unit = {
-
-    if(i < 0 || i >= size) throw new IndexOutOfBoundsException("Invalid index: " + i)
-  }
 }
 
 /**
@@ -99,6 +110,7 @@ class StringPointerTree(override val size:Int) extends StringPointerCollection(s
   * @param p
   */
 class PointerNode(var p:Position)
+*/
 
 
 class Thread(val instr:Instruction, val saved:StringPointerCollection)
