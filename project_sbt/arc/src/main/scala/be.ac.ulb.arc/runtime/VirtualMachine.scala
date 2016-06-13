@@ -23,8 +23,8 @@ object VirtualMachine {
     * @param processSAVE
     * @return
     */
-  def execute(prog:Program[Instruction], V:SVars[SVar], equalities:Array[(SVar, SVar)], input:String, mode:Int,
-              processSAVE:(Program[Instruction], ThreadList[Thread], Array[(SVar, SVar)], String, Position, Thread, Int, Int) => Unit)
+  def execute(prog:Program[Instruction], V:SVars[SVar], equalities:Set[(SVar, SVar)], input:String, mode:Int,
+              processSAVE:(Program[Instruction], ThreadList[Thread], Set[(SVar, SVar)], String, Position, Thread, Int, Int) => Unit)
   :Option[VSRelation[VSTuple]] = {
 
 
@@ -114,7 +114,7 @@ object VirtualMachine {
 
   }
 
-  def processSAVEwithEq (prog:Program[Instruction], l:ThreadList[Thread], eqs:Array[(SVar, SVar)], in:String, p:Position, t:Thread, ptr:Int, sp:Int):Unit = {
+  def processSAVEwithEq (prog:Program[Instruction], l:ThreadList[Thread], eqs:Set[(SVar, SVar)], in:String, p:Position, t:Thread, ptr:Int, sp:Int):Unit = {
 
     // If a span is being closed
     if(ptr % 2 != 0) {
@@ -148,7 +148,7 @@ object VirtualMachine {
     addThread(l, prog(p + 1), t.saved)
   }
 
-  def processSAVE(prog:Program[Instruction], l:ThreadList[Thread], eqs:Array[(SVar, SVar)], in:String, p:Position, t:Thread, ptr:Int, sp:Int): Unit = {
+  def processSAVE(prog:Program[Instruction], l:ThreadList[Thread], eqs:Set[(SVar, SVar)], in:String, p:Position, t:Thread, ptr:Int, sp:Int): Unit = {
 
     t.saved(ptr) = sp
     addThread(l, prog(p + 1), t.saved)

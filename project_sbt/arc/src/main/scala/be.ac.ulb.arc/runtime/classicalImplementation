@@ -5,6 +5,10 @@ import scala.{Int => SVar}
 import scala.collection.immutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 
+/**
+  * Represents a classical implementation of the relational operators of interest, and of
+  * string equality selection.
+  */
 object ClassicalImplementation {
 
   /**
@@ -137,7 +141,7 @@ object ClassicalImplementation {
     */
   def ∪(table1:VSRelation[VSTuple], vars1:SVars[SVar], table2:VSRelation[VSTuple], vars2:SVars[SVar]):Option[VSRelation[VSTuple]] = {
 
-    if(vars1.exists((t:SVar) => !vars2.contains(t)) || vars2.exists((t:SVar) => !vars1.contains(t)))
+    if(vars1 != vars2)
       return None
 
     val table3 = table1 ++ table2

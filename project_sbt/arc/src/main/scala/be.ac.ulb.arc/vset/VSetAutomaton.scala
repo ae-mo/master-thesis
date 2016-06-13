@@ -149,23 +149,18 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     * @param other
     * @return
     */
-  def ∪(other: Option[VSetAutomaton]): Option[VSetAutomaton] = {
-
-    // If we got nothing as parameter, abort (useful for fluent interface)
-    if(other == None) return None
-
-    val o = other.get
+  def ∪(other: VSetAutomaton): Option[VSetAutomaton] = {
 
     // Determine common variables
-    val cV = this.V.intersect(o.V)
+    val cV = this.V.intersect(other.V)
 
     // If the automata are not variable compatible, abort
-    if (!this.V.diff(cV).isEmpty || !o.V.diff(cV).isEmpty) return None
+    if (!this.V.diff(cV).isEmpty || !other.V.diff(cV).isEmpty) return None
 
     // Get the transitions of the other that involve the initial state
-    val oInitials = o.δ.filter((t:Transition[State]) => t.q == o.q0 || t.q1 == o.q0)
+    val oInitials = other.δ.filter((t:Transition[State]) => t.q == other.q0 || t.q1 == o.q0)
     // Get all the other transitions
-    val oOthers = o.δ.filter((t:Transition[State]) => !oInitials.contains(t))
+    val oOthers = other.δ.filter((t:Transition[State]) => !oInitials.contains(t))
 
     // Initialize new transition function
     var newδ = this.δ ++ oOthers
@@ -174,7 +169,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     // in all transition involving it
     for(t <- oInitials) {
 
-      val isQ = t.q == o.q0
+      val isQ = t.q == other.q0
       var newT:Transition[State] = null
 
       t match {
@@ -199,9 +194,9 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     }
 
     // Connect the other final state to this one
-    newδ = newδ + new OperationsTransition[State](o.qf, new SVOps, this.V, this.qf)
+    newδ = newδ + new OperationsTransition[State](other.qf, new SVOps, this.V, this.qf)
 
-    Some(new VSetAutomaton(this.Q ++ (o.Q - o.q0), this.q0, this.qf, this.V, newδ))
+    Some(new VSetAutomaton(this.Q ++ (other.Q - other.q0), this.q0, this.qf, this.V, newδ))
   }
 
   /**
@@ -245,16 +240,13 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     * @param other
     * @return
     */
-  def ⋈(other: Option[VSetAutomaton]): Option[VSetAutomaton] = {
+  def ⋈(other: VSetAutomaton): Option[VSetAutomaton] = {
 
-    if(other == None) return None
-    val o = other.get
-
-    val q02:State2 = (this.q0, o.q0)
-    val qf2:State2 = (this.qf, o.qf)
+    val q02:State2 = (this.q0, other.q0)
+    val qf2:State2 = (this.qf, other.qf)
 
     // Perform Cross Product
-    val (intδ, intQ) = this × o
+    val (intδ, intQ) = this × other
 
     if(!intQ.contains(q02) || !intQ.contains(qf2)) return None
 
@@ -269,7 +261,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     val q0 = q0Opt.get
     val qf = qfOpt.get
 
-    Some(new VSetAutomaton(newQ, q0, qf, this.V.union(o.V), newδ))
+    Some(new VSetAutomaton(newQ, q0, qf, this.V.union(other.V), newδ))
   }
 
   /**

@@ -4,7 +4,7 @@ import org.scalatest.FunSuite
 
 import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
-import scala.{Int => Position}
+import scala.collection.immutable.{HashSet => VSRelation}
 import scala.{Array => Program}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 
@@ -50,7 +50,7 @@ class virtualMachineTestSuite extends FunSuite{
 
     val vars = new SVars[SVar] + 0 + 1
 
-    val tuplesOpt = VirtualMachine.execute(data.prog1, vars, Array[(SVar, SVar)](), data.str1, 0, VirtualMachine.processSAVE)
+    val tuplesOpt = VirtualMachine.execute(data.prog1, vars, Set[(SVar, SVar)](), data.str1, 0, VirtualMachine.processSAVE)
 
     assert(tuplesOpt != None)
 
@@ -66,7 +66,7 @@ class virtualMachineTestSuite extends FunSuite{
 
     val vars = new SVars[SVar] + 0 + 1
 
-    val tuplesOpt = VirtualMachine.execute(data.prog2, vars, Array[(SVar, SVar)](), data.str2, 0, VirtualMachine.processSAVE)
+    val tuplesOpt = VirtualMachine.execute(data.prog2, vars, Set[(SVar, SVar)](), data.str2, 0, VirtualMachine.processSAVE)
 
     assert(tuplesOpt != None)
 
@@ -79,9 +79,9 @@ class virtualMachineTestSuite extends FunSuite{
   test("VM should match prog2 on str2 with var 1 equal to var 2") {
 
     val vars = new SVars[SVar] + 0 + 1
-    val eqs = new Array[(SVar, SVar)](1)
+    var eqs = Set[(SVar, SVar)]()
 
-    eqs(0) = ((0, 1))
+    eqs = eqs + ((0, 1))
 
     val tuplesOpt = VirtualMachine.execute(data.prog2, vars, eqs, data.str2, 0, VirtualMachine.processSAVEwithEq)
 
@@ -109,4 +109,19 @@ class virtualMachineTestSuite extends FunSuite{
     OutputWriter.printOutput(data.str2, tuples)
 
   }*/
+
+  test("String pointer arrays should be equal when they have the same variables and values") {
+
+    val s1 = new SVars[SVar] + 0 + 1
+    val s2 = new SVars[SVar] + 0 + 1
+    val a = new StringPointerArray(s1)
+    val b = new StringPointerArray(s2)
+
+    assert(a==b)
+    assert(a.hashCode == b.hashCode)
+
+    var ts = new VSRelation[VSTuple] + a + b
+
+    assert(ts.size == 1)
+  }
 }

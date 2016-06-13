@@ -10,14 +10,14 @@ import scala.{Int => SVar}
 /**
   * A reader of files containing vset-automata specifications.
   */
-object VSetAutomatonFileReader {
+object CoreSpannerFileReader {
 
   /**
     * Returns the vset-automaton contained in the given file.
     *
     * @param file the file name
     */
-  def getVSetAutomaton(file: String): (Option[VSetAutomaton], Option[Array[(SVar, SVar)]]) = {
+  def getCoreSpanner(file: String): (Option[CoreSpanner]) = {
 
     import scala.io.Source
 
@@ -64,10 +64,10 @@ object VSetAutomatonFileReader {
         eqsBuf += ((x.toInt, y.toInt))
       }
     }
-    var eqsArray:Option[Array[(SVar, SVar)]] = None
+    var eqsSet:Option[Set[(SVar, SVar)]] = None
 
     if(eqsBuf.size > 0)
-      eqsArray = Some(eqsBuf.toArray)
+      eqsSet = Some(eqsBuf.toSet)
 
 
     // Transition function and other states
@@ -121,6 +121,6 @@ object VSetAutomatonFileReader {
       }
     }
 
-    (Some(new VSetAutomaton(Q, q0, qf, V, δ)), eqsArray)
+    (Some(new CoreSpanner(new VSetAutomaton(Q, q0, qf, V, δ), eqsSet)))
   }
 }

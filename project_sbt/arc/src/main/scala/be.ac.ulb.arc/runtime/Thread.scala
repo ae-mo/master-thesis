@@ -1,12 +1,12 @@
 package be.ac.ulb.arc.runtime
 
-import scala.collection.mutable
 import scala.{Int => Position}
 import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
 
 /**
   * Represents collection of string pointers.
+  *
   * @param vars
   */
 abstract class StringPointerCollection(val vars:SVars[SVar]) {
@@ -19,6 +19,7 @@ abstract class StringPointerCollection(val vars:SVars[SVar]) {
 
 /**
   * Represents an array of string pointers.
+  *
   * @param vars
   */
 class StringPointerArray(override val vars:SVars[SVar]) extends StringPointerCollection(vars) { self =>
@@ -48,10 +49,42 @@ class StringPointerArray(override val vars:SVars[SVar]) extends StringPointerCol
     val rem = if (i % 2 == 0) 0 else 1
     sortedVars.indexOf(i2)*2+rem
   }
- }
+
+  def canEqual(a: Any) = a.isInstanceOf[StringPointerArray]
+
+  override def equals(that: Any): Boolean = {
+
+    that match {
+
+      case that: StringPointerArray => {
+
+        that.canEqual(this) && this.vars == that.vars && this.ptrs.deep == that.ptrs.deep
+      }
+    }
+  }
+
+  override def hashCode: Int = {
+
+    val prime = 31
+    var result = 1
+
+    for(v <- sortedVars) {
+
+      result = prime*result + v
+    }
+
+    for(p <- ptrs) {
+
+      result = prime*result + p
+    }
+
+    return result
+  }
+}
 
 /**
   * Represents a tree of string pointers.
+  *
   * @param size
   */
 /*
