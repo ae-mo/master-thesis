@@ -8,7 +8,7 @@ import dk.brics.automaton.RegExp
 
 object main{
 
-	val sampleVSet = "src/test/scala/be.ac.ulb.arc/compiler/sampleVSet6.txt"
+	val sampleVSet = "src/test/scala/be.ac.ulb.arc/compiler/spanner2.txt"
 	val sampleVSet2 = "src/test/scala/be.ac.ulb.arc/compiler/sampleVSet8.txt"
 
 	def main(args: Array[String]) {

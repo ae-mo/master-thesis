@@ -1,6 +1,10 @@
 package be.ac.ulb.arc.vset
 
 import scala.collection.mutable.{Map => CoreSpannersCollection}
+import scala.collection.mutable.{Map => VSRelationsCollection}
+import scala.collection.immutable.{HashSet => VSRelation}
+import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
+import be.ac.ulb.arc.runtime.ClassicalImplementation
 import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
 import scala.collection.mutable.ArrayBuffer
@@ -8,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * Represents a generic operation on a (V, s)-relation(s).
   */
-abstract class Operation {
+abstract class Operation(val res:String) {
 
   /**
     * Performs an operation on input spanners(s), resulting in a new spanner.
@@ -16,6 +20,53 @@ abstract class Operation {
     * @return
     */
   def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner]
+
+  /**
+    * Execute an operation on input relation(s), derived from input spanner(s). It results
+    * in a new relation.
+    * @param spanners
+    * @param relations
+    * @param doc
+    * @param lazyEv
+    * @return
+    */
+  def execute(spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean = false): Option[VSRelation[VSTuple]]
+
+  /**
+    * Gets a relation from a collection of relations. Supports lazy evaluation.
+    * @param a
+    * @param spanners
+    * @param relations
+    * @param doc
+    * @param lazyEv
+    * @return
+    */
+  def getRelation(a:String, spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean):Option[VSRelation[VSTuple]] = {
+
+    var r:VSRelation[VSTuple] = null
+
+    // If the input relation isn't there and lazy evaluation is enabled,
+    // evaluate it
+    if(!relations.contains(a)) {
+
+      if(!lazyEv)
+        return None
+
+      // if the spanner corresponding to a is not in the base spanners,
+      // the corresponding relation is empty
+      if(!spanners.contains(a)) return None
+
+      val rOpt = spanners(a).evaluate(doc)
+
+      if(rOpt == None) return None
+
+      r = rOpt.get
+
+    }
+    else r = relations(a)
+
+    Some(r)
+  }
 }
 
 /**
@@ -24,7 +75,7 @@ abstract class Operation {
   * @param a
   * @param vars
   */
-case class π(val a:String, val a2:String, val vars:SVars[SVar]) extends Operation {
+case class π(val a:String, val a2:String, val vars:SVars[SVar]) extends Operation(a2) {
 
   override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
 
@@ -53,6 +104,16 @@ case class π(val a:String, val a2:String, val vars:SVars[SVar]) extends Operati
 
     Some(_a2)
   }
+
+  override def execute(spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean = false): Option[VSRelation[VSTuple]] = {
+
+    val rOpt = getRelation(a, spanners, relations, doc, lazyEv)
+
+    if(rOpt == None) return None
+
+    ClassicalImplementation.π(rOpt.get, spanners(a).automaton.V, vars)
+  }
+
 }
 
 /**
@@ -61,7 +122,7 @@ case class π(val a:String, val a2:String, val vars:SVars[SVar]) extends Operati
   * @param a1
   * @param a2
   */
-case class ⋈(val a1:String, val a2:String, val a3:String) extends Operation {
+case class ⋈(val a1:String, val a2:String, val a3:String) extends Operation(a3) {
 
   override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
 
@@ -99,6 +160,17 @@ case class ⋈(val a1:String, val a2:String, val a3:String) extends Operation {
     }
     None
   }
+
+  override def execute(spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean = false): Option[VSRelation[VSTuple]] = {
+
+    val r1Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    // If any of the two input relations is empty, the result is empty
+    if(r1Opt == None) return None
+    val r2Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    if(r2Opt == None) return None
+
+    ClassicalImplementation.⋈(r1Opt.get, spanners(a1).automaton.V, r2Opt.get, spanners(a2).automaton.V)
+  }
 }
 
 /**
@@ -107,7 +179,7 @@ case class ⋈(val a1:String, val a2:String, val a3:String) extends Operation {
   * @param a1
   * @param a2
   */
-case class ∪(val a1:String, val a2:String, val a3:String) extends Operation {
+case class ∪(val a1:String, val a2:String, val a3:String) extends Operation(a3) {
 
   override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
 
@@ -145,6 +217,18 @@ case class ∪(val a1:String, val a2:String, val a3:String) extends Operation {
     }
     None
   }
+
+  override def execute(spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean = false): Option[VSRelation[VSTuple]] = {
+
+    val r1Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    var r1:VSRelation[VSTuple] = null
+    if(r1Opt == None) r1 = VSRelation[VSTuple]() else r1Opt.get
+    val r2Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    var r2:VSRelation[VSTuple] = null
+    if(r2Opt == None) r2 = VSRelation[VSTuple]() else r2Opt.get
+
+    ClassicalImplementation.∪(r1, spanners(a1).automaton.V, r2, spanners(a2).automaton.V)
+  }
 }
 
 /**
@@ -154,7 +238,7 @@ case class ∪(val a1:String, val a2:String, val a3:String) extends Operation {
   * @param v1
   * @param v2
   */
-case class ς(val a:String, val a2:String, val v1:SVar, val v2:SVar) extends Operation {
+case class ς(val a:String, val a2:String, val v1:SVar, val v2:SVar) extends Operation(a2) {
 
   override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
 
@@ -177,6 +261,15 @@ case class ς(val a:String, val a2:String, val v1:SVar, val v2:SVar) extends Ope
     spanners +=((a2, _a2))
 
     Some(_a2)
+  }
+
+  override def execute(spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean = false): Option[VSRelation[VSTuple]] = {
+
+    val rOpt = getRelation(a, spanners, relations, doc, lazyEv)
+
+    if(rOpt == None) return None
+
+    ClassicalImplementation.ς(doc, rOpt.get, spanners(a).automaton.V, v1, v2)
   }
 
 }
@@ -302,4 +395,5 @@ object OperationExtractors {
   buf += ς
 
   def apply(i:Int):OperationExtractor = buf(i)
+  def size = buf.size
 }

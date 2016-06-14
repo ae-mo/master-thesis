@@ -9,8 +9,8 @@ class vSetAutomatonTestSuite extends FunSuite{
 
   val data = new {
 
-    val vsetFile1 = "src/test/scala/be.ac.ulb.arc/vset/sampleVSet6.txt"
-    val vsetFile2 = "src/test/scala/be.ac.ulb.arc/vset/sampleVSet7.txt"
+    val vsetFile1 = "src/test/scala/be.ac.ulb.arc/vset/spanner2.txt"
+    val vsetFile2 = "src/test/scala/be.ac.ulb.arc/vset/spanner.txt"
   }
 
   test("Epsilon closure should add the correct transitions to vset-automata") {

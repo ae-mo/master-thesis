@@ -31,7 +31,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     * @param pc
     * @return
     */
-  def toNFAProgram(program:Program[Instruction], visitedStates:Map[State, Int], q:State, pc:Int): (Int, Program[JUMP]) = {
+  def toNFAProgram(program:Program[Instruction], visitedStates:Map[State, Int], q:State, pc:Int): Int = {
 
     var npc = pc
     var jumps = new ArrayBuffer[JUMP]()
@@ -63,17 +63,16 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
         // splits
         if(tr.size > 1 && j < tr.size - 1) {
 
-          split = new SPLIT(npc, null, null)
+          split = new SPLIT(npc, -1, -1)
           program += split
           npc += 1
 
           // If it is not the first split, connect the previous to this
           if(oldSplit != null) {
 
-            oldSplit.next2 = split
+            oldSplit.next2 = split.pos
           }
         }
-        else split = null
 
         // Find out the type of transition and add corresponding instruction to the program
         t match {
@@ -99,49 +98,39 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
               npc +=1
 
             }
-
-            if(s.size == 0)
-              instr = program.last
+            instr = program.last
           }
 
         }
 
         // if we placed a split, connect it to the first instruction
         if(split != null) {
-          split.next1 = instr
+          split.next1 = instr.pos
           oldSplit = split
         }
         else if(oldSplit != null) {
 
-          oldSplit.next2 = instr
+          oldSplit.next2 = instr.pos
         }
 
         if(visitedStates.contains(t.q1)) {
 
-          program += new JUMP(npc, program(visitedStates(t.q1)))
+          program += new JUMP(npc, visitedStates(t.q1))
           npc += 1
         }
         else {
 
           // Recur
-          val (n1pc, lastJumps) = toNFAProgram(program, visitedStates, t.q1, npc)
+          val n1pc = toNFAProgram(program, visitedStates, t.q1, npc)
           npc = n1pc
 
-          // Jump to the end of the alternatives
-          jumps += new JUMP(npc, null)
-          program += jumps.last
-          npc+=1
-          // Connect the jumps of the inner code to the outer code
-          for(jmp <- lastJumps) {
-            jmp.target = program.last
-          }
         }
 
         j += 1
       }
     }
 
-    (npc, jumps)
+    npc
   }
 
   /**
@@ -151,52 +140,24 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     */
   def ∪(other: VSetAutomaton): Option[VSetAutomaton] = {
 
-    // Determine common variables
-    val cV = this.V.intersect(other.V)
-
     // If the automata are not variable compatible, abort
-    if (!this.V.diff(cV).isEmpty || !other.V.diff(cV).isEmpty) return None
+    if (this.V != other.V) return None
 
-    // Get the transitions of the other that involve the initial state
-    val oInitials = other.δ.filter((t:Transition[State]) => t.q == other.q0 || t.q1 == o.q0)
-    // Get all the other transitions
-    val oOthers = other.δ.filter((t:Transition[State]) => !oInitials.contains(t))
+    // Get the union of the input state sets
+    var newQ = this.Q ++ other.Q
+    // Get the union of the input transition functions
+    var newδ = this.δ ++ other.δ
+    // Create the new final and initial states
+    var newQ0 = new State
+    var newQf = new State
 
-    // Initialize new transition function
-    var newδ = this.δ ++ oOthers
+    // Connect the original and initial final states to the new ones
+    newδ = newδ + new OperationsTransition[State](newQ0, new SVOps, this.V, this.q0)
+    newδ = newδ + new OperationsTransition[State](newQ0, new SVOps, this.V, other.q0)
+    newδ = newδ + new OperationsTransition[State](this.qf, new SVOps, this.V, newQf)
+    newδ = newδ + new OperationsTransition[State](other.qf, new SVOps, this.V, newQf)
 
-    // Substitute the other initial state with this initial states
-    // in all transition involving it
-    for(t <- oInitials) {
-
-      val isQ = t.q == other.q0
-      var newT:Transition[State] = null
-
-      t match {
-
-        case OrdinaryTransition(q, σ, v, q1) => {
-          if(isQ) newT = new OrdinaryTransition[State](q0, σ, v, q1)
-          else newT = new OrdinaryTransition[State](q, σ, v, q0)
-        }
-        case RangeTransition(q, σ, v, q1) => {
-          if(isQ) newT = new RangeTransition[State](q0, σ, v, q1)
-          else newT = new RangeTransition[State](q, σ, v, q0)
-        }
-        case OperationsTransition(q, s, v, q1) => {
-
-          if(isQ) newT = new OperationsTransition[State](q0, s, v, q1)
-          else newT = new OperationsTransition[State](q, s, v, q0)
-        }
-        case _ => None
-      }
-
-      newδ = newδ + newT
-    }
-
-    // Connect the other final state to this one
-    newδ = newδ + new OperationsTransition[State](other.qf, new SVOps, this.V, this.qf)
-
-    Some(new VSetAutomaton(this.Q ++ (other.Q - other.q0), this.q0, this.qf, this.V, newδ))
+    Some(new VSetAutomaton(newQ, newQ0, newQf, this.V, newδ))
   }
 
   /**
@@ -245,8 +206,24 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     val q02:State2 = (this.q0, other.q0)
     val qf2:State2 = (this.qf, other.qf)
 
+    var t:VSetAutomaton = null
+    var o:VSetAutomaton = null
+
+    // If the automata have common variables,
+    // do the closure as preprocessing
+    if(this.V.intersect(other.V).size != 0) {
+
+      t = this.ε
+      o = other.ε
+    }
+    else {
+
+      t = this
+      o = other
+    }
+
     // Perform Cross Product
-    val (intδ, intQ) = this × other
+    val (intδ, intQ) = t × o
 
     if(!intQ.contains(q02) || !intQ.contains(qf2)) return None
 
@@ -261,7 +238,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     val q0 = q0Opt.get
     val qf = qfOpt.get
 
-    Some(new VSetAutomaton(newQ, q0, qf, this.V.union(other.V), newδ))
+    Some(new VSetAutomaton(newQ, q0, qf, t.V.union(o.V), newδ))
   }
 
   /**

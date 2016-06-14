@@ -52,23 +52,20 @@ object CoreSpannerFileReader {
     V = V ++ VTok
 
     // String equalities
-    val eqPattern = "\\((.),(.)\\)".r
+    val eqPattern = "\\s*\\(\\s*(.)\\s*,\\s*(.)\\s*\\)\\s*".r
     var eqsBuf = new ArrayBuffer[(SVar, SVar)]()
-    val eqStr = lineIterator.next()
-    if(!eqStr.matches("-")) {
+    var eqStr = lineIterator.next()
 
-      val eqs = VStr.split("\\s+")
-      for(eq <- eqs) {
+    while(!eqStr.matches("-")) {
 
-        val eqPattern(x, y) = eq
-        eqsBuf += ((x.toInt, y.toInt))
-      }
+      val eqPattern(x, y) = eqStr
+      eqsBuf += ((x.toInt, y.toInt))
+      eqStr = lineIterator.next()
     }
     var eqsSet:Option[Set[(SVar, SVar)]] = None
 
     if(eqsBuf.size > 0)
       eqsSet = Some(eqsBuf.toSet)
-
 
     // Transition function and other states
     val transitionPattern = "(\\d+)\\s(.+)\\s(\\d+)".r

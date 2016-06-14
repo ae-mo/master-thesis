@@ -215,5 +215,12 @@ class basicsTestSuite extends FunSuite {
     assert(a(0) == 0)
   }
 
+  test("Sets should be equal when they have the same elements") {
+
+    val s1 = new SVars + 1 +2
+    val s2 = new SVars + 1 +2
+
+    assert(s1 == s2)
+  }
 
 }

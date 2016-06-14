@@ -75,13 +75,13 @@ object VirtualMachine {
           }
           case JUMP(pos, target) => {
 
-            addThread(cList, target, t.saved)
+            addThread(cList, prog(target), t.saved)
 
           }
           case SPLIT(pos, next1, next2) => {
 
-            addThread(cList, next1, t.saved)
-            addThread(cList, next2, t.saved)
+            addThread(cList, prog(next1), t.saved)
+            addThread(cList, prog(next2), t.saved)
           }
           case SAVE(ptr, pos) => {
 

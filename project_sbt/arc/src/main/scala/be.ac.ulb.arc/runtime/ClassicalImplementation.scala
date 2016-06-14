@@ -4,6 +4,57 @@ import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
 import scala.collection.immutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
+import scala.collection.mutable.{Map => CoreSpannersCollection}
+import scala.collection.mutable.{Map => VSRelationsCollection}
+import be.ac.ulb.arc.vset.AQLCoreFragmentSpecification
+import be.ac.ulb.arc.vset.CoreSpanner
+
+/**
+  * Represents an interpreter that views each operation in an AQL fragment as an operation on relations.
+  */
+object ClassicalInterpreter {
+
+  /**
+    * Executes an AQL fragment on a document.
+    * @param fragment
+    * @param doc
+    * @param lazyEv
+    * @return
+    */
+  def execute(fragment:AQLCoreFragmentSpecification, doc:String, lazyEv:Boolean = false):Option[VSRelation[VSTuple]] = {
+
+    val relations = VSRelationsCollection[String, VSRelation[VSTuple]]()
+
+    var result:Option[VSRelation[VSTuple]] = None
+
+    // If we don't want lazy evaluation
+    if(!lazyEv) {
+
+      // evaluate all the spanners before the operations
+      for((k, sp) <- fragment.spanners) {
+
+        val rOpt = sp.evaluate(doc)
+
+        if(rOpt != None) relations += ((k, rOpt.get))
+      }
+
+      // execute the operations
+      for(op <- fragment.operations) {
+
+        result = op.execute(fragment.spanners, relations, doc)
+      }
+    }
+    else {
+
+      for(op <- fragment.operations) {
+
+        result = op.execute(fragment.spanners, relations, doc, true)
+      }
+    }
+
+    result
+  }
+}
 
 /**
   * Represents a classical implementation of the relational operators of interest, and of

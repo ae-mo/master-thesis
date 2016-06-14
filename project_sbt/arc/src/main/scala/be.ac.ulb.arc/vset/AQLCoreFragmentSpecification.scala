@@ -56,7 +56,9 @@ object AQLCoreFragmentSpecificationReader {
 
       breakable {
 
-        for(ext:OperationExtractor <- OperationExtractors) {
+        for(i <- 0 until OperationExtractors.size) {
+
+          val ext = OperationExtractors(i)
 
           val opOpt = ext.extract(line)
 
