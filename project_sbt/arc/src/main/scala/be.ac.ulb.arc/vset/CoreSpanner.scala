@@ -2,8 +2,10 @@ package be.ac.ulb.arc.vset
 
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import be.ac.ulb.arc.runtime._
+
 import scala.collection.immutable.{HashSet => VSRelation}
-import scala.collection.mutable.{ArrayBuffer => Program, Map}
+import scala.collection.immutable.{HashSet => SVars}
+import scala.collection.mutable.{Map, ArrayBuffer => Program}
 import scala.{Int => SVar}
 import scala.collection.mutable.{Map => CoreSpannersCollection}
 
@@ -33,6 +35,90 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
       return Some(tuples)
     }
     None
+  }
+
+  /**
+    * Performs the projection of the spanner on the desired span variables.
+    * @param vars
+    * @return
+    */
+  def π(vars:SVars[SVar]):Option[CoreSpanner] = {
+
+    val res = this.automaton.π(vars)
+
+    return Some(new CoreSpanner(res, this.equalities))
+  }
+
+  /**
+    * Performs the union of the spanner with the given spanner.
+    * @param other
+    * @return
+    */
+  def ∪(other:CoreSpanner):Option[CoreSpanner] = {
+
+    val resOpt = this.automaton.∪(other.automaton)
+
+    if (resOpt == None) return None
+
+    val res = resOpt.get
+
+    val eqs = getEqualities(this.equalities, other.equalities)
+
+    Some(new CoreSpanner(res, eqs))
+  }
+
+  /**
+    * Performs the join of the spanner with the given spanner.
+    * @param other
+    * @return
+    */
+  def ⋈(other:CoreSpanner):Option[CoreSpanner] = {
+
+    val resOpt = this.automaton.⋈(other.automaton)
+
+    if (resOpt == None) return None
+
+    val res = resOpt.get
+
+    val eqs = getEqualities(this.equalities, other.equalities)
+
+    Some(new CoreSpanner(res, eqs))
+  }
+
+  /**
+    * Performs the string equality of the spanner on the given pair of span variables.
+    * @param var1
+    * @param var2
+    * @return
+    */
+  def ς(var1:SVar, var2:SVar):Option[CoreSpanner] = {
+
+    var eqs:Option[Set[(SVar, SVar)]] = None
+
+    // Add existing equalities
+    var eqSet = Set[(SVar, SVar)]()
+    if(this.equalities != None)
+      eqSet = eqSet ++ this.equalities.get
+
+    // Add new equalities
+    eqSet = eqSet + ((var1, var2))
+    eqs = Some(eqSet)
+
+    Some(new CoreSpanner(this.automaton, eqs))
+  }
+
+  /**
+    * Merges Two sets of string equality selections.
+    * @param eqs1
+    * @param eqs2
+    * @return
+    */
+  def getEqualities(eqs1:Option[Set[(SVar, SVar)]], eqs2:Option[Set[(SVar, SVar)]]):Option[Set[(SVar, SVar)]] = {
+
+    if(eqs1 == None && eqs2 == None) None
+    else if(eqs1 != None) this.equalities
+    else if(eqs2 != None) eqs2
+    else Some(eqs1.get ++ eqs2.get)
   }
 }
 

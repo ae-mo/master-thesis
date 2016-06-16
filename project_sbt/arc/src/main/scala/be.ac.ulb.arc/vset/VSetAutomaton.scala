@@ -27,21 +27,20 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     * Translates the vset-atomaton into a NFA program.
     * @param program
     * @param visitedStates
-    * @param q
+    * @param inQ
     * @param pc
     * @return
     */
-  def toNFAProgram(program:Program[Instruction], visitedStates:Map[State, Int], q:State, pc:Int): Int = {
+  def toNFAProgram(program:Program[Instruction], visitedStates:Map[State, Int], inQ:State, pc:Int): Int = {
 
     var npc = pc
-    var jumps = new ArrayBuffer[JUMP]()
 
-    visitedStates+= ((q, npc))
+    visitedStates+= ((inQ, npc))
 
     // A final state translates into a match operation, and it
     // doesn't go through the previous block because it doesn't have
     // outgoing transitions
-    if(q == qf) {
+    if(inQ == qf) {
 
       program += new MATCH(npc)
       npc += 1
@@ -51,11 +50,12 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
       var j = 0
       var oldSplit:SPLIT = null
 
-      val tr = this.δ.filter((t:Transition[State]) => t.q == q)
+      val tr = this.δ.filter((t:Transition[State]) => t.q == inQ)
 
       for(t <- tr) {
 
         var instr:Instruction = null
+        var firstInstr:Instruction = null
         var jmp:JUMP = null
         var split:SPLIT = null
 
@@ -74,6 +74,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
           }
         }
 
+        var instAdded = true
         // Find out the type of transition and add corresponding instruction to the program
         t match {
 
@@ -91,6 +92,8 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
           }
           case OperationsTransition(q:State, s:SVOps[SVOp], v:SVars[SVar], q1:State) => {
 
+            val cpc = npc
+
             for(o <- s) {
 
               val pos = if (o.t == ⊢) 0 else 1
@@ -99,18 +102,22 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
 
             }
             instr = program.last
+
+            if(s.size == 0)
+              instAdded = false
+            else firstInstr = program(cpc)
           }
 
         }
 
         // if we placed a split, connect it to the first instruction
         if(split != null) {
-          split.next1 = instr.pos
+          split.next1 = if(!instAdded) instr.pos + 1 else if(firstInstr != null) firstInstr.pos else instr.pos
           oldSplit = split
         }
         else if(oldSplit != null) {
 
-          oldSplit.next2 = instr.pos
+          oldSplit.next2 = if(!instAdded) instr.pos + 1 else if(firstInstr != null) firstInstr.pos else instr.pos
         }
 
         if(visitedStates.contains(t.q1)) {
@@ -131,6 +138,69 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     }
 
     npc
+  }
+
+  override def toString():String = {
+
+    var stateMap = Map[State, Int]()
+    var counter = 2
+    stateMap += ((q0, 0))
+    stateMap += ((qf, 1))
+
+    var s = ""
+    s += Q.size.toString + '\n'
+    s += "0" + '\n'
+    s += "1" + '\n'
+    for(v <- V)
+      s += v.toString  + " "
+    s += '\n'
+    s += "-" + '\n'
+    for(t <- δ) {
+
+      var sQ = ""
+      var dQ = ""
+
+      if(stateMap.contains(t.q))
+        sQ += stateMap(t.q)
+      else {
+        stateMap += ((t.q, counter))
+        sQ += counter
+        counter += 1
+      }
+
+      if(stateMap.contains(t.q1))
+        dQ += stateMap(t.q1)
+      else {
+        stateMap += ((t.q1, counter))
+        dQ += counter
+        counter += 1
+      }
+
+      val label:String = t match {
+
+        case OrdinaryTransition(q, σ, v, q1) => {
+          σ.toString
+        }
+        case RangeTransition(q, σ, v, q1) => {
+          "(" + σ.min.toChar + ", " + σ.max.toChar + ")"
+        }
+        case OperationsTransition(q, s, v, q1) => {
+          var l = "{"
+
+          for(o <- s) {
+            l += o.x + (if(o.t == ⊢) "⊢" else "⊣") + ", "
+          }
+
+          l += "}"
+
+          l
+        }
+      }
+
+      s += sQ + " " + label + " " + dQ + '\n'
+    }
+
+    s
   }
 
   /**
@@ -225,7 +295,8 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     // Perform Cross Product
     val (intδ, intQ) = t × o
 
-    if(!intQ.contains(q02) || !intQ.contains(qf2)) return None
+    if(!intQ.contains(q02) || !intQ.contains(qf2))
+      return None
 
     // Prune away invalid states
     val (prδ, prQ) = prune[State2](intδ, intQ, q02, qf2)
@@ -233,7 +304,8 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     // Convert state pairs into simple states
     val (newQ, q0Opt, qfOpt, newδ) = State2toState(prQ, q02, qf2, prδ)
 
-    if(q0Opt == None || qfOpt == None) return None
+    if(q0Opt == None || qfOpt == None)
+      return None
 
     val q0 = q0Opt.get
     val qf = qfOpt.get
@@ -307,12 +379,12 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
       cF = nF
       nF = Map[State, Predecessors[(State, SVOps[SVOp])]]()
     }
-
+/*
     // For each state, add an epsilon transition to itself
     for(q <- this.Q) {
 
       newδ = newδ + new OperationsTransition[State](q, new SVOps[SVOp], this.V, q)
-    }
+    }*/
 
     new VSetAutomaton(this.Q, this.q0, this.qf, this.V,  newδ)
   }
@@ -340,7 +412,6 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
         val t12 = t12Opt.get
         prodδ = prodδ + t12
 
-
         Q2 = Q2 + t12.q
         Q2 = Q2 + t12.q1
       }
@@ -366,6 +437,15 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
 
     var visitedForward = scala.collection.mutable.Map[State, Boolean]()
     var visitedBackward = scala.collection.mutable.Map[State, Boolean]()
+
+    // Initialize the maps keeping track of visited states
+    for(q <- Q) {
+
+      visitedForward += ((q, false))
+      visitedBackward += ((q, false))
+    }
+    visitedForward(q0) = true
+    visitedBackward(qf) = true
 
     // Build forwardδ for forward traversal
     for(q <- Q) {
@@ -402,7 +482,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     // Include only the states visited in both directions
     for(q <- Q) {
 
-      if(visitedForward(q) && visitedForward(q))
+      if(visitedForward(q) && visitedBackward(q))
         newQ = newQ + q
     }
 

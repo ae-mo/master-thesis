@@ -116,6 +116,10 @@ object CoreSpannerFileReader {
 
         δ = δ + new OperationsTransition[State](q, S, V, q1)
       }
+      else if(label.matches("DOT")) {
+
+        δ = δ + new RangeTransition[State](q, new Range(Character.MIN_VALUE, Character.MAX_VALUE), V, q1)
+      }
     }
 
     (Some(new CoreSpanner(new VSetAutomaton(Q, q0, qf, V, δ), eqsSet)))
