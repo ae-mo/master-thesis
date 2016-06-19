@@ -1,7 +1,7 @@
 package be.ac.ulb.arc.vset
 
 import be.ac.ulb.arc.runtime._
-import scala.collection.mutable.{ArrayBuffer, Map}
+import scala.collection.immutable.{HashSet => SVars}
 import org.scalatest.FunSuite
 
 /**
@@ -17,12 +17,21 @@ class coreSpannerTestSuite extends FunSuite{
     val spannerFile4 = "src/test/scala/be.ac.ulb.arc/vset/spanner4.txt"
     val spannerFile5 = "src/test/scala/be.ac.ulb.arc/vset/spanner5.txt"
     val spannerFile6 = "src/test/scala/be.ac.ulb.arc/vset/spanner6.txt"
+    val spannerFile7 = "src/test/scala/be.ac.ulb.arc/vset/spanner7.txt"
+    val spannerFile8 = "src/test/scala/be.ac.ulb.arc/vset/spanner8.txt"
+    val spannerFile9 = "src/test/scala/be.ac.ulb.arc/vset/spanner9.txt"
+    val spannerFile10 = "src/test/scala/be.ac.ulb.arc/vset/spanner10.txt"
+
 
     val spanner = CoreSpannerFileReader.getCoreSpanner(spannerFile1).get
     val spanner3 = CoreSpannerFileReader.getCoreSpanner(spannerFile3).get
     val spanner4 = CoreSpannerFileReader.getCoreSpanner(spannerFile4).get
     val spanner5 = CoreSpannerFileReader.getCoreSpanner(spannerFile5).get
     val spanner6 = CoreSpannerFileReader.getCoreSpanner(spannerFile6).get
+    val spanner7 = CoreSpannerFileReader.getCoreSpanner(spannerFile7).get
+    val spanner8 = CoreSpannerFileReader.getCoreSpanner(spannerFile8).get
+    val spanner9 = CoreSpannerFileReader.getCoreSpanner(spannerFile9).get
+    val spanner10 = CoreSpannerFileReader.getCoreSpanner(spannerFile10).get
   }
 
   test("A core spanner should be correctly converted into an NFA program") {
@@ -124,8 +133,79 @@ class coreSpannerTestSuite extends FunSuite{
     assert(t17.filter((p:StringPointerCollection) => p.toArray.deep == Array[Int](0, 3, 3, 3, 3, 3).deep).size == 1)
     assert(t17.filter((p:StringPointerCollection) => p.toArray.deep == Array[Int](0, 4, 4, 4, 4, 4).deep).size == 1)
     assert(t17.filter((p:StringPointerCollection) => p.toArray.deep == Array[Int](0, 0, 0, 0, 0, 0).deep).size == 1)
+
   }
 
+  test("the natural join operation between two spanners should result in the natural join of their (V, S)-relations (2)") {
 
+    val s1 = "test aaa ababab aaaaa" + '\0'
 
+    val t17Opt = data.spanner7.evaluate(s1)
+
+    assert(t17Opt != None)
+
+    val t17 = t17Opt.get
+
+    OutputWriter.printOutput(s1, t17)
+
+    val spanner9Opt = data.spanner7 ⋈ data.spanner8
+
+    assert(spanner9Opt != None)
+
+    val spanner9 = spanner9Opt.get
+
+    val t19Opt = spanner9.evaluate(s1)
+
+    assert(t19Opt != None)
+
+    val t19 = t19Opt.get
+
+    OutputWriter.printOutput(s1, t19)
+
+  }
+
+  test("Spanning overlapping tuples") {
+
+    val s1 = "this test will show the truth" + '\0'
+
+    val t19Opt = data.spanner9.evaluate(s1)
+
+    val t19 = t19Opt.get
+
+    OutputWriter.printOutput(s1, t19)
+  }
+
+  test("the projection operation on a spanner should in the projection of its (V, S)-relation on the desired span variables") {
+
+    val s1 = "this is a test ab test ab ab ababab" + '\0'
+
+    val t110Opt = data.spanner10.evaluate(s1)
+
+    assert(t110Opt != None)
+
+    val t110 = t110Opt.get
+
+    OutputWriter.printOutput(s1, t110)
+
+    val spanner11Opt = data.spanner10.π(new SVars + 1)
+
+    assert(spanner11Opt != None)
+
+    val spanner11 = spanner11Opt.get
+
+    val t111Opt = spanner11.evaluate(s1)
+
+    assert(t111Opt != None)
+
+    val t111 = t111Opt.get
+
+    OutputWriter.printOutput(s1, t111)
+
+    assert(t110.size == t111.size)
+
+    for(t <- t110) {
+
+      assert(t111.exists((t1:StringPointerCollection) => t1(2) == t(2) && t1(3) == t(3)))
+    }
+  }
 }

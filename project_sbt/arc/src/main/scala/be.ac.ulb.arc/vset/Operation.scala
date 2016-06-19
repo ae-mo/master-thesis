@@ -95,9 +95,11 @@ case class π(val a:String, val a2:String, val vars:SVars[SVar]) extends Operati
 
     }
 
-    val aut = _a.automaton.π(vars)
+    val autOpt = _a.π(vars)
+    if (autOpt == None)
+      return None
 
-    val _a2 = new CoreSpanner(aut, _a.equalities)
+    val _a2 = autOpt.get
 
     // Add the new spanner to the spanner collection
     spanners += ((a2, _a2))
@@ -127,12 +129,10 @@ case class ⋈(val a1:String, val a2:String, val a3:String) extends Operation(a3
   override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
 
     val _a1 = spanners(a1)
-    val aut1 = _a1.automaton
     val _a2 = spanners(a2)
-    val aut2 = _a2.automaton
 
     // Join the underlying automata
-    val aut3Opt = aut1 ⋈ aut2
+    val aut3Opt = _a1 ⋈ _a2
 
     if(aut3Opt != None) {
 
@@ -149,7 +149,7 @@ case class ⋈(val a1:String, val a2:String, val a3:String) extends Operation(a3
 
         a3Eqs = Some(eqSet)
 
-        val _a3 = new CoreSpanner(aut3Opt.get, a3Eqs)
+        val _a3 = aut3Opt.get
 
         // Add the result to the spanner collection
         spanners += ((a3, _a3))
@@ -184,12 +184,10 @@ case class ∪(val a1:String, val a2:String, val a3:String) extends Operation(a3
   override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
 
     val _a1 = spanners(a1)
-    val aut1 = _a1.automaton
     val _a2 = spanners(a2)
-    val aut2 = _a2.automaton
 
     // Join the underlying automata
-    val aut3Opt = aut1 ∪ aut2
+    val aut3Opt = _a1 ∪ _a2
 
     if(aut3Opt != None) {
 
@@ -206,7 +204,7 @@ case class ∪(val a1:String, val a2:String, val a3:String) extends Operation(a3
 
         a3Eqs = Some(eqSet)
 
-        val _a3 = new CoreSpanner(aut3Opt.get, a3Eqs)
+        val _a3 = aut3Opt.get
 
         // Add the result to the spanner collection
         spanners += ((a3, _a3))

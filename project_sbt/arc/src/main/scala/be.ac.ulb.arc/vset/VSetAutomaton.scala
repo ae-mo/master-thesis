@@ -327,6 +327,9 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     var cF = Map[State, Predecessors[(State, SVOps[SVOp])]]()
     var nF = Map[State, Predecessors[(State, SVOps[SVOp])]]()
 
+    // Keep track of the states already visited
+    var visited = Set[State]() + q0
+
     cF = cF + ((q0, new Predecessors[(State, SVOps[SVOp])]))
 
     // while it is possible to create a new frontier
@@ -342,7 +345,9 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
         // each new state gets its own list of predecessors
         // all the feasible transitions are followed in order to
         // visit all the graph
-        for(t <- qδ if t.q1 != q) {
+        for(t <- qδ if !visited.contains(t.q1)) {
+
+          visited = visited + t.q1
 
           if(t.isInstanceOf[OperationsTransition[State]]) {
 

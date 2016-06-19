@@ -155,7 +155,7 @@ object ClassicalImplementation {
       else {
 
         t3(v*2) = t2(v*2)
-        t3(v*2 + 1) = t1(v*2 + 1)
+        t3(v*2 + 1) = t2(v*2 + 1)
       }
     }
 
