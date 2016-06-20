@@ -120,6 +120,27 @@ object CoreSpannerFileReader {
 
         δ = δ + new RangeTransition[State](q, new Range(Character.MIN_VALUE, Character.MAX_VALUE), V, q1)
       }
+      else if(label.matches("CAPITAL")) {
+
+        δ = δ + new RangeTransition[State](q, new Range('A', 'Z'), V, q1)
+      }
+      else if(label.matches("LETTER")) {
+
+        δ = δ + new RangeTransition[State](q, new Range('a', 'z'), V, q1)
+      }
+      else if(label.matches("DIGIT")) {
+
+        δ = δ + new RangeTransition[State](q, new Range('0', '9'), V, q1)
+      }
+      else if(label.matches("PUNCTUATION")) {
+
+        δ = δ + new OrdinaryTransition[State](q, '!', V, q1)
+        δ = δ + new OrdinaryTransition[State](q, '?', V, q1)
+        δ = δ + new OrdinaryTransition[State](q, ':', V, q1)
+        δ = δ + new OrdinaryTransition[State](q, ',', V, q1)
+        δ = δ + new OrdinaryTransition[State](q, '.', V, q1)
+        δ = δ + new OrdinaryTransition[State](q, ';', V, q1)
+      }
     }
 
     (Some(new CoreSpanner(new VSetAutomaton(Q, q0, qf, V, δ), eqsSet)))
