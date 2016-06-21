@@ -6,8 +6,8 @@ import scala.collection.immutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import scala.collection.mutable.{Map => CoreSpannersCollection}
 import scala.collection.mutable.{Map => VSRelationsCollection}
-import be.ac.ulb.arc.vset.AQLCoreFragmentSpecification
-import be.ac.ulb.arc.vset.CoreSpanner
+import be.ac.ulb.arc.core.AQLCoreFragmentSpecification
+import be.ac.ulb.arc.core.CoreSpanner
 
 /**
   * Represents an interpreter that views each operation in an AQL fragment as an operation on relations.
@@ -16,6 +16,7 @@ object ClassicalInterpreter {
 
   /**
     * Executes an AQL fragment on a document.
+ *
     * @param fragment
     * @param doc
     * @param lazyEv
@@ -64,6 +65,7 @@ object ClassicalImplementation {
 
   /**
     * Performs the projection on the desired span variables of the given (V, s)-relation.
+ *
     * @param table
     * @param vars
     * @param projVars
@@ -93,6 +95,7 @@ object ClassicalImplementation {
 
   /**
     * Performs the natural join of two given (V, s)-relations.
+ *
     * @param table1
     * @param vars1
     * @param table2
@@ -134,6 +137,7 @@ object ClassicalImplementation {
 
   /**
     * Merges two tuples that agree on common variables.
+ *
     * @param t1
     * @param v1
     * @param t2
@@ -163,6 +167,7 @@ object ClassicalImplementation {
   }
   /**
     * A simple hashing function to support hash-join.
+ *
     * @param t
     * @param vars
     * @return
@@ -184,6 +189,7 @@ object ClassicalImplementation {
 
   /**
     * Performs the union of two given (V, s)-relations.
+ *
     * @param table1
     * @param vars1
     * @param table2
@@ -202,6 +208,7 @@ object ClassicalImplementation {
 
   /**
     * Performs a string equality selection on the given (V, s)-relation.
+ *
     * @param input
     * @param table
     * @param vars
@@ -228,5 +235,78 @@ object ClassicalImplementation {
 
     if(table2.size != 0) Some(table2)
     else None
+  }
+
+  /**
+    * Joins two input (V, s)-relations based on a given boolean predicate.
+ *
+    * @param table1
+    * @param vars1
+    * @param var1
+    * @param table2
+    * @param vars2
+    * @param var2
+    * @param predicate
+    * @return
+    */
+  def genericJoin(table1:VSRelation[VSTuple], vars1:SVars[SVar], var1:SVar, table2:VSRelation[VSTuple], vars2:SVars[SVar], var2:SVar, predicate:(VSTuple, SVar, VSTuple, SVar, Array[Int]) => Boolean, pars:Array[Int] = null)
+  :Option[VSRelation[VSTuple]] = {
+
+    // When there are common span variables we
+    // don't know how to merge, as here we use boolean predicates
+    if(vars1.intersect(vars2).size > 0) return None
+
+    val varsU = vars1 ++ vars2
+    var table3 = new VSRelation[VSTuple]
+
+    for(t1 <- table1; t2 <- table2) {
+
+      // If the predicate holds, merge t1 and t2 and add
+      // the result to the output relation
+      if(predicate(t1, var1, t2, var2, pars))
+        table3 = table3 + mergeTuples(t1, vars1, t2, vars2, varsU)
+    }
+
+    if(table3.size == 0) return None
+    else Some(table3)
+  }
+
+  /**
+    * Tests if an s-tuple follows another within a distance between the bounds specified.
+ *
+    * @param t1
+    * @param v1
+    * @param t2
+    * @param v2
+    * @param pars Bounds go here, min first.
+    * @return
+    */
+  def follows(t1:VSTuple, v1:SVar, t2:VSTuple, v2:SVar, pars:Array[Int]):Boolean = {
+
+    // If a tuple doesn't contain the specified span variable,
+    // the predicate is false
+    if(t1(v1*2) == -1 || t2(v2*2) == -1) return false
+
+    val diff = t2(v2*2) - t1(v1*2 + 1)
+    if(diff >= pars(0) && diff <= pars(1)) return true
+
+    false
+  }
+
+  /**
+    * Tests if an s-tuple is within a distance between the bounds specified with respect to another.
+ *
+    * @param t1
+    * @param v1
+    * @param t2
+    * @param v2
+    * @param pars Bounds go here, min first.
+    * @return
+    */
+  def isWithin(t1:VSTuple, v1:SVar, t2:VSTuple, v2:SVar, pars:Array[Int]):Boolean = {
+
+    if(follows(t1, v1, t2, v2, pars) || follows(t2, v2, t1, v1, pars)) return true
+
+    false
   }
 }

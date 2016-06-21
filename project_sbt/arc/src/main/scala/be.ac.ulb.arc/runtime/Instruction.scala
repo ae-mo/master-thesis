@@ -2,7 +2,7 @@ package be.ac.ulb.arc.runtime
 
 import scala.{Int => Position}
 import scala.{Int => Pointer}
-import be.ac.ulb.arc.vset.Range
+import be.ac.ulb.arc.core.Range
 
 // A generic instruction
 abstract class Instruction(val pos:Position)

@@ -5,6 +5,8 @@ import scala.collection.immutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import scala.collection.mutable.ArrayBuffer
 
+import java.io.FileWriter
+
 /**
   * A writer for outputs of NFA programs executed on input strings.
   */
@@ -42,5 +44,16 @@ object OutputWriter {
       }
       println()
     }
+  }
+
+  /**
+    * Prints the given tuples spanned from the given program to the given output file.
+    * @param input
+    * @param output
+    * @param outputFile
+    */
+  def writeOutput(input:String, output:VSRelation[VSTuple], outputFile:FileWriter):Unit = {
+
+
   }
 }

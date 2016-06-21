@@ -1,4 +1,4 @@
-package be.ac.ulb.arc.vset
+package be.ac.ulb.arc.core
 
 import be.ac.ulb.arc.runtime._
 import scala.collection.immutable.{HashSet => SVars}

@@ -1,7 +1,7 @@
 package be.ac.ulb.arc.benchmark
 
 import be.ac.ulb.arc.runtime.OutputWriter
-import be.ac.ulb.arc.vset.{CoreSpannerFileReader, OrdinaryTransition, Transition, State}
+import be.ac.ulb.arc.core.{CoreSpannerFileReader, OrdinaryTransition, Transition, State}
 import org.scalatest.FunSuite
 /**
   * Created by andrea on 20/06/16.

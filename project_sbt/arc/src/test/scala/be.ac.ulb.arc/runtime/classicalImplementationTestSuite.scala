@@ -1,6 +1,6 @@
 package be.ac.ulb.arc.runtime
 
-import be.ac.ulb.arc.vset.CoreSpannerFileReader
+import be.ac.ulb.arc.core.CoreSpannerFileReader
 import scala.collection.immutable.{HashSet => SVars}
 import org.scalatest.FunSuite
 /**

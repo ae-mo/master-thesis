@@ -1,4 +1,4 @@
-package be.ac.ulb.arc.vset
+package be.ac.ulb.arc.core
 
 import scala.collection.immutable.{HashSet => SVars}
 import scala.collection.immutable.{HashSet => SVOps}
@@ -6,11 +6,9 @@ import scala.collection.immutable.{HashSet => TransitionFunction}
 import scala.collection.immutable.{HashSet => StateSet}
 import scala.collection.immutable.{HashSet => Predecessors}
 import scala.collection.mutable.{ArrayBuffer => Program, Map}
-import scala.collection.mutable.ArrayBuffer
 import scala.{Int => SVar}
 
 import be.ac.ulb.arc.runtime._
-
 
 /**
   * Represents a variable-set automaton.
@@ -140,6 +138,10 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     npc
   }
 
+  /**
+    * Returns a string representation of the automaton. WARNING: For debug purposes only!
+    * @return
+    */
   override def toString():String = {
 
     var stateMap = Map[State, Int]()
@@ -384,12 +386,6 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
       cF = nF
       nF = Map[State, Predecessors[(State, SVOps[SVOp])]]()
     }
-/*
-    // For each state, add an epsilon transition to itself
-    for(q <- this.Q) {
-
-      newδ = newδ + new OperationsTransition[State](q, new SVOps[SVOp], this.V, q)
-    }*/
 
     new VSetAutomaton(this.Q, this.q0, this.qf, this.V,  newδ)
   }

@@ -1,4 +1,4 @@
-package be.ac.ulb.arc.vset
+package be.ac.ulb.arc.core
 
 import org.scalatest.FunSuite
 

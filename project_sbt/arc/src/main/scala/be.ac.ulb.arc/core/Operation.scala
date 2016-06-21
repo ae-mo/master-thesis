@@ -1,4 +1,4 @@
-package be.ac.ulb.arc.vset
+package be.ac.ulb.arc.core
 
 import scala.collection.mutable.{Map => CoreSpannersCollection}
 import scala.collection.mutable.{Map => VSRelationsCollection}
@@ -16,6 +16,7 @@ abstract class Operation(val res:String) {
 
   /**
     * Performs an operation on input spanners(s), resulting in a new spanner.
+    *
     * @param spanners
     * @return
     */
@@ -24,6 +25,7 @@ abstract class Operation(val res:String) {
   /**
     * Execute an operation on input relation(s), derived from input spanner(s). It results
     * in a new relation.
+    *
     * @param spanners
     * @param relations
     * @param doc
@@ -34,6 +36,7 @@ abstract class Operation(val res:String) {
 
   /**
     * Gets a relation from a collection of relations. Supports lazy evaluation.
+    *
     * @param a
     * @param spanners
     * @param relations
@@ -166,7 +169,7 @@ case class ⋈(val a1:String, val a2:String, val a3:String) extends Operation(a3
     val r1Opt = getRelation(a1, spanners, relations, doc, lazyEv)
     // If any of the two input relations is empty, the result is empty
     if(r1Opt == None) return None
-    val r2Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    val r2Opt = getRelation(a2, spanners, relations, doc, lazyEv)
     if(r2Opt == None) return None
 
     ClassicalImplementation.⋈(r1Opt.get, spanners(a1).automaton.V, r2Opt.get, spanners(a2).automaton.V)
@@ -221,7 +224,7 @@ case class ∪(val a1:String, val a2:String, val a3:String) extends Operation(a3
     val r1Opt = getRelation(a1, spanners, relations, doc, lazyEv)
     var r1:VSRelation[VSTuple] = null
     if(r1Opt == None) r1 = VSRelation[VSTuple]() else r1Opt.get
-    val r2Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    val r2Opt = getRelation(a2, spanners, relations, doc, lazyEv)
     var r2:VSRelation[VSTuple] = null
     if(r2Opt == None) r2 = VSRelation[VSTuple]() else r2Opt.get
 
@@ -270,6 +273,84 @@ case class ς(val a:String, val a2:String, val v1:SVar, val v2:SVar) extends Ope
     ClassicalImplementation.ς(doc, rOpt.get, spanners(a).automaton.V, v1, v2)
   }
 
+}
+
+/**
+  * Represents the join based on the 'follows' predicate.
+  *
+  * @param a1
+  * @param a2
+  * @param a3
+  * @param var1
+  * @param var2
+  * @param min
+  * @param max
+  */
+case class Follows(val a1:String, val a2:String, val a3:String, val var1:SVar, val var2:SVar, val min:Int, val max:Int) extends Operation(a3) {
+
+  override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
+
+    val _a1 = spanners(a1)
+    val _a2 = spanners(a2)
+
+    val _a3Opt = _a1.follows(_a2, var1, var2, min, max)
+
+    _a3Opt
+  }
+
+  override def execute(spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean = false): Option[VSRelation[VSTuple]] = {
+
+    val r1Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    if(r1Opt == None) return None
+    val r2Opt = getRelation(a2, spanners, relations, doc, lazyEv)
+    if(r1Opt == None) return None
+
+    val pars = new Array[Int](2)
+    pars(0) = min
+    pars(1) = max
+
+    // Do the join with the 'follows' predicate
+    ClassicalImplementation.genericJoin(r1Opt.get, spanners(a1).automaton.V, var1, r2Opt.get, spanners(a2).automaton.V, var2, ClassicalImplementation.follows, pars)
+  }
+}
+
+/**
+  * Represents the join based on the 'isWithin' predicate.
+  *
+  * @param a1
+  * @param a2
+  * @param a3
+  * @param var1
+  * @param var2
+  * @param min
+  * @param max
+  */
+case class IsWithin(val a1:String, val a2:String, val a3:String, val var1:SVar, val var2:SVar, val min:Int, val max:Int) extends Operation(a3) {
+
+  override def perform(spanners:CoreSpannersCollection[String, CoreSpanner]):Option[CoreSpanner] = {
+
+    val _a1 = spanners(a1)
+    val _a2 = spanners(a2)
+
+    val _a3Opt = _a1.isWithin(_a2, var1, var2, min, max)
+
+    _a3Opt
+  }
+
+  override def execute(spanners:CoreSpannersCollection[String, CoreSpanner], relations:VSRelationsCollection[String, VSRelation[VSTuple]], doc:String, lazyEv:Boolean = false): Option[VSRelation[VSTuple]] = {
+
+    val r1Opt = getRelation(a1, spanners, relations, doc, lazyEv)
+    if(r1Opt == None) return None
+    val r2Opt = getRelation(a2, spanners, relations, doc, lazyEv)
+    if(r1Opt == None) return None
+
+    val pars = new Array[Int](2)
+    pars(0) = min
+    pars(1) = max
+
+    // Do the join with the 'isWithin' predicate
+    ClassicalImplementation.genericJoin(r1Opt.get, spanners(a1).automaton.V, var1, r2Opt.get, spanners(a2).automaton.V, var2, ClassicalImplementation.isWithin, pars)
+  }
 }
 
 /**
@@ -376,6 +457,46 @@ object selectionExtractor extends OperationExtractor {
 }
 
 /**
+  * Represents an extractor of a join operation based on the 'follows' predicate.
+  */
+object followsExtractor extends OperationExtractor {
+
+  val followsPatternS = "\\s*(.+)\\s*=\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*follows\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*"
+  val followsPattern = followsPatternS.r
+
+  override def extract(s:String):Option[Operation] = {
+
+    if(s.matches(followsPatternS)) {
+
+      val followsPattern(a3, a1, v1, a2, v2, min, max) = s
+
+      return Some(new Follows(a1, a2, a3, v1.toInt, v2.toInt, min.toInt, max.toInt))
+    }
+    None
+  }
+}
+
+/**
+  * Represents an extractor of a join operation based on the 'isWithin' predicate.
+  */
+object isWithinExtractor extends OperationExtractor {
+
+  val isWithinPatternS = "\\s*(.+)\\s*=\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*isWithin\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*"
+  val isWithinPattern = isWithinPatternS.r
+
+  override def extract(s:String):Option[Operation] = {
+
+    if(s.matches(isWithinPatternS)) {
+
+      val isWithinPattern(a3, a1, v1, a2, v2, min, max) = s
+
+      return Some(new Follows(a1, a2, a3, v1.toInt, v2.toInt, min.toInt, max.toInt))
+    }
+    None
+  }
+}
+
+/**
   * Collects the operation extractors available.
   */
 object OperationExtractors {
@@ -384,6 +505,8 @@ object OperationExtractors {
   val ⋈ = joinExtractor
   val ∪ = unionExtractor
   val ς = selectionExtractor
+  val follows = followsExtractor
+  val isWithin = isWithinExtractor
 
   val buf = new ArrayBuffer[OperationExtractor]()
 
@@ -391,6 +514,8 @@ object OperationExtractors {
   buf += ⋈
   buf += ∪
   buf += ς
+  buf += follows
+  buf += isWithin
 
   def apply(i:Int):OperationExtractor = buf(i)
   def size = buf.size

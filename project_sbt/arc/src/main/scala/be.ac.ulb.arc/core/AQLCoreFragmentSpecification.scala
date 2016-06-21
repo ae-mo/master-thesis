@@ -1,4 +1,4 @@
-package be.ac.ulb.arc.vset
+package be.ac.ulb.arc.core
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{Map => CoreSpannersCollection}
