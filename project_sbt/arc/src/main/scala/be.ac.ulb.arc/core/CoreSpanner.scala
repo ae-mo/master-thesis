@@ -22,6 +22,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
   automaton.toNFAProgram(prog, Map[State, Int](), automaton.q0, 0)
   /**
     * Evaluates the spanner on the given document.
+    *
     * @param doc
     * @return
     */
@@ -42,6 +43,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
 
   /**
     * Performs the projection of the spanner on the desired span variables.
+    *
     * @param vars
     * @return
     */
@@ -54,6 +56,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
 
   /**
     * Performs the union of the spanner with the given spanner.
+    *
     * @param other
     * @return
     */
@@ -72,6 +75,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
 
   /**
     * Performs the join of the spanner with the given spanner.
+    *
     * @param other
     * @return
     */
@@ -90,6 +94,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
 
   /**
     * Performs the string equality of the spanner on the given pair of span variables.
+    *
     * @param var1
     * @param var2
     * @return
@@ -113,6 +118,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
   /**
     * Returns the spanner that spans the s-tuples in which the span assigned to
     * var1 is distant from the span assigned to var2 min to max characters.
+    *
     * @param other
     * @param var1
     * @param var2
@@ -138,6 +144,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
   /**
     * Returns the spanner that spans the s-tuples in which the span assigned to
     * var1 follows the span assigned to var2 within min to max characters.
+    *
     * @param other
     * @param var1 Has to be a span variable from this spanner, not in the other.
     * @param var2 Has to be a span variable from the other spanner, not in this one.
@@ -227,6 +234,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
 
   /**
     * Merges Two sets of string equality selections.
+    *
     * @param eqs1
     * @param eqs2
     * @return
@@ -238,6 +246,94 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
     else if(eqs2 != None) eqs2
     else Some(eqs1.get ++ eqs2.get)
   }
+
+  /**
+    * Returns an executable string representation of the spanner.
+    *
+    * @return
+    */
+  override def toString(): String = {
+
+    var stateMap = Map[State, Int]()
+    var counter = 2
+    stateMap += ((automaton.q0, 0))
+    stateMap += ((automaton.qf, 1))
+
+    var s = ""
+    s += automaton.Q.size.toString + '\n'
+    s += "0" + '\n'
+    s += "1" + '\n'
+    for(v <- automaton.V)
+      s += v.toString + " "
+    s += '\n'
+
+    if(equalities != None) {
+
+      val eqs = equalities.get
+
+      for(e <- eqs) {
+
+        s += "(" + e._1 + "," + e._2 + ")\n"
+      }
+    }
+    s += "-" + '\n'
+    for(t <- automaton.δ) {
+
+      var sQ = ""
+      var dQ = ""
+
+      if(stateMap.contains(t.q))
+        sQ += stateMap(t.q)
+      else {
+        stateMap += ((t.q, counter))
+        sQ += counter
+        counter += 1
+      }
+
+      if(stateMap.contains(t.q1))
+        dQ += stateMap(t.q1)
+      else {
+        stateMap += ((t.q1, counter))
+        dQ += counter
+        counter += 1
+      }
+
+      val label:String = t match {
+
+        case OrdinaryTransition(q, σ, v, q1) => {
+          σ.toString
+        }
+        case RangeTransition(q, σ, v, q1) => {
+          "(" + σ.min.toChar + ", " + σ.max.toChar + ")"
+        }
+        case OperationsTransition(q, s, v, q1) => {
+          var l = "{"
+
+          var sA = s.toArray
+          var o:SVOp = null
+
+          if (sA.length > 0) {
+            o = sA(0)
+            l += o.x + (if (o.t == ⊢) "⊢" else "⊣")
+          }
+
+          if(sA.length > 1)
+            for(i <- 1 until sA.length) {
+              o = sA(i)
+              l +=  ", " + o.x + (if(o.t == ⊢) "⊢" else "⊣")
+            }
+
+          l += "}"
+
+          l
+        }
+      }
+
+      s += sQ + " " + label + " " + dQ + '\n'
+    }
+
+    s
+  }
 }
 
 /**
@@ -247,14 +343,16 @@ object CoreSpannerGenerator {
 
   /**
     * Generates a core spanner from an AQL core fragment specification.
+    *
     * @param spec
     * @return
     */
   def generate(spec:AQLCoreFragmentSpecification):CoreSpanner = {
 
-    val spanners = CoreSpannersCollection[String, CoreSpanner]()
+    var spanners = CoreSpannersCollection[String, CoreSpanner]()
     var result:CoreSpanner = null
 
+    spanners = spanners ++ spec.spanners
     // Perform the operations on the input spanners
     for(op <- spec.operations) {
 

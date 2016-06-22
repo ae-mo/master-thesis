@@ -4,11 +4,8 @@ import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
 import scala.collection.immutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
-import scala.collection.mutable.{Map => CoreSpannersCollection}
 import scala.collection.mutable.{Map => VSRelationsCollection}
 import be.ac.ulb.arc.core.AQLCoreFragmentSpecification
-import be.ac.ulb.arc.core.CoreSpanner
-
 /**
   * Represents an interpreter that views each operation in an AQL fragment as an operation on relations.
   */
@@ -36,7 +33,8 @@ object ClassicalInterpreter {
 
         val rOpt = sp.evaluate(doc)
 
-        if(rOpt != None) relations += ((k, rOpt.get))
+        if(rOpt != None)
+          relations += ((k, rOpt.get))
       }
 
       // execute the operations
@@ -285,10 +283,12 @@ object ClassicalImplementation {
 
     // If a tuple doesn't contain the specified span variable,
     // the predicate is false
-    if(t1(v1*2) == -1 || t2(v2*2) == -1) return false
+    if(t1(v1*2) == -1 || t2(v2*2) == -1)
+      return false
 
     val diff = t2(v2*2) - t1(v1*2 + 1)
-    if(diff >= pars(0) && diff <= pars(1)) return true
+    if(diff >= pars(0) && diff <= pars(1))
+      return true
 
     false
   }

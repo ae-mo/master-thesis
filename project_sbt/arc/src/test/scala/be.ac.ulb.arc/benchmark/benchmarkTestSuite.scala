@@ -107,4 +107,13 @@ class benchmarkTestSuite extends FunSuite{
 
   }
 
+  test("Spanner 'title' should try to span groups of words representing likely movie titles (2)") {
+    val s = "'Station Agent'" + '\0'
+
+    val tTitleOpt = data.title.evaluate(s)
+    assert(tTitleOpt != None)
+    val tTitle = tTitleOpt.get
+
+    OutputWriter.printOutput(s, tTitle)
+  }
 }

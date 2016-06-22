@@ -1,5 +1,9 @@
 package be.ac.ulb.arc.core
 
+import scala.collection.immutable.{HashSet => VSRelation}
+import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
+import be.ac.ulb.arc.runtime.ClassicalInterpreter
+
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{Map => CoreSpannersCollection}
 import scala.{Array => Operations}
@@ -10,7 +14,19 @@ import scala.util.control.Breaks._
   * @param spanners
   * @param operations
   */
-class AQLCoreFragmentSpecification(val spanners:CoreSpannersCollection[String, CoreSpanner], val operations:Operations[Operation])
+class AQLCoreFragmentSpecification(val spanners:CoreSpannersCollection[String, CoreSpanner], val operations:Operations[Operation]) {
+
+  /**
+    * Executes this AQL specification on a given input document.
+    * @param doc
+    * @param lazyEv
+    * @return
+    */
+  def evaluate(doc:String, lazyEv:Boolean = false):Option[VSRelation[VSTuple]] = {
+
+    ClassicalInterpreter.execute(this, doc, lazyEv)
+  }
+}
 
 /**
   * Represents a reader for a specification of a core spanners.
@@ -34,7 +50,7 @@ object AQLCoreFragmentSpecificationReader {
     // The series of operations to perform
     val opsBuffer = new ArrayBuffer[Operation]()
 
-    val automatonPattern = "\\s*(.+)\\s*=\\s*(.+)\\s*".r
+    val automatonPattern = "\\s*(\\S+)\\s*=\\s*(\\S+)\\s*".r
 
     var line = lineIterator.next()
 
@@ -49,6 +65,7 @@ object AQLCoreFragmentSpecificationReader {
 
       spanners += ((name, spannerOpt.get))
 
+      line = lineIterator.next()
     }
 
     // Acquire the operations
@@ -74,8 +91,11 @@ object AQLCoreFragmentSpecificationReader {
 
     }
 
+    source.close
+
     val ops = opsBuffer.toArray
 
     Some(new AQLCoreFragmentSpecification(spanners, ops))
   }
+
 }

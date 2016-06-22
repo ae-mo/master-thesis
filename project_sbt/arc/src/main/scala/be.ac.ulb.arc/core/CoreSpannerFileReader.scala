@@ -69,6 +69,8 @@ object CoreSpannerFileReader {
 
     // Transition function and other states
     val transitionPattern = "(\\d+)\\s(.+)\\s(\\d+)".r
+    val rangePatternS = "\\((.),\\s*(.)\\)"
+    val rangePattern = rangePatternS.r
     var δ = new TransitionFunction[Transition[State]]
 
     for (l <- lineIterator) {
@@ -107,14 +109,24 @@ object CoreSpannerFileReader {
         var S = new SVOps[SVOp]
 
         for(vOp <- vOpsTok) {
-
-          val opSymbol = vOp.charAt(vOp.length - 1)
-          val sVar = vOp.dropRight(1).toInt
+          val vOp1 = vOp.replaceAll(" ", "")
+          val opSymbol = vOp1.charAt(vOp1.length - 1)
+          val sVar = vOp1.dropRight(1).toInt
           val kind = if(opSymbol == '⊢') ⊢ else ⊣
           S = S + new SVOp(sVar, kind)
         }
 
         δ = δ + new OperationsTransition[State](q, S, V, q1)
+      }
+      else if(label.matches(rangePatternS)) {
+
+        val rangePattern(min, max) = label
+        val minA = min.toCharArray
+        val minC = minA(0)
+        val maxA = max.toCharArray
+        val maxC = maxA(0)
+        δ = δ + new RangeTransition[State](q, new Range(minC, maxC), V, q1)
+
       }
       else if(label.matches("DOT")) {
 
@@ -142,6 +154,8 @@ object CoreSpannerFileReader {
         δ = δ + new OrdinaryTransition[State](q, ';', V, q1)
       }
     }
+
+    source.close
 
     (Some(new CoreSpanner(new VSetAutomaton(Q, q0, qf, V, δ), eqsSet)))
   }

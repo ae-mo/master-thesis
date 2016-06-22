@@ -11,16 +11,18 @@ class coreSpannerTestSuite extends FunSuite{
 
   val data = new {
 
-    val spannerFile1 = "src/test/scala/be.ac.ulb.arc/vset/spanner.txt"
-    val spannerFile2 = "src/test/scala/be.ac.ulb.arc/vset/spanner2.txt"
-    val spannerFile3 = "src/test/scala/be.ac.ulb.arc/vset/spanner3.txt"
-    val spannerFile4 = "src/test/scala/be.ac.ulb.arc/vset/spanner4.txt"
-    val spannerFile5 = "src/test/scala/be.ac.ulb.arc/vset/spanner5.txt"
-    val spannerFile6 = "src/test/scala/be.ac.ulb.arc/vset/spanner6.txt"
-    val spannerFile7 = "src/test/scala/be.ac.ulb.arc/vset/spanner7.txt"
-    val spannerFile8 = "src/test/scala/be.ac.ulb.arc/vset/spanner8.txt"
-    val spannerFile9 = "src/test/scala/be.ac.ulb.arc/vset/spanner9.txt"
-    val spannerFile10 = "src/test/scala/be.ac.ulb.arc/vset/spanner10.txt"
+    val spannerFile1 = "src/test/scala/be.ac.ulb.arc/core/spanner.txt"
+    val spannerFile2 = "src/test/scala/be.ac.ulb.arc/core/spanner2.txt"
+    val spannerFile3 = "src/test/scala/be.ac.ulb.arc/core/spanner3.txt"
+    val spannerFile4 = "src/test/scala/be.ac.ulb.arc/core/spanner4.txt"
+    val spannerFile5 = "src/test/scala/be.ac.ulb.arc/core/spanner5.txt"
+    val spannerFile6 = "src/test/scala/be.ac.ulb.arc/core/spanner6.txt"
+    val spannerFile7 = "src/test/scala/be.ac.ulb.arc/core/spanner7.txt"
+    val spannerFile8 = "src/test/scala/be.ac.ulb.arc/core/spanner8.txt"
+    val spannerFile9 = "src/test/scala/be.ac.ulb.arc/core/spanner9.txt"
+    val spannerFile10 = "src/test/scala/be.ac.ulb.arc/core/spanner10.txt"
+    val keywordsFile = "src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp"
+    val titleFile = "src/test/scala/be.ac.ulb.arc/benchmark/title.csp"
 
 
     val spanner = CoreSpannerFileReader.getCoreSpanner(spannerFile1).get
@@ -32,6 +34,8 @@ class coreSpannerTestSuite extends FunSuite{
     val spanner8 = CoreSpannerFileReader.getCoreSpanner(spannerFile8).get
     val spanner9 = CoreSpannerFileReader.getCoreSpanner(spannerFile9).get
     val spanner10 = CoreSpannerFileReader.getCoreSpanner(spannerFile10).get
+    val keywords = CoreSpannerFileReader.getCoreSpanner(keywordsFile).get
+    val title = CoreSpannerFileReader.getCoreSpanner(titleFile).get
   }
 
   test("A core spanner should be correctly converted into an NFA program") {
@@ -207,5 +211,10 @@ class coreSpannerTestSuite extends FunSuite{
 
       assert(t111.exists((t1:StringPointerCollection) => t1(2) == t(2) && t1(3) == t(3)))
     }
+  }
+
+  test("toString method should give a string representation of a spanner") {
+
+    println(data.title.toString())
   }
 }

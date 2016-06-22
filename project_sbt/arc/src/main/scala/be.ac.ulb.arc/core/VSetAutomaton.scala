@@ -280,13 +280,18 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
 
     var t:VSetAutomaton = null
     var o:VSetAutomaton = null
+    var closed = false
 
     // If the automata have common variables,
     // do the closure as preprocessing
+    // remove redundant states and transitions
     if(this.V.intersect(other.V).size != 0) {
 
       t = this.ε
+      t = t.removeStates(t.hasOnlyOperationsTransitions)
       o = other.ε
+      o = o.removeStates(o.hasOnlyOperationsTransitions)
+      closed = true
     }
     else {
 
@@ -312,7 +317,10 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     val q0 = q0Opt.get
     val qf = qfOpt.get
 
-    Some(new VSetAutomaton(newQ, q0, qf, t.V.union(o.V), newδ))
+    val result = new VSetAutomaton(newQ, q0, qf, t.V.union(o.V), newδ)
+
+    if(closed) Some(result.removeStates(result.hasOnlyOperationsTransitions))
+    else Some(result)
   }
 
   /**
@@ -574,4 +582,48 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     (Q, q0, qf, δ)
   }
 
+  /**
+    * Removes from the autamaton the states that satisfy a given predicate, and the related transitions.
+    * @return
+    */
+  def removeStates(predicate:State => Boolean):VSetAutomaton = {
+
+    var newQ = new StateSet[State]
+    var rQ = new StateSet[State]
+    var newδ = new TransitionFunction[Transition[State]]
+    var rδ = new TransitionFunction[Transition[State]]
+
+    // Accumulate states satyisfing the predicate and related transitions
+    for(q <- Q if predicate(q)) {
+
+      rQ = rQ + q
+      val tr = δ.filter((t:Transition[State]) => t.q == q || t.q1 == q)
+      rδ = rδ ++ tr
+    }
+
+    newQ = Q.diff(rQ)
+    newδ = δ.diff(rδ)
+
+    new VSetAutomaton(newQ, q0, qf, V, newδ)
+  }
+
+  /**
+    * Checks if a state only has operations transitions incoming/outgoing.
+    * WARNING: won't give positive result for initial and final states!
+    * @param q
+    * @return
+    */
+  def hasOnlyOperationsTransitions(q:State):Boolean = {
+
+    // We don't want to accidentally remove the
+    // initial or final state
+    if(q == q0 || q == qf) return false
+
+    val qδ = δ.filter((t:Transition[State]) => t.q == q || t.q1 == q)
+
+    // Check if there is a non operation transition
+    for(t <- qδ if !t.isInstanceOf[OperationsTransition[State]])
+      return false
+    true
+  }
 }

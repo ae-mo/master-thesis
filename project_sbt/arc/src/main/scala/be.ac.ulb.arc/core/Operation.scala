@@ -372,7 +372,7 @@ abstract class OperationExtractor {
   */
 object joinExtractor extends OperationExtractor {
 
-  val joinPatternS = "\\s*(.+)\\s*=\\s*(.+)\\s*⋈\\s*(.+)\\s*"
+  val joinPatternS = "\\s*(\\S+)\\s*=\\s*(\\S+)\\s*⋈\\s*(\\S+)\\s*"
   val joinPattern = joinPatternS.r
 
   override def extract(s:String):Option[Operation] = {
@@ -392,7 +392,7 @@ object joinExtractor extends OperationExtractor {
   */
 object unionExtractor extends OperationExtractor{
 
-  val unionPatternS = "\\s*(.+)\\s*=\\s*(.+)\\s*∪\\s*(.+)\\s*"
+  val unionPatternS = "\\s*(\\S+)\\s*=\\s*(\\S+)\\s*∪\\s*(\\S+)\\s*"
   val unionPattern = unionPatternS.r
 
   override def extract(s:String):Option[Operation] = {
@@ -412,7 +412,7 @@ object unionExtractor extends OperationExtractor{
   */
 object projectionExtractor extends OperationExtractor{
 
-  val projectionPatternS = "\\s*(.+)\\s*=\\s*π\\s*\\((.+)\\)\\s*(.+)\\s*"
+  val projectionPatternS = "\\s*(\\S+)\\s*=\\s*π\\s*\\((\\S+)\\)\\s*(\\S+)\\s*"
   val projectionPattern = projectionPatternS.r
   var varsPattern = "\\s*\\d(\\s*,\\s*\\d\\s*)*"
 
@@ -441,7 +441,7 @@ object projectionExtractor extends OperationExtractor{
   */
 object selectionExtractor extends OperationExtractor {
 
-  val selectionPatternS = "\\s*(.+)\\s*=\\s*ς\\s*\\(\\s*(\\d)\\s*,\\s*(\\d)\\s*\\)\\s*(.+)\\s*"
+  val selectionPatternS = "\\s*(\\S+)\\s*=\\s*ς\\s*\\(\\s*(\\d)\\s*,\\s*(\\d)\\s*\\)\\s*(\\S+)\\s*"
   val selectionPattern = selectionPatternS.r
 
   override def extract(s:String):Option[Operation] = {
@@ -461,7 +461,7 @@ object selectionExtractor extends OperationExtractor {
   */
 object followsExtractor extends OperationExtractor {
 
-  val followsPatternS = "\\s*(.+)\\s*=\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*follows\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*"
+  val followsPatternS = "\\s*(\\S+)\\s*=\\s*\\(\\s*(\\S+)\\s*,\\s*(\\d+)\\s*\\)\\s*follows\\s*\\(\\s*(\\S+)\\s*,\\s*(\\d+)\\s*\\)\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*"
   val followsPattern = followsPatternS.r
 
   override def extract(s:String):Option[Operation] = {
@@ -481,7 +481,7 @@ object followsExtractor extends OperationExtractor {
   */
 object isWithinExtractor extends OperationExtractor {
 
-  val isWithinPatternS = "\\s*(.+)\\s*=\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*isWithin\\s*\\(\\s*(.+)\\s*,\\s*(\\d+)\\s*\\)\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*"
+  val isWithinPatternS = "\\s*(\\S+)\\s*=\\s*\\(\\s*(\\S+)\\s*,\\s*(\\d+)\\s*\\)\\s*isWithin\\s*\\(\\s*(\\S+)\\s*,\\s*(\\d+)\\s*\\)\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*"
   val isWithinPattern = isWithinPatternS.r
 
   override def extract(s:String):Option[Operation] = {

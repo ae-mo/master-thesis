@@ -47,13 +47,38 @@ object OutputWriter {
   }
 
   /**
-    * Prints the given tuples spanned from the given program to the given output file.
+    * Writes the given tuples spanned from the given program to the given output file.
     * @param input
     * @param output
-    * @param outputFile
+    * @param outputFileWriter
     */
-  def writeOutput(input:String, output:VSRelation[VSTuple], outputFile:FileWriter):Unit = {
+  def writeOutput(input:String, output:VSRelation[VSTuple], outputFileWriter:FileWriter):Unit = {
 
+    for(t <- output) {
 
+      var spans = new ArrayBuffer[Position]() ++ t.toArray
+
+      while(!spans.isEmpty) {
+
+        val (span, newSpans) = spans.splitAt(2)
+        spans = newSpans
+
+        outputFileWriter.write("(" + span(0) + "," + span(1) + ") ")
+      }
+
+      spans = new ArrayBuffer[Position]() ++ t.toArray
+
+      while(!spans.isEmpty) {
+
+        val (span, newSpans) = spans.splitAt(2)
+        spans = newSpans
+
+        if(span(0) < span(1))
+          outputFileWriter.write(" " + input.substring(span(0), span(1)) + " ")
+        else outputFileWriter.write(" ε ")
+      }
+      outputFileWriter.write('\n')
+
+    }
   }
 }
