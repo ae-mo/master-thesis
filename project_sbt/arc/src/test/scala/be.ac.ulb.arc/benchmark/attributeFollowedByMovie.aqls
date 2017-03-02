@@ -1,0 +1,4 @@
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp
+attribute = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/attribute.csp
+-
+r4 = (attribute, 2) follows (movie, 1) (0, 60) 10

@@ -1,11 +1,10 @@
 package be.ac.ulb.arc.runtime
 
 import scala.{Int => Position}
-import scala.collection.immutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import scala.collection.mutable.ArrayBuffer
 
-import java.io.FileWriter
+import java.io.BufferedWriter
 
 /**
   * A writer for outputs of NFA programs executed on input strings.
@@ -17,7 +16,7 @@ object OutputWriter {
     * @param input
     * @param output
     */
-  def printOutput(input:String, output:VSRelation[VSTuple]):Unit = {
+  def printOutput(input:String, output:Iterable[VSTuple], lengthConstraint:Int = -1):Unit = {
 
     for(t <- output) {
 
@@ -29,6 +28,7 @@ object OutputWriter {
         spans = newSpans
 
         print("(" + span(0) + "," + span(1) + ") ")
+
       }
 
       spans = new ArrayBuffer[Position]() ++ t.toArray
@@ -52,11 +52,13 @@ object OutputWriter {
     * @param output
     * @param outputFileWriter
     */
-  def writeOutput(input:String, output:VSRelation[VSTuple], outputFileWriter:FileWriter):Unit = {
+  def writeOutput(input:String, output:Iterable[VSTuple], outputFileWriter:BufferedWriter, lengthConstraint:Int = -1):Unit = {
 
     for(t <- output) {
 
       var spans = new ArrayBuffer[Position]() ++ t.toArray
+
+      var printed = 0
 
       while(!spans.isEmpty) {
 
@@ -64,6 +66,7 @@ object OutputWriter {
         spans = newSpans
 
         outputFileWriter.write("(" + span(0) + "," + span(1) + ") ")
+
       }
 
       spans = new ArrayBuffer[Position]() ++ t.toArray
@@ -76,9 +79,11 @@ object OutputWriter {
         if(span(0) < span(1))
           outputFileWriter.write(" " + input.substring(span(0), span(1)) + " ")
         else outputFileWriter.write(" ε ")
+
       }
       outputFileWriter.write('\n')
 
     }
   }
+
 }

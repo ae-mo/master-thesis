@@ -1,0 +1,18 @@
+title = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/title.csp
+action = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/action.csp
+attribute = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/attribute.csp
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp
+sentiment = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/sentiment.csp
+genre = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/genre.csp
+roleClue = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/roleClue.csp
+name = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/name.csp
+role = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/role.csp
+-
+r1 = (action,0) follows (title,6) (0,10) 10
+r2 = (r1, 10) follows (attribute, 2) (0, 40) 12
+r3 = (sentiment,4) follows (genre, 5) (0,60) 10
+r4 = (r3, 10) follows (movie, 1) (0, 60) 12
+r5 = (name, 8) follows (roleClue, 7) (0,40) 10
+r6 = (r5, 10) follows (role,9) (0,40) 12
+u1 = r2 ∪ r4
+u2 = u1 ∪ r6

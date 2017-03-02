@@ -1,8 +1,10 @@
 package be.ac.ulb.arc.benchmark
 
-import be.ac.ulb.arc.runtime.OutputWriter
-import be.ac.ulb.arc.core.{CoreSpannerFileReader, OrdinaryTransition, Transition, State}
+import be.ac.ulb.arc.runtime.{ClassicalImplementation, OutputWriter}
+import be.ac.ulb.arc.core._
 import org.scalatest.FunSuite
+
+import scala.io.{BufferedSource, Source}
 /**
   * Created by andrea on 20/06/16.
   */
@@ -17,6 +19,18 @@ class benchmarkTestSuite extends FunSuite{
     val sentimentFile = "src/test/scala/be.ac.ulb.arc/benchmark/sentiment.csp"
     val genreFile = "src/test/scala/be.ac.ulb.arc/benchmark/genre.csp"
     val titleFile = "src/test/scala/be.ac.ulb.arc/benchmark/title.csp"
+    val nameFile = "src/test/scala/be.ac.ulb.arc/benchmark/name.csp"
+
+    val documentFile = "src/test/scala/be.ac.ulb.arc/benchmark/excerpt/189575.female.23.indUnk.Libra.xml"
+    val documentFile2 = "src/test/scala/be.ac.ulb.arc/benchmark/excerpt/476271.female.25.Publishing.Pisces.xml"
+    val documentFile3 = "src/test/scala/be.ac.ulb.arc/benchmark/excerpt/317450.female.25.indUnk.Taurus.xml"
+    val fragmentFile = "src/test/scala/be.ac.ulb.arc/benchmark/movieFollowsTitle.aqls"
+    val fragmentFile2 = "src/test/scala/be.ac.ulb.arc/benchmark/test2.aqls"
+    val fragmentFile3 = "src/test/scala/be.ac.ulb.arc/benchmark/test3.aqls"
+    val fragmentFile5 = "src/test/scala/be.ac.ulb.arc/benchmark/test5.aqls"
+    val fragmentFile6 = "src/test/scala/be.ac.ulb.arc/benchmark/sentiment_genre_movie.aqls"
+    val fragmentFile7 = "src/test/scala/be.ac.ulb.arc/benchmark/keywords'.aqls"
+    val fragmentFile8 = "src/test/scala/be.ac.ulb.arc/benchmark/title''.aqls"
 
     val action = CoreSpannerFileReader.getCoreSpanner(actionFile).get
     val keywords = CoreSpannerFileReader.getCoreSpanner(keywordsFile).get
@@ -25,6 +39,10 @@ class benchmarkTestSuite extends FunSuite{
     val sentiment = CoreSpannerFileReader.getCoreSpanner(sentimentFile).get
     val genre = CoreSpannerFileReader.getCoreSpanner(genreFile).get
     val title = CoreSpannerFileReader.getCoreSpanner(titleFile).get
+    val name = CoreSpannerFileReader.getCoreSpanner(nameFile).get
+    var document = Source.fromFile(documentFile).mkString + '\0'
+    var document2 = Source.fromFile(documentFile2, "ISO-8859-1").mkString + '\0'
+    var document3 = Source.fromFile(documentFile3, "ISO-8859-1").mkString + '\0'
   }
 
   test("Spanner 'action' should correctly span words representing actions") {
@@ -115,5 +133,192 @@ class benchmarkTestSuite extends FunSuite{
     val tTitle = tTitleOpt.get
 
     OutputWriter.printOutput(s, tTitle)
+  }
+
+  test("The execution of a query plan with specialized join on 'follows' should give the same result as the usual execution") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile)
+    val fragmentSpec = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile, true)
+
+    val tOpt = fragment.get.evaluate(data.document)
+    assert(tOpt != None)
+    val t = tOpt.get
+    val tOptSpec = fragmentSpec.get.evaluate(data.document)
+    assert(tOptSpec != None)
+    val tSpec = tOptSpec.get
+
+    assert(t == tSpec)
+
+    OutputWriter.printOutput(data.document, t)
+    println()
+    OutputWriter.printOutput(data.document, tSpec)
+
+  }
+
+  test("the consolidation operation should correctly aggregate tuples that overlap") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile2, true)
+
+    val tOpt = fragment.get.evaluate(data.document2)
+    assert(tOpt != None)
+    val t = tOpt.get
+    val aggregate = ClassicalImplementation.Ωo(t, 7)
+
+    OutputWriter.printOutput(data.document2, aggregate)
+  }
+
+  test("the consolidation operation should correctly aggregate tuples that overlap (2)") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile, true)
+
+    val tOpt = fragment.get.evaluate(data.document)
+    assert(tOpt != None)
+    val t = tOpt.get
+
+    OutputWriter.printOutput(data.document, t)
+    println()
+
+    val aggregate = ClassicalImplementation.Ωo(t, 7)
+
+    OutputWriter.printOutput(data.document, aggregate)
+  }
+
+  test("the consolidation operation should correctly aggregate tuples that overlap (3)") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile2, true)
+
+    val tOpt = fragment.get.evaluate(data.document)
+    assert(tOpt != None)
+    val t = tOpt.get
+
+    OutputWriter.printOutput(data.document, t)
+    println()
+
+    val aggregate = ClassicalImplementation.Ωo(t, 7)
+
+    OutputWriter.printOutput(data.document, aggregate)
+  }
+
+  test("the consolidation + block operation should correctly aggregate tuples") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile2, true)
+
+    val tOpt = fragment.get.evaluate(data.document)
+    assert(tOpt != None)
+    val t = tOpt.get
+
+    val aggregate = ClassicalImplementation.Ωo(t, 7)
+
+    OutputWriter.printOutput(data.document, aggregate)
+    println()
+
+    val aggregate2 = ClassicalImplementation.β(aggregate, 7, 60, 10)
+
+    OutputWriter.printOutput(data.document, aggregate2)
+  }
+
+  test("the consolidation + block operation should correctly aggregate tuples (2)") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile3, true)
+
+    val tOpt = fragment.get.evaluate(data.document2)
+    assert(tOpt != None)
+    val t = tOpt.get
+
+    OutputWriter.printOutput(data.document2, t)
+    println()
+
+    val aggregate = ClassicalImplementation.Ωo(t, 8)
+
+    OutputWriter.printOutput(data.document2, aggregate)
+    println()
+
+    val aggregate2 = ClassicalImplementation.β(aggregate, 8, 60, 10)
+
+    OutputWriter.printOutput(data.document2, aggregate2)
+  }
+
+  test("the consolidation + block operation should correctly aggregate tuples (3)") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile5, true)
+
+    val tOpt = fragment.get.evaluate(data.document2)
+    assert(tOpt != None)
+    val t = tOpt.get
+
+    OutputWriter.printOutput(data.document2, t)
+    println()
+
+    val aggregate = ClassicalImplementation.Ωo(t, 10)
+
+    OutputWriter.printOutput(data.document2, aggregate)
+    println()
+
+    val aggregate2 = ClassicalImplementation.β(aggregate, 10, 100, 10)
+
+    OutputWriter.printOutput(data.document2, aggregate2, 70)
+  }
+
+  test("the consolidation + block operation should correctly aggregate tuples (4)") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile5, true)
+
+    val tOpt = fragment.get.evaluate(data.document3)
+    assert(tOpt != None)
+    val t = tOpt.get
+
+    OutputWriter.printOutput(data.document3, t)
+    println()
+
+    val aggregate = ClassicalImplementation.Ωo(t, 10)
+
+    OutputWriter.printOutput(data.document3, aggregate)
+    println()
+
+    val aggregate2 = ClassicalImplementation.β(aggregate, 10, 100, 10)
+
+    OutputWriter.printOutput(data.document3, aggregate2, 70)
+  }
+
+  test("Spanning names") {
+
+    val tNameOpt = data.name.evaluate(data.document2)
+    assert(tNameOpt != None)
+    val tName = tNameOpt.get
+
+    OutputWriter.printOutput(data.document2, tName)
+  }
+
+  test("aql spec sentiment_genre_movie should correctly obtain tuples") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile6, true)
+
+    val tOpt = fragment.get.evaluate(data.document2)
+    assert(tOpt != None)
+    val t = tOpt.get
+
+    OutputWriter.printOutput(data.document2, t)
+  }
+
+  test("Should correctly add context relation for join to 'keywords' spanner") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile7, true)
+
+    val s = CoreSpannerGenerator.generate(fragment.get)
+
+    val tOpt = s.evaluate(data.document3)
+
+    OutputWriter.printOutput(data.document3, tOpt.get.toArray.sortWith( _(2) < _(2)))
+  }
+
+  test("Should correctly add context relation for join to 'title' spanner") {
+
+    val fragment = AQLCoreFragmentSpecificationReader.getSpecification(data.fragmentFile8, true)
+
+    val s = CoreSpannerGenerator.generate(fragment.get)
+
+    val tOpt = s.evaluate(data.document3)
+
+    OutputWriter.printOutput(data.document3, tOpt.get.toArray.sortWith( _(12) < _(12)))
   }
 }

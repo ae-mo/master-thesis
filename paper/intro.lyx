@@ -1,132 +1,464 @@
-#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass ulb_thesis
+\use_default_options false
+\maintain_unincluded_children false
 \language american
+\language_package default
 \inputencoding auto
-\font_roman default
-\font_sans default
-\font_typewriter default
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize 12
 \spacing single
+\use_hyperref false
 \papersize default
 \use_geometry false
-\use_amsmath 2
-\use_esint 0
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 0
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \secnumdepth 2
 \tocdepth 2
 \paragraph_separation indent
-\defskip medskip
+\paragraph_indentation default
 \quotes_language english
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
 
 \begin_layout Chapter
-
-\lang english
 Introduction
 \end_layout
 
-\begin_layout Section
-
-\lang english
-Problem
+\begin_layout Standard
+In recent years, companies and people have witnessed a huge increase in
+ the amount of available data.
+ This growth is not likely to stop; instead, it is probably going to proceed
+ at an ever-accelerating pace.
+ Companies are trying to use the datasets that they possess, aided by computer
+ software, to obtain useful insights on their business, on their reference
+ market, etc.
+ Moreover, in many cases, data constitute a fundamental component of the
+ core business of an enterprise, making it even more important to exploit
+ them to the fullest.
 \end_layout
 
 \begin_layout Standard
+A considerable part of the total amount of the available data comes in the
+ form of documents, containing text written (entirely or partially) in natural
+ language.
+ For instance, web pages are a category of such documents.
+ While computer generated data usually have a fixed structure, that is not
+ the case for text documents.
+ In order for the information in a document to be used by a software agent,
+ a way to make its semantic structure explicit must be provided.
+ This is the goal of 
+\emph on
+Information Extraction
+\emph default
+.
+ It is the discipline that deals with the task of obtaining structured informati
+on from unstructured or semi-structured documents algorithmically.
+\end_layout
 
-\lang english
-citation example 
-\begin_inset LatexCommand cite
-key "book-full"
+\begin_layout Standard
+Information Extraction (IE) began in the 1970s inside the early Natural
+ Language Processing (NLP) community 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Cowie96informationextraction"
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Section
-
-\lang english
-Objective
-\end_layout
-
-\begin_layout Standard
-
-\lang english
-index example
-\begin_inset LatexCommand index
-name "example"
+.
+ Ever since, it has received contributions from a number of other research
+ areas, such as Information Retrieval (IR) and Machine Learning (ML) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sarawagi:2008:IE:1498844.1498845"
 
 \end_inset
 
+.
+ Over the years, two prominent approaches to IE were identified: 
+\emph on
+rule-based
+\emph default
+ and 
+\emph on
+statistical
+\emph default
+.
+ The main focus of IE systems has historically been the 
+\emph on
+accuracy
+\emph default
+ of the extraction, neglecting aspects such as 
+\emph on
+throughput
+\emph default
+,
+\emph on
+ scalability
+\emph default
+,
+\emph on
+ flexibility
+\emph default
+, etc.
+ On the contrary, enterprises, which are nowadays interested in IE as a
+ mean of increasing the added value of their datasets, are concerned with
+ these aspects.
+ To bridge the gap between the traditional systems and the modern requirements,
+ companies have been pursuing a series of research initiatives.
+ At IBM, this effort led to the development of 
+\emph on
+SystemT
+\emph default
+, a system for rule-based Information Extraction.
+ Its first version appeared in 2008 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "4497502"
 
-\end_layout
+\end_inset
 
-\begin_layout Section
+.
+ The main innovation of SystemT lies in its approach to the specification
+ and execution of extraction tasks: a set of basic extractors are set up,
+ using regular expressions or dictionaries, then they are combined by means
+ of algebraic operators, thus defining two distinct execution phases.
+ The creators of SystemT call this method 
+\emph on
+the algebraic approach
+\emph default
+.
+ The execution of an extraction task is considerably faster with SystemT
+ than with traditional systems, which usually rely on 
+\emph on
+cascaded formal grammars
+\emph default
+, that are very expensive to evaluate 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "4497502,Krishnamurthy:2009:SSD:1519103.1519105"
 
-\lang english
-Outline
+\end_inset
+
+.
+ We can say that SystemT tackles the issue of the scalability of extraction
+ tasks with success.
+ Moreover, it supports an iterative and modular development process, thus
+ providing flexibility to its users.
 \end_layout
 
 \begin_layout Standard
+The great results of SystemT drew the attention of the research community
+ on it, and a series of related studies were conducted.
+ One of the most prominent describes a formal model for the core fragment
+ of the language used to express extraction tasks in SystemT, called Annotation
+ Query Language (AQL) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
 
-\lang english
-blabla
+\end_inset
+
+.
+ The model introduces the concept of 
+\emph on
+document spanner
+\emph default
+.
+ A document spanner is an entity that extracts a set of tuples containing
+ spans of text from a document, and it generalizes the concept of extractor.
+ The ability of AQL to combine extractors is modeled with the concept of
+ 
+\emph on
+algebra of spanners
+\emph default
+, which is a set of operators that combine the outputs of their input spanners.
+ The most important operators described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+ are the standard relational operators: 
+\emph on
+projection,
+\emph default
+ 
+\emph on
+union 
+\emph default
+and 
+\emph on
+natural join
+\emph default
+.
+ These operators are traditionally used for querying a relational database.
+ The authors propose three classes of formal models to represent document
+ spanners: 
+\emph on
+regex formulas
+\emph default
+, 
+\emph on
+variable stack automata 
+\emph default
+(or 
+\emph on
+vstk-automata
+\emph default
+)
+\emph on
+ 
+\emph default
+and 
+\emph on
+variable set automata
+\emph default
+ (or 
+\emph on
+vset-automata
+\emph default
+).
+ Regex formulas model regular expressions with capture variables, also used
+ in AQL, while vstk-automata and vset-automata are Nondeterministic Finite
+ State Automata (NFAs) opportunely modified to retain spans of the input
+ strings.
+ A particularly interesting result of the study is that we can simulate
+ the projection, the union and the natural join of spanners represented
+ by vset-automata with another vset-automaton.
+ This fact discloses the opportunity to evaluate AQL queries, at least in
+ part, by using NFA execution engines (modified as needed), whose properties
+ and performances have been extensively studied (see, e.g., 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "cox_2007,Yang:2012:FSE:2396556.2396594,Grathwohl:2016:KCN:2914770.2837647"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Section
-
-\lang english
 Contributions
 \end_layout
 
 \begin_layout Standard
-
-\lang english
-blabla
+With this thesis, I make the following contributions:
 \end_layout
 
-\begin_layout Section
+\begin_layout Itemize
+I introduce a new class of spanner representations: 
+\emph on
+extended vset-automata
+\emph default
+ (or 
+\emph on
+eVset-automata
+\emph default
+).
+ EVset-automata are a modified version of vset-automata.
+ I show that the two types of representations are equivalent.
+ Moreover, I define 
+\emph on
+well-behaved eVset-automata
+\emph default
+, a special kind of eVset-automata that has good execution properties;
+\end_layout
 
-\lang english
-Publications
+\begin_layout Itemize
+I prove the existence of 
+\emph on
+polynomial-time
+\emph default
+ constructions to simulate projection, union and natural join of well-behaved
+ eVset-automata.
+ These constructions represent an improvement over the analogous constructions
+ described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+ for vset-automata, whose 
+\emph on
+space
+\emph default
+ complexity is, in general, exponential.
+ Moreover, the new constructions preserve well-behavedness;
+\end_layout
+
+\begin_layout Itemize
+I have designed and implemented a runtime system for the core of AQL.
+ It is based on the model presented in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+.
+ It works exclusively with well-behaved eVset-automata, which I show to
+ guarantee the full applicability of the system.
+ The latter has a compilation module that exploits the mentioned constructions
+ to compile an AQL query into a well-behaved eVset-automaton;
+\end_layout
+
+\begin_layout Itemize
+I implemented a subsystem that imitates the way SystemT executes AQL queries,
+ in order to perform a fair comparison between the approach delineated in
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+ and the algebraic approach;
+\end_layout
+
+\begin_layout Itemize
+I performed some experiments with the system.
+ I developed a set of queries aiming to find informal movie reviews in a
+ text, to be run on a corpus of blog posts.
+ The queries were executed both with the runtime system and the subsystem
+ imitating SystemT, allowing to compare the two.
+ I also experimented certain transformations of some of the test queries
+ that improved the performance of the runtime system;
 \end_layout
 
 \begin_layout Standard
+In general, I believe that this work could serve as a basis for further
+ research on the performance advantages and issues of the approach presented
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
 
-\lang english
-blabla
+\end_inset
+
+, and stimulate the development of optimization techniques specific to it.
+ 
 \end_layout
 
 \begin_layout Section
-
-\lang english
-Notations
+Outline
 \end_layout
 
 \begin_layout Standard
+The outline of this dissertation is as follows.
+ Chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "chap:IE"
 
-\lang english
-blabla
+\end_inset
+
+ is an overview of Information Extraction.
+ Chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "chap:SystemT-and-AQL"
+
+\end_inset
+
+ describes SystemT and its query language AQL, and it discusses the model
+ for the core of AQL proposed in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+.
+ In Chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "chap:A-Runtime-System"
+
+\end_inset
+
+, I formally describe the elements of the runtime system, in particular
+ well-behaved eVset-automata.
+ I discuss their expressive power  and I introduce the mentioned constructions
+ for simulating projection, union and natural join.
+ Chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "chap:Implementation"
+
+\end_inset
+
+ is a description of the implementation of the runtime system.
+ Chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "chap:Experiments"
+
+\end_inset
+
+ contains a detailed description of the experiments and a discussion of
+ the results.
+ Finally, in Chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "chap:Summary-and-Conclusions"
+
+\end_inset
+
+, I summarize the work done, I make some closing considerations and I suggest
+ some interesting research perspectives for the future.
 \end_layout
 
 \end_body

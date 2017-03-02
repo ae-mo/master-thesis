@@ -1,0 +1,4 @@
+sentiment13 = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/sentiment13.csp
+genre13 = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/genre13.csp
+-
+r = sentiment13 ∪ genre13

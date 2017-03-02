@@ -1,96 +1,293 @@
-#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass ulb_thesis
+\use_default_options false
+\maintain_unincluded_children false
 \language american
+\language_package default
 \inputencoding auto
-\font_roman default
-\font_sans default
-\font_typewriter default
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize 12
 \spacing single
+\use_hyperref false
 \papersize default
 \use_geometry false
-\use_amsmath 2
-\use_esint 0
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 0
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \secnumdepth 2
 \tocdepth 2
 \paragraph_separation indent
-\defskip medskip
+\paragraph_indentation default
 \quotes_language english
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
 
 \begin_layout Chapter
+\begin_inset CommandInset label
+LatexCommand label
+name "chap:Summary-and-Conclusions"
 
-\lang english
+\end_inset
+
+Summary and Conclusions
+\end_layout
+
+\begin_layout Section
+Summary
+\end_layout
+
+\begin_layout Standard
+Drawing upon the formal model for the core fragment of AQL introduced in
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+, I have defined and developed a runtime system for AQL queries that belong
+ to this fragment.
+ The system is based on the concept of document spanner.
+ It supports the execution of any core spanner.
+ Spanners are represented into the system by means of well-behaved eVset-automat
+a, a modified version of vset-automata (that were originally proposed in
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+).
+ The difference with vset-automata is that they can do more than one span
+ capturing operation in one transition.
+ The system actually works with a subclass of eVset-automata, which I have
+ shown it can be used as a base for core spanner representations: well-behaved
+ eVset-automata.
+ We saw that this subclass has very useful properties.
+ First of all, it exempts the evaluation engine from any runtime check on
+ the validity of the feasible runs of an automaton.
+ Then, it is closed under the operations of projection, union and natural
+ join, and there exist polynomial-time constructions that allow to simulate
+ the latter with well-behaved eVset-automata.
+ This is an improvement over the constructions proposed in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+, that generate exponentially larger automata.
+ The system has a compilation module that allows to combine well-behaved
+ eVset-automata by exploiting the constructions described in this dissertation.
+\end_layout
+
+\begin_layout Standard
+After the development of the runtime system, a series of experiments were
+ conducted with it.
+ I developed a set of queries and I have run them on a sample text corpus.
+ Moreover, I realized a subsystem that supports the algebraic approach described
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "4497502,Krishnamurthy:2009:SSD:1519103.1519105"
+
+\end_inset
+
+.
+ All the queries were run with this subsystem too in order to compare the
+ performances of the two approaches.
+ The results show that the redundancy of a query plays a central role in
+ determining the difference of performance of the two systems.
+ Non redundant queries are more efficiently executed with the runtime system.
+ However, the subsystem loses performance as the redundancy of the queries
+ increases, while the algebraic subsystem naturally exploits it to reduce
+ its workload.
+ More generally, in both cases the running time depends on the amount of
+ runs tried by the automata evaluated on the input.
+ Another consideration is that the speedup with respect to the algebraic
+ subsystem increases as the matching patterns become more restrictive, as,
+ e.g., in ternary joins.
+\end_layout
+
+\begin_layout Section
 Conclusions
 \end_layout
 
+\begin_layout Standard
+One of main objectives of this thesis was to investigate the benefits of
+ the point of view provided in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fagin:2015:DSF:2772377.2699442"
+
+\end_inset
+
+ over the one currently adopted by SystemT.
+ The results highlight that the runtime system has its own advantages, although
+ its convenience seems to depend on the context.
+ In fact, the impact of the redundancy of a query on performance was discovered
+ during the experimental phase, and I didn't expect it to be so relevant.
+ A concrete system for the execution of AQL queries would probably need
+ to mix both the execution approaches that were compared in this thesis,
+ opportunely choosing the best one for a given (sub)query.
+ It seems clear that one of main choice criteria would be the redundancy
+ of a query.
+ Another one could be the variability in the structure of the entities targeted
+ by an extraction task.
+ Nonetheless, I invite the reader to interpret these results as preliminary.
+ Indeed, there is a lot of work to be performed on the system yet.
+ 
+\end_layout
+
 \begin_layout Section
-
-\lang english
-Discussion
+Future Work
 \end_layout
 
 \begin_layout Standard
-
-\lang english
-blabla
-\end_layout
-
-\begin_layout Section
-
-\lang english
-Future Works
+The development of a module that transforms input queries for a more efficient
+ execution with eVset-automata seems promising.
+ Moreover, other benchmarks than the one presented in this paper could be
+ conceived, in order to gain an even better understanding of the system.
 \end_layout
 
 \begin_layout Standard
+Then, I believe that some of the constructions described in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:EVST-wb"
 
-\lang english
-blabla
-\end_layout
+\end_inset
 
-\begin_layout Section
-
-\lang english
-Promising Directions
-\end_layout
-
-\begin_layout Standard
-
-\lang english
-blabla
+ and the specialized join with distance constraint could be further improved.
+ For instance, a BFS (Breadth First Search) algorithm could be used for
+ natural join, instead of a plain conditional product.
 \end_layout
 
 \begin_layout Standard
+Further work could be dedicated to the evaluation engine.
+ The execution algorithm could be optimized.
+ Moreover, other evaluation methods exist, based on approaches that are
+ different from the Thompson one.
+ In particular, two of them were identified as interesting.
+ One is based on Ordered Binary Decision Diagrams (OBDDs).
+ In 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yang:2012:FSE:2396556.2396594"
 
+\end_inset
+
+, it is shown how to encode NFAs as OBDDs, with support for submatch extraction.
+ Then, a procedure for evaluating a string by using an OBDD representation
+ of a NFA is described.
+ Given a regular expression 
+\begin_inset Formula $r$
+\end_inset
+
+ of size 
+\begin_inset Formula $m$
+\end_inset
+
+ and a string of size 
+\begin_inset Formula $n$
+\end_inset
+
+, the runtime cost of this approach is shown to be between 
+\begin_inset Formula $O\left(m\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $O\left(mn\right)$
+\end_inset
+
+.
+ Another interesting engine is called Kleenex 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Grathwohl:2016:KCN:2914770.2837647"
+
+\end_inset
+
+.
+ It is based on the concept of 
+\emph on
+transducer.
+ 
+\emph default
+Its creators show that it has linear-time performance in the worst case,
+ with high throughput.
 \end_layout
 
 \begin_layout Standard
+The focus of this thesis was on the comparative experimental validation,
+ and the specific implementation of the evaluation engine is likely to be
+ orthogonal to this task, because both the approaches that were compared
+ would benefit from a performance increase due to it.
+ Nonetheless, trying to adapt the mentioned engines for the system could
+ be a useful improvement.
+ Another possible amelioration of the engine, which was ultimately not pursued
+ for similar reasons, would be the usage of the Scala library LMS (Lightweight
+ Modular Staging), extensively described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "5456/THESES"
 
-\end_layout
+\end_inset
 
-\begin_layout Standard
-
+, that uses the principles of generative programming to optimize Scala source
+ code.
+ In particular, it would allow to produce a specialized engine for each
+ input query, ideally boosting performance.
 \end_layout
 
 \end_body

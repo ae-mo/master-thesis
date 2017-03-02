@@ -1,0 +1,6 @@
+roleClue = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/roleClue.csp
+name = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/name.csp
+role = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/role.csp
+-
+r1 = (name, 8) follows (roleClue, 7) (0,40) 10
+r2 = (r1, 10) follows (role,9) (0,40) 12

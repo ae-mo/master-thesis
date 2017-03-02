@@ -82,11 +82,7 @@ class StringPointerArray(override val vars:SVars[SVar]) extends StringPointerCol
   }
 }
 
-/**
-  * Represents a tree of string pointers.
-  *
-  * @param size
-  */
+
 /*
 class StringPointerTree(override val vars:SVars[SVar]) extends StringPointerCollection(vars) { self =>
 

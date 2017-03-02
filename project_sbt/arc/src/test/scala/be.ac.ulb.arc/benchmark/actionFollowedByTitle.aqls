@@ -1,0 +1,4 @@
+title = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/title.csp
+action = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/action.csp
+-
+r3 = (action,0) follows (title,6) (0,10) 10

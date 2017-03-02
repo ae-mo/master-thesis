@@ -1,0 +1,18 @@
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp
+title = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/title.csp
+sentiment13 = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/sentiment13.csp
+action = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/action.csp
+name = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/name.csp
+role = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/role.csp
+attribute = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/attribute.csp
+aspect = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/aspect.csp
+genre13 = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/genre13.csp
+-
+r1 = (aspect,11) follows (attribute, 2) (0,40) 10
+r2 = (action,0) follows (title,6) (0,10) 10
+r3 = sentiment13 ∪ genre13
+r4 = (r3, 13) follows (movie, 1) (0, 60) 10
+r5 = (role,9) follows (name, 8) (0,40) 10
+u1 = r1 ∪ r2
+u2 = u1 ∪ r4
+u3 = u2 ∪ r5

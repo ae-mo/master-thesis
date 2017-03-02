@@ -4,7 +4,7 @@ import scala.collection.immutable.{HashSet => SVars}
 import scala.{Int => SVar}
 import scala.{Int => Position}
 import scala.{Array => Program}
-import scala.collection.immutable.{HashSet => VSRelation}
+import scala.collection.mutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import scala.collection.mutable.{MutableList => ThreadList}
 

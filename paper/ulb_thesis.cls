@@ -150,7 +150,7 @@
 % Our own options
 \DeclareOption{defended}{\thesisdefendedtrue}
 \DeclareOption{techreport}{\techreporttrue}
-\DeclareOption{draftfoot}{\thesisdrafttrue}
+\DeclareOption{draftfoot}{\thesisdraftfalse}
 \DeclareOption{preprint}{\thesispreprinttrue}
 \DeclareOption{lucida}{\lucidafonttrue}
 \DeclareOption{doublespace}{\doublespacetrue}
@@ -358,6 +358,9 @@
   {\clearpage}
 \newenvironment{acknowledgments}
   {\extrachapter{Acknowledgments}}
+  {\clearpage}
+\newenvironment{abstractf}
+  {\extrachapter{R\'esum\'e}}
   {\clearpage}
 % although `acknowledgments' is preferred
 \newenvironment{acknowledgements}

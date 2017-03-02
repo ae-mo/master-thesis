@@ -1,0 +1,4 @@
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywordsM.csp
+title = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/titleMB.csp
+-
+r1 = movie ⋈ title

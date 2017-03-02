@@ -1,0 +1,4 @@
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp
+genre = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/genre.csp
+-
+r5 = (genre, 5) follows (movie, 1) (0, 60) 10

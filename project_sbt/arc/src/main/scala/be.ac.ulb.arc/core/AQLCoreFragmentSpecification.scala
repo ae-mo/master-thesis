@@ -1,6 +1,6 @@
 package be.ac.ulb.arc.core
 
-import scala.collection.immutable.{HashSet => VSRelation}
+import scala.collection.mutable.{HashSet => VSRelation}
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import be.ac.ulb.arc.runtime.ClassicalInterpreter
 
@@ -15,6 +15,10 @@ import scala.util.control.Breaks._
   * @param operations
   */
 class AQLCoreFragmentSpecification(val spanners:CoreSpannersCollection[String, CoreSpanner], val operations:Operations[Operation]) {
+
+  // Obtain the NFA program representations of the base spanners
+  for((k, s) <- spanners)
+    s.toNFAProgram
 
   /**
     * Executes this AQL specification on a given input document.
@@ -38,7 +42,7 @@ object AQLCoreFragmentSpecificationReader {
     * @param file
     * @return
     */
-  def getSpecification(file: String): Option[AQLCoreFragmentSpecification] = {
+  def getSpecification(file: String, specialize:Boolean = false): Option[AQLCoreFragmentSpecification] = {
 
     import scala.io.Source
 
@@ -67,6 +71,10 @@ object AQLCoreFragmentSpecificationReader {
 
       line = lineIterator.next()
     }
+
+    // Set the specialization flags to true
+    if(specialize)
+      OperationExtractors.specializeJoin = true
 
     // Acquire the operations
     for(line <- lineIterator) {

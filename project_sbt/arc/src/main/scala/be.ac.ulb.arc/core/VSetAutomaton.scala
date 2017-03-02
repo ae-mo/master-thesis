@@ -222,12 +222,21 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
     // Create the new final and initial states
     var newQ0 = new State
     var newQf = new State
+    newQ = newQ + newQ0 + newQf
 
     // Connect the original and initial final states to the new ones
     newδ = newδ + new OperationsTransition[State](newQ0, new SVOps, this.V, this.q0)
     newδ = newδ + new OperationsTransition[State](newQ0, new SVOps, this.V, other.q0)
     newδ = newδ + new OperationsTransition[State](this.qf, new SVOps, this.V, newQf)
     newδ = newδ + new OperationsTransition[State](other.qf, new SVOps, this.V, newQf)
+
+    // Eliminate loops on old initial and final states
+    newδ = newδ.diff(newδ.filter((t:Transition[State]) => (t.q == this.qf && t.q1 == this.qf) || (t.q == other.qf && t.q1 == other.qf)))
+    newδ = newδ.diff(newδ.filter((t:Transition[State]) => (t.q == this.q0 && t.q1 == this.q0) || (t.q == other.q0 && t.q1 == other.q0)))
+
+    //Unanchored matching
+    newδ = newδ + new RangeTransition[State](newQ0, new Range(Char.MinValue, Char.MaxValue), this.V, newQ0)
+    newδ = newδ + new RangeTransition[State](newQf, new Range(Char.MinValue, Char.MaxValue), this.V, newQf)
 
     Some(new VSetAutomaton(newQ, newQ0, newQf, this.V, newδ))
   }
@@ -319,7 +328,11 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
 
     val result = new VSetAutomaton(newQ, q0, qf, t.V.union(o.V), newδ)
 
-    if(closed) Some(result.removeStates(result.hasOnlyOperationsTransitions))
+    if(closed) {
+      val reduced = result.removeStates(result.hasOnlyOperationsTransitions)
+      val  (prδ, prQ) = reduced.prune[State](reduced.δ, reduced.Q, reduced.q0, reduced.qf)
+      Some(new VSetAutomaton(prQ, reduced.q0, reduced.qf, reduced.V, prδ))
+    }
     else Some(result)
   }
 
@@ -355,9 +368,7 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
         // each new state gets its own list of predecessors
         // all the feasible transitions are followed in order to
         // visit all the graph
-        for(t <- qδ if !visited.contains(t.q1)) {
-
-          visited = visited + t.q1
+        for(t <- qδ) {
 
           if(t.isInstanceOf[OperationsTransition[State]]) {
 
@@ -382,11 +393,19 @@ class VSetAutomaton(val Q:StateSet[State], val q0:State, val qf:State, val V:SVa
             newP = newP + ((q, newSVOps))
 
             // Add the new state to the next frontier
-            nF = nF + ((to.q1, newP))
+            if (!visited.contains(t.q1)) {
+
+              nF = nF + ((to.q1, newP))
+              visited = visited + t.q1
+            }
           }
-          else
+          else if (!visited.contains(t.q1)) {
+
             // Follow all the transitions!
             nF = nF + ((t.q1, new Predecessors[(State, SVOps[SVOp])]))
+            visited = visited + t.q1
+          }
+
 
         }
       }

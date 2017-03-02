@@ -153,10 +153,16 @@ object CoreSpannerFileReader {
         δ = δ + new OrdinaryTransition[State](q, '.', V, q1)
         δ = δ + new OrdinaryTransition[State](q, ';', V, q1)
       }
+      else if(label.matches("NEWLINE")) {
+
+        δ = δ + new OrdinaryTransition[State](q, '\n', V, q1)
+      }
     }
 
     source.close
 
-    (Some(new CoreSpanner(new VSetAutomaton(Q, q0, qf, V, δ), eqsSet)))
+    val result = new CoreSpanner(new VSetAutomaton(Q, q0, qf, V, δ), eqsSet)
+    result.toNFAProgram
+    Some(result)
   }
 }

@@ -1,0 +1,12 @@
+title = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/title.csp
+action = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/action.csp
+attribute = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/attribute.csp
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp
+sentiment = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/sentiment.csp
+genre = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/genre.csp
+-
+r1 = (action,0) follows (title,6) (0,10) 10
+r2 = (r1, 10) follows (attribute, 2) (0, 40) 12
+r3 = (sentiment,4) follows (genre, 5) (0,60) 10
+r4 = (r3, 10) follows (movie, 1) (0, 60) 12
+u1 = r2 ∪ r4

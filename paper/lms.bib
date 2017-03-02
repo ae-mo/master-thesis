@@ -1,0 +1,76 @@
+@PhDThesis{5456/THESES,
+   abstract        = {Programs expressed in a high-level programming
+                     language need to be translated to a low-level machine
+                     dialect for execution. This translation is usually
+                     accomplished by a compiler, which is able to
+                     translate any legal program to equivalent low-level
+                     code. But for individual source programs, automatic
+                     translation does not always deliver good results:
+                     Software engineering practice demands generalization
+                     and abstraction, whereas high performance demands
+                     specialization and concretization. These goals are at
+                     odds, and compilers can only rarely translate
+                     expressive high-level programs tomodern hardware
+                     platforms in a way that makes best use of the
+                     available resources. Explicit program generation is a
+                     promising alternative to fully automatic translation.
+                     Instead of writing down the program and relying on a
+                     compiler for translation, developers write a program
+                     generator, which produces a specialized, efficient,
+                     low-level program as its output. However, developing
+                     high-quality program generators requires a very large
+                     effort that is often hard to amortize. In this
+                     thesis, we propose a hybrid design: Integrate
+                     compilers into programs so that programs can take
+                     control of the translation process, but rely on
+                     libraries of common compiler functionality for help.
+                     We present Lightweight Modular Staging (LMS), a
+                     generative programming approach that lowers the
+                     development effort significantly. LMS combines
+                     program generator logic with the generated code in a
+                     single program, using only types to distinguish the
+                     two stages of execution. Through extensive use of
+                     component technology, LMS makes a reusable and
+                     extensible compiler framework available at the
+                     library level, allowing programmers to tightly
+                     integrate domain-specific abstractions and
+                     optimizations into the generation process, with
+                     common generic optimizations provided by the
+                     framework. Compared to previous work on
+                     programgeneration, a key aspect of our design is the
+                     use of staging not only as a front-end, but also as a
+                     way to implement internal compiler passes and
+                     optimizations, many of which can be combined into
+                     powerful joint simplification passes. LMS is well
+                     suited to develop embedded domain specific languages
+                     (DSLs) and has been used to develop powerful
+                     performance-oriented DSLs for demanding domains such
+                     as machine learning, with code generation for
+                     heterogeneous platforms including GPUs. LMS has also
+                     been used to generate SQL for embedded database
+                     queries and JavaScript for web applications.},
+   address         = {Lausanne},
+   affiliation     = {EPFL},
+   author          = {Rompf, Tiark},
+   details         = {http://infoscience.epfl.ch/record/180642},
+   doctoral        = {EDIC},
+   documenturl     = {https://infoscience.epfl.ch/record/180642/files/EPFL_TH5456.pdf},
+   doi             = {10.5075/epfl-thesis-5456},
+   extra-id        = {7334938},
+   institute       = {IIF},
+   keywords        = {Programming Languages; Compilers; Staging; Performance; Parallelism},
+   language        = {eng},
+   oai-id          = {oai:infoscience.epfl.ch:180642},
+   oai-set         = {thesis-bn},
+   original-unit   = {LAMP1},
+   production-date = 2012,
+   publisher       = {EPFL},
+   school          = {IC},
+   status          = {PUBLISHED},
+   submitter       = {108898},
+   thesis-id       = {5456},
+   title           = {Lightweight {M}odular {S}taging and {E}mbedded {C}ompilers},
+   unit            = {LAMP},
+   urn             = {urn:nbn:ch:bel-epfl-thesis5456-2},
+   year            = 2012
+}

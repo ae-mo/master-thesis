@@ -3,7 +3,7 @@ package be.ac.ulb.arc.core
 import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
 import be.ac.ulb.arc.runtime._
 
-import scala.collection.immutable.{HashSet => VSRelation}
+import scala.collection.mutable.{HashSet => VSRelation}
 import scala.collection.immutable.{HashSet => SVars}
 import scala.collection.mutable.{Map, ArrayBuffer => Program}
 import scala.{Int => SVar}
@@ -11,15 +11,29 @@ import scala.collection.mutable.{Map => CoreSpannersCollection}
 import scala.collection.immutable.{HashSet => SVOps}
 import scala.collection.immutable.{HashSet => TransitionFunction}
 import scala.collection.immutable.{HashSet => StateSet}
+import scala.collection.mutable.{HashSet => RunSet}
 
 /**
   * Represents a core spanner.
   */
 class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, SVar)]]) {
 
-  // Convert the vset automaton into an NFA program
+  // Convert the vset-automaton into an NFA program
   val prog = new Program[Instruction]()
-  automaton.toNFAProgram(prog, Map[State, Int](), automaton.q0, 0)
+  var map = scala.collection.immutable.Map[State, Array[Transition[State]]]()
+
+  // Pair each state with its outgoing transitions for performance
+  for(q <- automaton.Q)
+    map = map + ((q, automaton.δ.filter((t:Transition[State]) => t.q == q && t.q1 == q).toArray ++
+      automaton.δ.filter((t:Transition[State]) => t.q == q && t.q1 != q)))
+
+  /**
+    * Produces a NFA program representation of the spanner.
+    */
+  def toNFAProgram(): Unit = {
+    automaton.toNFAProgram(prog, Map[State, Int](), automaton.q0, 0)
+  }
+
   /**
     * Evaluates the spanner on the given document.
     *
@@ -28,7 +42,7 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
     */
   def evaluate(doc: String):Option[VSRelation[VSTuple]]= {
 
-    val eqs = if(equalities != None) equalities.get else Set[(SVar, SVar)]()
+    /*val eqs = if(equalities != None) equalities.get else Set[(SVar, SVar)]()
 
     // Use the virtual machine to span tuples from the document
     val tuplesOpt = VirtualMachine.execute(prog.toArray, automaton.V, eqs, doc, 0, VirtualMachine.processSAVE)
@@ -38,7 +52,29 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
       val tuples = tuplesOpt.get
       return Some(tuples)
     }
-    None
+    None*/
+
+    run(doc)
+  }
+
+  def run(doc:String):Option[VSRelation[VSTuple]] = {
+
+    val runs = new RunSet[Run]
+    val tuples = new VSRelation[VSTuple]
+
+    runs += new Run(automaton.q0, automaton.qf, doc, 0, new StringPointerArray(automaton.V), map)
+
+    while(runs.size > 0)
+      for(r <- runs)
+        r.advance(runs, tuples)
+
+    if(tuples.size == 0)
+      return None
+    else {
+
+      return Some(tuples)
+    }
+
   }
 
   /**
@@ -126,10 +162,10 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
     * @param max
     * @return
     */
-  def isWithin(other:CoreSpanner, var1:SVar, var2:SVar, min:Int, max:Int):Option[CoreSpanner] = {
+  def isWithin(other:CoreSpanner, var1:SVar, var2:SVar, min:Int, max:Int, var3:SVar):Option[CoreSpanner] = {
 
-    val followsOpt = this.follows(other, var1, var2, min, max)
-    val precedesOpt = other.follows(this, var2, var1, min, max)
+    val followsOpt = this.follows(other, var1, var2, min, max, var3)
+    val precedesOpt = other.follows(this, var2, var1, min, max, var3)
 
     if(followsOpt != None && precedesOpt != None)
       return followsOpt.get ∪ precedesOpt.get
@@ -152,21 +188,16 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
     * @param max
     * @return
     */
-  def follows(other:CoreSpanner, var1:SVar, var2:SVar, min:Int, max:Int):Option[CoreSpanner] = {
+  def follows(other:CoreSpanner, var1:SVar, var2:SVar, min:Int, max:Int, var3:SVar):Option[CoreSpanner] = {
 
     if(!this.automaton.V.contains(var1) || this.automaton.V.contains(var2) ||
       other.automaton.V.contains(var1) || !other.automaton.V.contains(var2)) return None
-
-    // do the join between the input spanners
-    val j1Opt = this ⋈ other
-    if(j1Opt == None) return None
-    val j1 = j1Opt.get
 
     // Create the spanner that joins this spanner with the other based on the relative
     // distance of their s-tuples
     var Q = new StateSet[State]
     var δ = new TransitionFunction[Transition[State]]
-    var V = new SVars[SVar] ++ this.automaton.V ++ other.automaton.V
+    var V = new SVars[SVar] ++ this.automaton.V ++ other.automaton.V + var3
     val q0 = new State
     val qf = new State
     Q = Q + q0 + qf
@@ -175,10 +206,10 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
     // Unanchored matching
     δ = δ + new RangeTransition[State](q0, new Range(Char.MinValue, Char.MaxValue), V, q0)
     δ = δ + new RangeTransition[State](qf, new Range(Char.MinValue, Char.MaxValue), V, qf)
-    // Open the first variable
+    // Open the first variable and enclosing variable
     var s:State = new State
     Q = Q + s
-    var S:SVOps[SVOp] = new SVOps + new SVOp(var1, ⊢)
+    var S:SVOps[SVOp] = new SVOps + new SVOp(var1, ⊢) + new SVOp(var3, ⊢)
     δ = δ + new OperationsTransition[State](q0, S, V, s)
     // Span the first variable
     δ = δ + new RangeTransition[State](s, new Range(Char.MinValue, Char.MaxValue), V, s)
@@ -218,8 +249,8 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
     δ = δ + new OperationsTransition[State](s, S, V, s2)
     // Span the second variable
     δ = δ + new RangeTransition[State](s2, new Range(Char.MinValue, Char.MaxValue), V, s2)
-    // Close the second variable and match
-    S = new SVOps + new SVOp(var2, ⊣)
+    // Close the second variable and the enclosing one and match
+    S = new SVOps + new SVOp(var2, ⊣) + new SVOp(var3, ⊣)
     δ = δ + new OperationsTransition[State](s2, S, V, qf)
 
     // Create the vset-automaton
@@ -227,9 +258,119 @@ class CoreSpanner(val automaton:VSetAutomaton, val equalities:Option[Set[(SVar, 
     // Create the spanner
     val joinS = new CoreSpanner(joinA, None)
 
-    // Join the result of the first join with the created spanner
-    val j2Opt = j1 ⋈ joinS
-    j2Opt
+    // do the join between this spanner and the context spanner
+    val j1Opt = this ⋈ joinS
+    if(j1Opt == None) return None
+    val j1 = j1Opt.get
+
+    // Join the result of the first join with the other spanner
+    val j2Opt = j1 ⋈ other
+    if(j2Opt == None) return None
+    // Project on the enclosing variable
+    else j2Opt.get.π(new SVars + var3)
+  }
+
+  /**
+    * Adds a span variable which captures the next or the previous min to max characters to the given span veriable.
+    * @param v
+    * @param jV
+    * @param min
+    * @param max
+    * @param forward
+    * @return
+    */
+  def addIsFollowedBy(v:SVar, jV:SVar, min:Int, max:Int, forward:Boolean = true): CoreSpanner ={
+
+    var q0 = automaton.q0
+    var qf = automaton.qf
+
+    val V = new SVars[SVar] + v + jV
+
+    if(forward) {
+
+      q0 = qf
+      qf = new State
+
+      var (newQ, newδ) = distanceConstraint(q0, qf, V, jV, min, max)
+
+      newQ = newQ + q0 + qf
+
+      newδ = newδ + new RangeTransition[State](qf, new Range(Char.MinValue, Char.MaxValue), V, qf)
+
+      val loops = automaton.δ.filter((t:Transition[State]) => t.q == q0 && t.q1 == q0)
+
+      new CoreSpanner(new VSetAutomaton(newQ ++ automaton.Q, automaton.q0, qf,  automaton.V + jV, automaton.δ -- loops ++ newδ), equalities)
+
+    }
+    else {
+
+      qf = q0
+      q0 = new State
+
+      var (newQ, newδ) = distanceConstraint(q0, qf, V, jV, min, max)
+
+      newQ = newQ + q0 + qf
+
+      newδ = newδ + new RangeTransition[State](q0, new Range(Char.MinValue, Char.MaxValue), V, q0)
+
+      val loops = automaton.δ.filter((t:Transition[State]) => t.q == qf && t.q1 == qf)
+
+      new CoreSpanner(new VSetAutomaton(newQ ++ automaton.Q, q0, automaton.qf, automaton.V + jV, automaton.δ -- loops ++ newδ), equalities)
+    }
+  }
+
+  /**
+    * Creates the necessary states and transitions to add an 'isFollowedBy' context span variable.
+    * @param q0
+    * @param qf
+    * @param V
+    * @param v
+    * @param min
+    * @param max
+    * @return
+    */
+  def distanceConstraint(q0:State, qf:State, V:SVars[SVar], v:SVar, min:Int, max:Int): (StateSet[State], TransitionFunction[Transition[State]]) = {
+
+    var Q = new StateSet[State]
+    var δ = new TransitionFunction[Transition[State]]
+
+    // Open the distance constraint variable
+    var s = new State
+    Q = Q + s
+    var S:SVOps[SVOp] = new SVOps + new SVOp(v, ⊢)
+    δ = δ + new OperationsTransition[State](q0, S, V, s)
+
+    // Match the minimum amount of characters required
+    var i = 1
+    var s1 = s
+    while(i <= min) {
+
+      s1 = new State
+      Q = Q + s1
+      δ = δ + new RangeTransition[State](s, new Range(Char.MinValue, Char.MaxValue), V, s1)
+      s = s1
+      i += 1
+    }
+    // Match the characters between min and max
+    i = min + 1
+    S = new SVOps[SVOp]  + new SVOp(v, ⊣)
+    var s2 = qf
+    δ = δ + new OperationsTransition[State](s, S, V, s2)
+    while (i <= max) {
+
+      // Match one character
+      s1 = new State
+      Q = Q + s1
+      δ = δ + new RangeTransition[State](s, new Range(Char.MinValue, Char.MaxValue), V, s1)
+      // Or go to final state
+      δ = δ + new OperationsTransition[State](s, S, V, s2)
+      s = s1
+      i += 1
+    }
+
+    δ = δ + new OperationsTransition[State](s, S, V, s2)
+
+    (Q, δ)
   }
 
   /**
@@ -358,13 +499,15 @@ object CoreSpannerGenerator {
 
       val resultOpt = op.perform(spanners)
 
-      if(resultOpt == None) throw new Exception("Could not generate the spanner.")
+      if(resultOpt == None) throw new Exception("Could not generate the spanner: " + op.res + ".")
 
       result = resultOpt.get
 
       spanners += ((op.res, result))
     }
 
+    // Generate the NFA program
+    result.toNFAProgram
     result
   }
 }

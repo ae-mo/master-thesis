@@ -1,14 +1,13 @@
 package be.ac.ulb.arc.runtime
 
-import be.ac.ulb.arc.core.CoreSpannerFileReader
+import be.ac.ulb.arc.core.{AQLCoreFragmentSpecificationReader, CoreSpannerFileReader}
+
 import scala.collection.immutable.{HashSet => SVars}
 import org.scalatest.FunSuite
 /**
   * Created by andrea on 19/06/16.
   */
 class classicalImplementationTestSuite extends FunSuite{
-
-
 
   val data = new {
 
@@ -25,6 +24,11 @@ class classicalImplementationTestSuite extends FunSuite{
     val spannerFile11 = "src/test/scala/be.ac.ulb.arc/vset/spanner11.txt"
     val spannerFile12 = "src/test/scala/be.ac.ulb.arc/vset/spanner12.txt"
     val spannerFile13 = "src/test/scala/be.ac.ulb.arc/vset/spanner13.txt"
+
+    val documentFile = "src/test/scala/be.ac.ulb.arc/benchmark/excerpt/189575.female.23.indUnk.Libra.xml"
+    val documentFile2 = "src/test/scala/be.ac.ulb.arc/benchmark/excerpt/476271.female.25.Publishing.Pisces.xml"
+    val fragmentFile = "src/test/scala/be.ac.ulb.arc/benchmark/movieFollowsTitle.aqls"
+    val fragmentFile2 = "src/test/scala/be.ac.ulb.arc/benchmark/test2.aqls"
 
     val spanner = CoreSpannerFileReader.getCoreSpanner(spannerFile1).get
     val spanner3 = CoreSpannerFileReader.getCoreSpanner(spannerFile3).get
@@ -126,4 +130,6 @@ class classicalImplementationTestSuite extends FunSuite{
 
     for(t <- tNEq) assert(s.substring(t(0), t(1)) != s.substring(t(2), t(3)))
   }
+
+
 }

@@ -24,7 +24,6 @@ class coreSpannerTestSuite extends FunSuite{
     val keywordsFile = "src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp"
     val titleFile = "src/test/scala/be.ac.ulb.arc/benchmark/title.csp"
 
-
     val spanner = CoreSpannerFileReader.getCoreSpanner(spannerFile1).get
     val spanner3 = CoreSpannerFileReader.getCoreSpanner(spannerFile3).get
     val spanner4 = CoreSpannerFileReader.getCoreSpanner(spannerFile4).get
@@ -35,7 +34,6 @@ class coreSpannerTestSuite extends FunSuite{
     val spanner9 = CoreSpannerFileReader.getCoreSpanner(spannerFile9).get
     val spanner10 = CoreSpannerFileReader.getCoreSpanner(spannerFile10).get
     val keywords = CoreSpannerFileReader.getCoreSpanner(keywordsFile).get
-    val title = CoreSpannerFileReader.getCoreSpanner(titleFile).get
   }
 
   test("A core spanner should be correctly converted into an NFA program") {
@@ -213,8 +211,4 @@ class coreSpannerTestSuite extends FunSuite{
     }
   }
 
-  test("toString method should give a string representation of a spanner") {
-
-    println(data.title.toString())
-  }
 }

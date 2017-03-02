@@ -3,6 +3,12 @@ package be.ac.ulb.arc.core
 import scala.collection.immutable.{HashSet => SVars}
 import scala.collection.immutable.{HashSet => SVOps}
 import scala.{Int => SVar}
+import be.ac.ulb.arc.runtime.StringPointerCollection
+import be.ac.ulb.arc.runtime.{StringPointerCollection => VSTuple}
+import scala.collection.mutable.{HashSet => VSRelation}
+
+import scala.collection.mutable.{HashSet => RunSet}
+import scala.collection.mutable.ArrayBuffer
 
 trait ⊢/⊣
 
@@ -83,6 +89,7 @@ abstract class Transition[State](val q:State, val V:SVars[SVar], val q1:State) e
 
 /**
   * Represents an ordinary transition, with a character label.
+  *
   * @param q
   * @param σ
   * @param q1
@@ -105,7 +112,7 @@ case class OrdinaryTransition[State](override val q: State, σ: Char, override v
 
       case RangeTransition(q:State, σ:Range, v:SVars[SVar], q1:State) => {
 
-        if(this.σ >= σ.min || this.σ <= σ.max)
+        if(this.σ >= σ.min && this.σ <= σ.max)
           Some(OrdinaryTransition[State2]((this.q, q), this.σ, this.V.union(v), (this.q1, q1)))
         else None
 
@@ -238,15 +245,15 @@ case class RangeTransition[State](override val q: State, σ: Range, override val
   */
 case class OperationsTransition[State](override val q: State, S: SVOps[SVOp], override val V:SVars[SVar], override val q1: State) extends Transition[State](q, V, q1) {
 
-  override def &(other:Transition[State]):Option[Transition[State2]]  = {
+  override def &(other: Transition[State]): Option[Transition[State2]] = {
 
     other match {
 
-      case OrdinaryTransition(q:State, σ:Char, v:SVars[SVar], q1:State) => {
+      case OrdinaryTransition(q: State, σ: Char, v: SVars[SVar], q1: State) => {
 
-        for(o <- this.S) {
+        for (o <- this.S) {
 
-          if(v.contains(o.x))
+          if (v.contains(o.x))
             return None
         }
 
@@ -254,11 +261,11 @@ case class OperationsTransition[State](override val q: State, S: SVOps[SVOp], ov
 
       }
 
-      case RangeTransition(q:State, σ:Range, v:SVars[SVar], q1:State) => {
+      case RangeTransition(q: State, σ: Range, v: SVars[SVar], q1: State) => {
 
-        for(o <- this.S) {
+        for (o <- this.S) {
 
-          if(v.contains(o.x))
+          if (v.contains(o.x))
             return None
         }
 
@@ -266,7 +273,7 @@ case class OperationsTransition[State](override val q: State, S: SVOps[SVOp], ov
 
       }
 
-      case OperationsTransition(q:State, s:SVOps[SVOp], v:SVars[SVar], q1:State) => {
+      case OperationsTransition(q: State, s: SVOps[SVOp], v: SVars[SVar], q1: State) => {
 
         // common variables
         val V1 = V.intersect(v)
@@ -279,9 +286,9 @@ case class OperationsTransition[State](override val q: State, S: SVOps[SVOp], ov
 
         // Check if the variable operations only in S involve common variables.
         // In that case, abort.
-        for(v <- S_S1) {
+        for (v <- S_S1) {
 
-          if(V1.contains(v.x))
+          if (V1.contains(v.x))
             return None
 
         }
@@ -294,9 +301,9 @@ case class OperationsTransition[State](override val q: State, S: SVOps[SVOp], ov
 
         // Check if the variable operations only in s involve common variables.
         // In that case, abort.
-        for(v <- s_S1) {
+        for (v <- s_S1) {
 
-          if(V1.contains(v.x))
+          if (V1.contains(v.x))
             return None
 
         }
@@ -316,7 +323,7 @@ case class OperationsTransition[State](override val q: State, S: SVOps[SVOp], ov
 
     that match {
 
-      case that: OperationsTransition[State] =>  {
+      case that: OperationsTransition[State] => {
 
         that.canEqual(this) && that.q == this.q && that.q1 == this.q1 && that.S == this.S && that.V == this.V && this.hashCode == that.hashCode
       }
@@ -324,16 +331,186 @@ case class OperationsTransition[State](override val q: State, S: SVOps[SVOp], ov
     }
   }
 
-  override def hashCode:Int = {
+  override def hashCode: Int = {
 
     val prime = 31
     var result = 1
 
-    result = prime*result + (if (this.q == null) 0 else this.q.hashCode)
-    result = prime*result + (if (this.S == null) 0 else this.S.hashCode)
-    result = prime*result + (if (this.V == null) 0 else this.V.hashCode)
-    result = prime*result + (if (this.q1 == null) 0 else this.q1.hashCode)
+    result = prime * result + (if (this.q == null) 0 else this.q.hashCode)
+    result = prime * result + (if (this.S == null) 0 else this.S.hashCode)
+    result = prime * result + (if (this.V == null) 0 else this.V.hashCode)
+    result = prime * result + (if (this.q1 == null) 0 else this.q1.hashCode)
     return result
   }
 
 }
+
+/**
+  * Represents a configuration of a vset-automaton.
+  *
+  * @param q
+  * @param i
+  * @param saved
+  */
+class Configuration(var q: State, var i: Int, var saved: StringPointerCollection) {
+
+  def canEqual(a: Any) = a.isInstanceOf[Configuration]
+
+  override def equals(that: Any): Boolean = {
+
+    that match {
+
+      case that: Configuration=> {
+
+        that.canEqual(this) && that.q == this.q && that.q == this.q && that.i == this.i && that.saved == this.saved
+      }
+      case _ => false
+    }
+  }
+
+  override def hashCode: Int = {
+
+    val prime = 31
+    var result = 1
+
+    result = prime * result + (if (this.q == null) 0 else this.q.hashCode)
+    result = prime * result + i
+    result = prime * result + (if (this.saved == null) 0 else this.saved.hashCode)
+    return result
+  }
+}
+
+/**
+  * Represents a run of a vset-automaton.
+  *
+  * @param q0
+  * @param qf
+  * @param input
+  * @param i
+  * @param saved
+  * @param δ
+  */
+class Run(val q0: State, val qf: State, val input: String, val i: Int, val saved: StringPointerCollection, val δ: Map[State, Array[Transition[State]]]) {
+
+  val configuration = new Configuration(q0, i, saved)
+
+  /**
+    * Advances this run.
+    *
+    * @param runs
+    * @param tuples
+    */
+  def advance(runs: RunSet[Run], tuples:VSRelation[VSTuple]):Unit = {
+
+    // If we are in the final state, return the spanned tuple
+    // Eliminate this run from the list of active runs
+    if (configuration.q == qf) {
+      runs -= this
+      tuples += configuration.saved
+      return
+    }
+
+    val (tr, rδ) = δ(configuration.q).splitAt(1)
+    val i = configuration.i
+    val saved = configuration.saved
+
+
+    var evOpt = applyTransition(tr(0), configuration.i, configuration.saved)
+    var ev:(State, Int, StringPointerCollection) = null
+
+    if(evOpt == None) {
+
+      runs -= this
+    }
+    else {
+      ev = evOpt.get
+      configuration.q = ev._1
+      configuration.i = ev._2
+      configuration.saved = ev._3
+    }
+
+
+    for (t <- rδ) {
+
+      evOpt = applyTransition(t, i, saved)
+      if(evOpt != None) {
+
+        ev = evOpt.get
+        runs += new Run(ev._1, qf, input, ev._2, ev._3, δ)
+      }
+
+    }
+  }
+
+  /**
+    * Applies the given transition with the given string pointer and saved pointers collection.
+    *
+    * @param t
+    * @param i
+    * @param saved
+    * @return
+    */
+  def applyTransition(t:Transition[State], i:Int, saved:StringPointerCollection): Option[(State, Int, StringPointerCollection)] = {
+
+    t match {
+
+      case OrdinaryTransition(q:State, σ:Char, v:SVars[SVar], q1:State) => {
+
+        if(i < input.size && input(i) == σ)
+          return Some((q1, i+1, saved))
+
+        None
+      }
+      case RangeTransition(q: State, σ: Range, v: SVars[SVar], q1: State) => {
+
+        if(i < input.size && input(i) >= σ.min && input(i) <= σ.max)
+          return Some((q1, i+1, saved))
+
+        None
+      }
+      case OperationsTransition(q: State, s: SVOps[SVOp], v: SVars[SVar], q1: State) => {
+
+        if(s.size > 0) {
+
+          val savedC = saved.copy
+
+          for(o <- s) {
+
+            if(o.t == ⊢)
+              savedC(o.x * 2) = i
+            else
+              savedC(o.x * 2 + 1) = i
+          }
+
+          return Some((q1, i, savedC))
+        }
+
+        return Some((q1, i, saved))
+      }
+    }
+  }
+
+  /*ef canEqual(a: Any) = a.isInstanceOf[Run]
+
+  override def equals(that: Any): Boolean = {
+
+    that match {
+
+      case that: Run => {
+
+        that.canEqual(this) && that.configuration == this.configuration
+      }
+      case _ => false
+    }
+  }
+
+  override def hashCode: Int = {
+
+    val prime = 31
+    var result = 1
+
+    result = prime * result + (if (this.configuration == null) 0 else this.configuration.hashCode)
+    return result
+  }*/
+}
+

@@ -1,0 +1,6 @@
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp
+sentiment = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/sentiment.csp
+genre = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/genre.csp
+-
+r1 = (sentiment,4) follows (genre, 5) (0,60) 10
+r2 = (r1, 10) follows (movie, 1) (0, 60) 12

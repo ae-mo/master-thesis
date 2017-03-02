@@ -1,0 +1,3 @@
+title = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/title.csp
+-
+r1 = (title,6) addIsFollowedBy 13 (0, 10) 0

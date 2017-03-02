@@ -1,0 +1,3 @@
+movie = /home/andrea/Documenti/ulb/thesis/amorcian/project_sbt/arc/src/test/scala/be.ac.ulb.arc/benchmark/keywords.csp
+-
+r1 = (movie,6) addIsFollowedBy 13 (0, 40) 1
